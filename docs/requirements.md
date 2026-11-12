@@ -4,7 +4,7 @@ Every requirement below comes from the Cahier des Charges (CdC). The "From" colu
 
 - **R-** items are what UEMF asked for. We build all of them.
 - **P-** items are proposals. Most come from the old project's work. They only become rules once Mouhssine approves each one.
-- Anything only UEMF can decide has a **Q-** number, matching `docs/questions-for-uemf.md`.
+- Anything only UEMF can decide has a **Q-** number, matching `docs/questions-for-uemf.md`. Until the meeting, we use the proposed default answer, built as a setting an admin can change (see `docs/decisions/0001-build-with-adjustable-defaults.md`).
 
 ## Spaces
 

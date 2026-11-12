@@ -2,6 +2,8 @@
 
 À l'attention de **M. Brahim Seddouki, Directeur de la Communication**.
 
+> Note interne (Mouhssine et Claude) : ce document est **l'ordre du jour de la future réunion**. Il ne sera pas envoyé avant. En attendant, chaque « Proposition » est utilisée comme réglage par défaut, modifiable dans l'application (voir `docs/decisions/0001-build-with-adjustable-defaults.md`).
+
 Ces questions viennent du Cahier des Charges. Nous ne voulons pas inventer de règles à la place de l'université. Pour chaque question, nous proposons une réponse par défaut. Un simple « OK » suffit si elle vous convient.
 
 Les questions marquées 🔴 bloquent le design. Les autres peuvent attendre quelques semaines.
