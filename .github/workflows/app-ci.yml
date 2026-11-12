@@ -57,7 +57,7 @@ jobs:
 
       - name: Build web preview
         run: |
-          flutter build web --release --base-href /
+          flutter build web --release --base-href / --no-web-resources-cdn
           # Make the preview work from any folder, not only the site root.
           sed -i 's#<base href="/">#<base href="./">#' build/web/index.html
 
