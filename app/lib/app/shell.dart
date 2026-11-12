@@ -4,7 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../core/theme/es_colors.dart';
 import '../core/theme/es_text.dart';
+import '../core/widgets/es_button.dart';
+import '../core/widgets/layout.dart';
 import '../data/app_state.dart';
+import 'demo_mode.dart';
 import 'demo_switcher.dart';
 import 'tabs.dart';
 
@@ -18,25 +21,39 @@ class AppShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final person = ref.watch(currentPersonProvider);
     final tabs = tabsFor(person);
-    var index = tabs.indexWhere((t) => location.startsWith(t.path));
-    if (index < 0) index = 0;
+    final index = tabs.indexWhere((t) => location.startsWith(t.path));
+    // A role never sees a screen that isn't one of its tabs (route guard).
+    final Widget page = index >= 0
+        ? child
+        : EmptyState(
+            icon: Icons.lock_outline_rounded,
+            title: 'Écran non disponible',
+            message: 'Cet écran n’est pas accessible avec votre rôle.',
+            action: EsButton(
+              'Retour à l’accueil',
+              expand: false,
+              onPressed: () => context.go(tabs.first.path),
+            ),
+          );
 
     return Scaffold(
       body: Column(
         children: [
-          const DemoBar(),
+          if (kDemoMode) const DemoBar(),
           // The demo bar already handles the status-bar space.
           Expanded(
-            child: MediaQuery.removePadding(
-              context: context,
-              removeTop: true,
-              child: child,
-            ),
+            child: kDemoMode
+                ? MediaQuery.removePadding(
+                    context: context,
+                    removeTop: true,
+                    child: page,
+                  )
+                : page,
           ),
         ],
       ),
       bottomNavigationBar: NavigationBar(
-        selectedIndex: index,
+        selectedIndex: index < 0 ? 0 : index,
         onDestinationSelected: (i) => context.go(tabs[i].path),
         destinations: [
           for (final t in tabs)
@@ -60,16 +77,19 @@ class DemoBar extends ConsumerWidget {
     final c = context.es;
     final p = ref.watch(currentPersonProvider);
     final top = MediaQuery.paddingOf(context).top;
-    return Material(
-      color: c.bgBrandRaised,
+    return Semantics(
+      button: true,
+      label: 'Mode démo. Vous êtes ${p.fullName}. Changer de rôle',
+      excludeSemantics: true,
+      child: Material(
+      color: c.bgBrand,
       child: InkWell(
         onTap: () => showDemoSwitcher(context, ref),
         child: Padding(
-          padding: EdgeInsets.fromLTRB(16, top + 6, 12, 6),
+          padding: EdgeInsets.fromLTRB(16, top + 12, 12, 12),
           child: Row(
             children: [
-              Icon(Icons.theater_comedy_outlined,
-                  size: 16, color: c.brandAccent),
+              Icon(Icons.swap_horiz_rounded, size: 18, color: c.brandAccent),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -80,13 +100,14 @@ class DemoBar extends ConsumerWidget {
               ),
               Text(
                 'Changer',
-                style: EsText.labelS.copyWith(color: c.brandAccent),
+                style: EsText.labelM.copyWith(color: c.textOnBrand),
               ),
-              Icon(Icons.expand_more_rounded, size: 18, color: c.brandAccent),
+              Icon(Icons.expand_more_rounded, size: 18, color: c.textOnBrand),
             ],
           ),
         ),
       ),
+    ),
     );
   }
 }

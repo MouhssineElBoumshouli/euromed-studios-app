@@ -33,7 +33,8 @@ Future<void> showDemoSwitcher(BuildContext context, WidgetRef ref) {
               ),
               const SizedBox(height: 4),
               Text(
-                'Mode démo : données fictives. Les actions faites ici '
+                'Mode démo. Toutes les personnes sont fictives et sans lien '
+                'avec le personnel réel de l’UEMF. Les actions faites ici '
                 '(réserver, valider…) sont visibles par les autres rôles.',
                 style: EsText.bodyS.copyWith(color: c.textSecondary),
               ),

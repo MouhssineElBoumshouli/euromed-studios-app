@@ -45,7 +45,9 @@ QuotaStatus quotaFor({
   for (final b in bookings) {
     final counts = b.status.holdsSlot || b.status == BookingStatus.completed;
     final sameOwner = type == RequesterType.club
-        ? b.clubId == clubId && b.requesterType == RequesterType.club
+        ? clubId != null &&
+            b.clubId == clubId &&
+            b.requesterType == RequesterType.club
         : b.requesterId == requesterId && b.requesterType == type;
     if (counts &&
         sameOwner &&

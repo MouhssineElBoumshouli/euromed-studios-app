@@ -70,8 +70,10 @@ List<Slot> slotsFor({
   ];
 
   final slots = <Slot>[];
-  var start = dateOnly(day).add(Duration(hours: policy.openingHour));
-  final close = dateOnly(day).add(Duration(hours: policy.closingHour));
+  // Built from calendar fields, not by adding hours to midnight, so a
+  // clock change never shifts the opening hours.
+  var start = DateTime(day.year, day.month, day.day, policy.openingHour);
+  final close = DateTime(day.year, day.month, day.day, policy.closingHour);
   final step = Duration(minutes: policy.slotMinutes);
   while (!start.add(step).isAfter(close)) {
     final end = start.add(step);
@@ -86,15 +88,16 @@ List<Slot> slotsFor({
     )) {
       state = SlotState.maintenance;
     } else {
+      // An approved booking wins over a pending one on the same slot.
       for (final b in roomBookings) {
-        if (b.overlaps(start, end)) {
-          state = b.status == BookingStatus.approved
-              ? SlotState.taken
-              : SlotState.pending;
+        if (!b.overlaps(start, end)) continue;
+        final approved = b.status == BookingStatus.approved;
+        if (state == SlotState.free || approved) {
+          state = approved ? SlotState.taken : SlotState.pending;
           bookingId = b.id;
           studioId = b.studioId;
-          break;
         }
+        if (approved) break;
       }
     }
     slots.add(
@@ -111,19 +114,33 @@ List<Slot> slotsFor({
   return slots;
 }
 
-/// True when every slot between [start] and [end] is free.
+/// True when [start]–[end] is covered exactly, with no gap, by slots that
+/// are all free. A range that starts before opening, ends after closing
+/// or falls between slot boundaries is not free.
 bool rangeIsFree(List<Slot> slots, DateTime start, DateTime end) {
-  final inside = slots.where(
-    (s) => !s.start.isBefore(start) && !s.end.isAfter(end),
-  );
-  return inside.isNotEmpty && inside.every((s) => s.state.isSelectable);
+  if (!start.isBefore(end)) return false;
+  final inside = [
+    for (final s in slots)
+      if (!s.start.isBefore(start) && !s.end.isAfter(end)) s,
+  ];
+  if (inside.isEmpty) return false;
+  if (inside.first.start != start || inside.last.end != end) return false;
+  for (var i = 1; i < inside.length; i++) {
+    if (inside[i].start != inside[i - 1].end) return false;
+  }
+  return inside.every((s) => s.state.isSelectable);
 }
+
+/// Days between two calendar dates, immune to clock changes.
+int _calendarDays(DateTime from, DateTime to) =>
+    DateTime.utc(to.year, to.month, to.day)
+        .difference(DateTime.utc(from.year, from.month, from.day))
+        .inDays;
 
 /// Whether [day] is inside the booking window (Q3).
 bool isBookableDay(DateTime day, DateTime now, Policy policy) {
-  final d = dateOnly(day);
-  final today = dateOnly(now);
-  return !d.isBefore(today) &&
-      d.difference(today).inDays <= policy.maxAdvanceDays &&
-      policy.openWeekdays.contains(d.weekday);
+  final diff = _calendarDays(now, day);
+  return diff >= 0 &&
+      diff <= policy.maxAdvanceDays &&
+      policy.openWeekdays.contains(day.weekday);
 }

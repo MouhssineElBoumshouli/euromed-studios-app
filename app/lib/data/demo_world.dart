@@ -293,7 +293,7 @@ abstract final class DemoWorld {
       firstName: 'Omar',
       lastName: 'Berrada',
       roles: {Role.externalClient},
-      title: 'Atlas Média · client externe',
+      title: 'Studio Lumen (fictif) · client externe',
     ),
     Person(
       id: 'amrani',
@@ -494,18 +494,23 @@ abstract final class DemoWorld {
       history: [
         BookingEvent(
           type: BookingEventType.submitted,
-          at: _at(-1, 11),
+          at: DateTime(2026, 10, 28, 11),
           actorId: 'yasmine',
         ),
         BookingEvent(
           type: BookingEventType.entityApproved,
-          at: _at(0, 10),
+          at: DateTime(2026, 10, 29, 10),
           actorId: 'amrani',
         ),
         BookingEvent(
           type: BookingEventType.studioApproved,
-          at: _at(1, 9, 30),
+          at: DateTime(2026, 10, 30, 9, 30),
           actorId: 'tazi',
+        ),
+        BookingEvent(
+          type: BookingEventType.checkedIn,
+          at: _at(2, 14),
+          actorId: 'haddad',
         ),
         BookingEvent(
           type: BookingEventType.completed,
@@ -578,7 +583,7 @@ abstract final class DemoWorld {
         ),
         BookingEvent(
           type: BookingEventType.checkedIn,
-          at: _at(11, 8, 58),
+          at: _at(11, 9),
           actorId: 'haddad',
         ),
       ],

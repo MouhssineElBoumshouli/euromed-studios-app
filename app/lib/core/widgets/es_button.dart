@@ -40,7 +40,7 @@ class EsButton extends StatelessWidget {
       EsButtonStyle.destructive => (c.dangerBg, c.dangerText, null),
     };
     final enabled = onPressed != null && !loading;
-    final height = size == EsButtonSize.large ? 52.0 : 40.0;
+    final height = size == EsButtonSize.large ? 52.0 : 44.0;
     final text = size == EsButtonSize.large ? EsText.labelM : EsText.labelS;
 
     final child = Row(

@@ -38,11 +38,9 @@ class HomeScreen extends ConsumerWidget {
             tooltip: 'Notifications',
             onPressed: () =>
                 _soon(context, 'Les notifications arrivent à l’étape 7.'),
-            icon: Badge(
-              backgroundColor: c.brandAccent,
-              smallSize: 8,
-              child:
-                  Icon(Icons.notifications_none_rounded, color: c.textOnBrand),
+            icon: Icon(
+              Icons.notifications_none_rounded,
+              color: c.textOnBrand,
             ),
           ),
         ),
@@ -362,7 +360,7 @@ class _ManagerHome extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final me = ref.watch(currentPersonProvider);
     final c = context.es;
-    final inbox = inboxFor(me, w.bookings);
+    final inbox = inboxFor(me, w.bookings, people: DemoWorld.people);
     final today = [
       for (final b in w.bookings)
         if (b.status == BookingStatus.approved &&

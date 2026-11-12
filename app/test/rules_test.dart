@@ -204,9 +204,17 @@ void main() {
     });
 
     test('inbox lists only what the person can decide, oldest first', () {
-      final inbox = inboxFor(personById('tazi'), DemoWorld.bookings);
+      final inbox = inboxFor(
+        personById('tazi'),
+        DemoWorld.bookings,
+        people: DemoWorld.people,
+      );
       expect(inbox.map((x) => x.id), ['b8', 'b2']);
-      final amrani = inboxFor(personById('amrani'), DemoWorld.bookings);
+      final amrani = inboxFor(
+        personById('amrani'),
+        DemoWorld.bookings,
+        people: DemoWorld.people,
+      );
       expect(amrani.map((x) => x.id), ['b3', 'b12']);
     });
   });
@@ -260,6 +268,170 @@ void main() {
         () => n.approve('b3', by: personById('tazi')),
         throwsStateError,
       );
+    });
+  });
+  group('Review fixes (milestone 1 review)', () {
+    test('rangeIsFree refuses gaps, out-of-hours and partial slots', () {
+      final s = slots('chroma', DateTime(2026, 11, 16));
+      DateTime t(int h, [int m = 0]) => DateTime(2026, 11, 16, h, m);
+      expect(rangeIsFree(s, t(17), t(19)), isFalse); // after closing
+      expect(rangeIsFree(s, t(8), t(10)), isFalse); // before opening
+      expect(rangeIsFree(s, t(9, 30), t(10, 30)), isFalse); // off-grid
+      expect(rangeIsFree(s, t(10), t(10)), isFalse); // empty range
+      expect(rangeIsFree(s, t(9), t(12)), isTrue);
+    });
+
+    test('an approved booking wins over a pending one on the same slot', () {
+      final extra = DemoWorld.bookings.first.copyWith(
+        status: BookingStatus.pendingEntity,
+      );
+      final s = slots(
+        'plateau_tv',
+        DateTime(2026, 11, 12),
+        bookings: [extra, ...DemoWorld.bookings],
+      );
+      expect(at(s, 14).state, SlotState.taken);
+    });
+
+    test('cancel: only the requester or an admin, only before start', () {
+      final b1 = DemoWorld.bookings.firstWhere((x) => x.id == 'b1');
+      final b6 = DemoWorld.bookings.firstWhere((x) => x.id == 'b6');
+      expect(canCancel(personById('yasmine'), b1, now), isTrue);
+      expect(canCancel(personById('adam'), b1, now), isFalse);
+      expect(canCancel(personById('idrissi'), b1, now), isTrue);
+      expect(canCancel(personById('nadia'), b6, now), isFalse); // started
+      final b5 = DemoWorld.bookings.firstWhere((x) => x.id == 'b5');
+      expect(canCancel(personById('yasmine'), b5, now), isFalse); // refused
+    });
+
+    test('the same person cannot approve both levels', () {
+      const both = Person(
+        id: 'both',
+        firstName: 'X',
+        lastName: 'Y',
+        roles: {Role.entityApprover, Role.studioManager},
+        approverScopes: [ApproverScope(RequesterType.student)],
+      );
+      final b2 = DemoWorld.bookings.firstWhere((x) => x.id == 'b2');
+      final afterL1 = b2.copyWith(
+        history: [
+          ...b2.history.take(1),
+          BookingEvent(
+            type: BookingEventType.entityApproved,
+            at: now,
+            actorId: 'both',
+          ),
+        ],
+      );
+      expect(canDecide(both, afterL1), isFalse);
+    });
+
+    test('a director booking for their own school goes to the admin', () {
+      final own = DemoWorld.bookings
+          .firstWhere((x) => x.id == 'b10')
+          .copyWith(); // Pr. Rami's request, approver: Benjelloun
+      expect(needsLevel1Fallback(own, DemoWorld.people), isFalse);
+      // Benjelloun (director, also professor) books for herself.
+      final mine = Booking(
+        id: 'x',
+        reference: 'X',
+        requesterId: 'benjelloun',
+        requesterType: RequesterType.professor,
+        establishmentId: 'eidia',
+        studioId: 'pedago',
+        start: DateTime(2026, 11, 16, 9),
+        end: DateTime(2026, 11, 16, 10),
+        activity: Activity.recording,
+        status: BookingStatus.pendingEntity,
+        history: [
+          BookingEvent(
+            type: BookingEventType.submitted,
+            at: now,
+            actorId: 'benjelloun',
+          ),
+        ],
+      );
+      expect(needsLevel1Fallback(mine, DemoWorld.people), isTrue);
+      expect(canDecide(personById('benjelloun'), mine), isFalse);
+      expect(
+        canDecide(personById('idrissi'), mine, people: DemoWorld.people),
+        isTrue,
+      );
+    });
+
+    test('submit refuses a taken slot, a full quota and a wrong role', () {
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+      final n = c.read(worldProvider.notifier);
+      SubmitProblem? problem(String who, RequesterType t, String studio,
+              DateTime s, DateTime e, {String? club}) =>
+          n.check(
+            requesterId: who,
+            requesterType: t,
+            studioId: studio,
+            start: s,
+            end: e,
+            clubId: club,
+          );
+      // Radio shares the room with Plateau TV, booked Thu 12 at 14:00.
+      expect(
+        problem('yasmine', RequesterType.student, 'radio',
+            DateTime(2026, 11, 12, 14), DateTime(2026, 11, 12, 15)),
+        SubmitProblem.slotUnavailable,
+      );
+      // Next week Yasmine already has 2 h of 2 h.
+      expect(
+        problem('yasmine', RequesterType.student, 'montage',
+            DateTime(2026, 11, 17, 9), DateTime(2026, 11, 17, 10)),
+        SubmitProblem.overQuota,
+      );
+      // Yasmine is not a club representative.
+      expect(
+        problem('yasmine', RequesterType.club, 'montage',
+            DateTime(2026, 11, 12, 9), DateTime(2026, 11, 12, 10),
+            club: 'club_av'),
+        SubmitProblem.notAllowed,
+      );
+      // Saturday.
+      expect(
+        problem('yasmine', RequesterType.student, 'montage',
+            DateTime(2026, 11, 14, 9), DateTime(2026, 11, 14, 10)),
+        SubmitProblem.dayClosed,
+      );
+      expect(
+        () => n.submit(
+          requesterId: 'yasmine',
+          requesterType: RequesterType.student,
+          studioId: 'radio',
+          start: DateTime(2026, 11, 12, 14),
+          end: DateTime(2026, 11, 12, 15),
+          activity: Activity.recording,
+        ),
+        throwsA(isA<SubmitRejected>()),
+      );
+    });
+
+    test('Level 2 is blocked by maintenance in the room', () {
+      final c = ProviderContainer();
+      addTearDown(c.dispose);
+      final n = c.read(worldProvider.notifier);
+      final probe = DemoWorld.bookings
+          .firstWhere((x) => x.id == 'b7')
+          .copyWith(status: BookingStatus.pendingStudio);
+      final moved = Booking(
+        id: probe.id,
+        reference: probe.reference,
+        requesterId: probe.requesterId,
+        requesterType: probe.requesterType,
+        establishmentId: probe.establishmentId,
+        studioId: 'speedmooc',
+        start: DateTime(2026, 11, 11, 15),
+        end: DateTime(2026, 11, 11, 16),
+        activity: probe.activity,
+        status: BookingStatus.pendingStudio,
+        history: probe.history,
+      );
+      expect(n.level2Conflict(moved), contains('Maintenance'));
     });
   });
 }

@@ -62,7 +62,7 @@ class ProfileScreen extends ConsumerWidget {
                       _Line(
                         'Quota hebdomadaire',
                         '${formatMinutes(quota.limitMinutes!)} · '
-                            '${formatMinutes(quota.usedMinutes)} utilisées',
+                            '${formatMinutes(quota.usedMinutes)} déjà réservé cette semaine',
                       ),
                     if (quota != null && quota.unlimited)
                       const _Line('Quota hebdomadaire', 'Sans limite'),
@@ -78,7 +78,7 @@ class ProfileScreen extends ConsumerWidget {
               const SizedBox(height: EsSpace.s5),
               EsButton(
                 'Voir l’application avec un autre rôle',
-                icon: Icons.theater_comedy_outlined,
+                icon: Icons.swap_horiz_rounded,
                 style: EsButtonStyle.secondary,
                 onPressed: () => showDemoSwitcher(context, ref),
               ),
