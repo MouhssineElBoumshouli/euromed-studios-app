@@ -15,4 +15,4 @@ Each phase ends with something we can show and check. We move to the next phase 
 
 ## Now
 
-Phase 1, requirements.
+Phases 1 and 2 are done: requirements and the design system. Phase 3 (screens and prototype) is in progress, and wave 1 is built: access, home, studios, booking, my bookings, QR and validations.
