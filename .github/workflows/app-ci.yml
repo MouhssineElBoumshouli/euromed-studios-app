@@ -61,6 +61,28 @@ jobs:
           # Make the preview work from any folder, not only the site root.
           sed -i 's#<base href="/">#<base href="./">#' build/web/index.html
 
+      - name: Save preview to the "preview" branch
+        if: github.event_name == 'push'
+        working-directory: .
+        run: |
+          set -e
+          SLUG=$(echo "${{ github.ref_name }}" | tr '/' '-')
+          rm -rf /tmp/pv && mkdir -p /tmp/pv
+          cp -r app/build/web /tmp/pv/site
+          find /tmp/pv/site -name '*.symbols' -delete
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin preview:preview 2>/dev/null || true
+          if git show-ref --quiet refs/heads/preview; then
+            git worktree add /tmp/pvwt preview
+          else
+            git worktree add --detach /tmp/pvwt && (cd /tmp/pvwt && git checkout --orphan preview && git rm -rf . -q || true)
+          fi
+          rm -rf "/tmp/pvwt/$SLUG" && mkdir -p "/tmp/pvwt/$SLUG"
+          cp -r /tmp/pv/site/. "/tmp/pvwt/$SLUG/"
+          echo "${{ github.sha }}" > "/tmp/pvwt/$SLUG/BUILD_SHA"
+          cd /tmp/pvwt && git add -A && git commit -qm "preview: $SLUG @ ${{ github.sha }}" && git push -q origin preview
+
       - name: Upload web preview
         uses: actions/upload-artifact@v4
         with:
