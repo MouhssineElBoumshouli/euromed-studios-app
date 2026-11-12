@@ -117,6 +117,6 @@
  "lessons": [
   "After resize() on an auto-layout frame, set primaryAxisSizingMode='AUTO' again or it collapses.",
   "Prototype links only work within one page: all screens live on 'Screens · Prototype' in sections.",
-  "Shell cannot reach Figma upload URLs (network allowlist); photos must be added in Figma by hand."
+  "Photos: upload_assets URLs are blocked from the cloud shell and the PC's sandboxed shell. What works: put files on the PC (device_commit_files), then the local Playwright tool: setInputFiles on a file input + in-page fetch POST to the submitUrl."
  ]
 }
