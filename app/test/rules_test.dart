@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   final now = DemoWorld.now; // Wed 11 Nov 2026, 10:05
-  final policy = DemoWorld.policy;
+  const policy = DemoWorld.policy;
 
   List<Slot> slots(String studioId, DateTime day, {List<Booking>? bookings}) =>
       slotsFor(
