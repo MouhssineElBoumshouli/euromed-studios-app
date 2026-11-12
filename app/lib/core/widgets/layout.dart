@@ -99,8 +99,16 @@ class InfoBanner extends StatelessWidget {
     final c = context.es;
     final (Color bg, Color fg, IconData ic) = switch (tone) {
       BannerTone.info => (c.reviewBg, c.reviewText, Icons.info_outline_rounded),
-      BannerTone.warning => (c.pendingBg, c.pendingText, Icons.schedule_rounded),
-      BannerTone.danger => (c.dangerBg, c.dangerText, Icons.error_outline_rounded),
+      BannerTone.warning => (
+          c.pendingBg,
+          c.pendingText,
+          Icons.schedule_rounded
+        ),
+      BannerTone.danger => (
+          c.dangerBg,
+          c.dangerText,
+          Icons.error_outline_rounded
+        ),
       BannerTone.success => (
           c.successBg,
           c.successText,
@@ -129,7 +137,8 @@ class InfoBanner extends StatelessWidget {
 
 /// Initials in a circle.
 class Avatar extends StatelessWidget {
-  const Avatar(this.initials, {super.key, this.size = 40, this.onBrand = false});
+  const Avatar(this.initials,
+      {super.key, this.size = 40, this.onBrand = false});
   final String initials;
   final double size;
   final bool onBrand;
@@ -245,7 +254,8 @@ class ZelligePainter extends CustomPainter {
         canvas.translate(x, y);
         canvas.rotate(math.pi / 4);
         canvas.drawRect(
-          Rect.fromCenter(center: Offset.zero, width: half * 2, height: half * 2),
+          Rect.fromCenter(
+              center: Offset.zero, width: half * 2, height: half * 2),
           p,
         );
         canvas.restore();
@@ -285,7 +295,8 @@ class EmptyState extends StatelessWidget {
           Container(
             width: 64,
             height: 64,
-            decoration: BoxDecoration(color: c.bgSubtle, shape: BoxShape.circle),
+            decoration:
+                BoxDecoration(color: c.bgSubtle, shape: BoxShape.circle),
             child: Icon(icon, color: c.textSecondary, size: 28),
           ),
           const SizedBox(height: EsSpace.s4),

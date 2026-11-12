@@ -75,7 +75,8 @@ void main() {
           x.id == 'b3' ? x.copyWith(status: BookingStatus.refused) : x,
       ];
       final before = slots('chroma', DateTime(2026, 11, 18));
-      final after = slots('chroma', DateTime(2026, 11, 18), bookings: withRefusal);
+      final after =
+          slots('chroma', DateTime(2026, 11, 18), bookings: withRefusal);
       expect(at(before, 9).state, SlotState.pending);
       expect(at(after, 9).state, SlotState.free);
     });
@@ -87,7 +88,8 @@ void main() {
     test('booking window: today to 30 days ahead, working days only', () {
       expect(isBookableDay(DateTime(2026, 11, 11), now, policy), isTrue);
       expect(isBookableDay(DateTime(2026, 11, 10), now, policy), isFalse);
-      expect(isBookableDay(DateTime(2026, 11, 14), now, policy), isFalse); // Sat
+      expect(
+          isBookableDay(DateTime(2026, 11, 14), now, policy), isFalse); // Sat
       expect(isBookableDay(DateTime(2026, 12, 14), now, policy), isFalse);
     });
 

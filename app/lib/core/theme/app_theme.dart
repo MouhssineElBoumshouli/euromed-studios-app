@@ -84,7 +84,8 @@ abstract final class AppTheme {
         filled: true,
         fillColor: c.bgSurface,
         hintStyle: EsText.bodyM.copyWith(color: c.textDisabled),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(EsRadius.md),
           borderSide: BorderSide(color: c.border),

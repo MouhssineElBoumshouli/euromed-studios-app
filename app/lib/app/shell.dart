@@ -68,7 +68,8 @@ class DemoBar extends ConsumerWidget {
           padding: EdgeInsets.fromLTRB(16, top + 6, 12, 6),
           child: Row(
             children: [
-              Icon(Icons.theater_comedy_outlined, size: 16, color: c.brandAccent),
+              Icon(Icons.theater_comedy_outlined,
+                  size: 16, color: c.brandAccent),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(

@@ -75,7 +75,8 @@ Future<void> showDemoSwitcher(BuildContext context, WidgetRef ref) {
                           ),
                         ),
                         if (p.id == current)
-                          Icon(Icons.check_circle_rounded, color: c.successFill),
+                          Icon(Icons.check_circle_rounded,
+                              color: c.successFill),
                       ],
                     ),
                   ),

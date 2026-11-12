@@ -36,11 +36,13 @@ class HomeScreen extends ConsumerWidget {
           bottomPadding: 72,
           trailing: IconButton(
             tooltip: 'Notifications',
-            onPressed: () => _soon(context, 'Les notifications arrivent à l’étape 7.'),
+            onPressed: () =>
+                _soon(context, 'Les notifications arrivent à l’étape 7.'),
             icon: Badge(
               backgroundColor: c.brandAccent,
               smallSize: 8,
-              child: Icon(Icons.notifications_none_rounded, color: c.textOnBrand),
+              child:
+                  Icon(Icons.notifications_none_rounded, color: c.textOnBrand),
             ),
           ),
         ),
@@ -48,9 +50,7 @@ class HomeScreen extends ConsumerWidget {
           offset: const Offset(0, -56),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: EsSpace.s4),
-            child: isRequester
-                ? _RequesterHome(w: w)
-                : _ManagerHome(w: w),
+            child: isRequester ? _RequesterHome(w: w) : _ManagerHome(w: w),
           ),
         ),
       ],
@@ -165,7 +165,8 @@ class _NextSessionCard extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Overline(ongoing ? 'Séance en cours' : 'Prochaine séance'),
+                child:
+                    Overline(ongoing ? 'Séance en cours' : 'Prochaine séance'),
               ),
               StatusChip(booking.status),
             ],
@@ -254,7 +255,8 @@ class _QuotaCard extends StatelessWidget {
               value: quota.ratio,
               minHeight: 8,
               backgroundColor: c.bgSubtle,
-              color: quota.remainingMinutes == 0 ? c.dangerText : c.actionPrimary,
+              color:
+                  quota.remainingMinutes == 0 ? c.dangerText : c.actionPrimary,
             ),
           ),
           const SizedBox(height: EsSpace.s2),
@@ -281,7 +283,8 @@ class _RequestRow extends StatelessWidget {
     final c = context.es;
     final s = studioById(booking.studioId);
     return InkWell(
-      onTap: () => _soon(context, 'Le détail de la demande arrive à l’étape 2.'),
+      onTap: () =>
+          _soon(context, 'Le détail de la demande arrive à l’étape 2.'),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
@@ -290,7 +293,8 @@ class _RequestRow extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(s.name, style: EsText.titleS.copyWith(color: c.textPrimary)),
+                  Text(s.name,
+                      style: EsText.titleS.copyWith(color: c.textPrimary)),
                   const SizedBox(height: 2),
                   Text(
                     '${Fmt.relativeDay(booking.start, now)} · '

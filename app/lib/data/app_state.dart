@@ -53,7 +53,8 @@ class WorldNotifier extends Notifier<WorldState> {
         bookings: List.of(DemoWorld.bookings),
         maintenance: List.of(DemoWorld.maintenance),
         signedCharterVersion: {
-          for (final p in DemoWorld.people) p.id: DemoWorld.policy.charterVersion,
+          for (final p in DemoWorld.people)
+            p.id: DemoWorld.policy.charterVersion,
         },
       );
 
@@ -212,15 +213,12 @@ final currentPersonProvider = Provider<Person>((ref) {
   return DemoWorld.people.firstWhere((p) => p.id == id);
 });
 
-Person personById(String id) =>
-    DemoWorld.people.firstWhere((p) => p.id == id);
+Person personById(String id) => DemoWorld.people.firstWhere((p) => p.id == id);
 
-Studio studioById(String id) =>
-    DemoWorld.studios.firstWhere((s) => s.id == id);
+Studio studioById(String id) => DemoWorld.studios.firstWhere((s) => s.id == id);
 
 EquipmentItem equipmentById(String id) =>
     DemoWorld.equipment.firstWhere((e) => e.id == id);
 
-Establishment? establishmentById(String? id) => id == null
-    ? null
-    : DemoWorld.establishments.firstWhere((e) => e.id == id);
+Establishment? establishmentById(String? id) =>
+    id == null ? null : DemoWorld.establishments.firstWhere((e) => e.id == id);

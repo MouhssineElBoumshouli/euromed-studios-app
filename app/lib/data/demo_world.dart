@@ -121,8 +121,7 @@ abstract final class DemoWorld {
       zone: Zone.production,
       roomId: 'area3',
       photo: 'assets/photos/photo.jpg',
-      description:
-          'Fond vert et éclairage studio pour incrustation, tournages '
+      description: 'Fond vert et éclairage studio pour incrustation, tournages '
           'multicaméra et contenus créatifs.',
       capabilities: {
         Capability.audioPro,
@@ -221,7 +220,8 @@ abstract final class DemoWorld {
       zone: Zone.postproduction,
       roomId: 'ctrl1',
       photo: 'assets/photos/regie.jpg',
-      description: 'Régie du Plateau TV. Réservée automatiquement avec le studio.',
+      description:
+          'Régie du Plateau TV. Réservée automatiquement avec le studio.',
       capabilities: {
         Capability.audioPro,
         Capability.camerasPro,
@@ -543,8 +543,7 @@ abstract final class DemoWorld {
           type: BookingEventType.refused,
           at: _at(4, 15, 10),
           actorId: 'tazi',
-          comment:
-              'Créneau réservé à un tournage MOOC prioritaire. Le Studio '
+          comment: 'Créneau réservé à un tournage MOOC prioritaire. Le Studio '
               'Pédagogique est libre le même jour à 14:00.',
         ),
       ],

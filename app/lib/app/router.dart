@@ -24,7 +24,8 @@ final appRouter = GoRouter(
           builder: (_, __) => const ComingSoonScreen(
             title: 'Studios',
             milestone: 'Étape 2',
-            what: 'La liste des studios par zone, avec filtres et disponibilité en direct.',
+            what:
+                'La liste des studios par zone, avec filtres et disponibilité en direct.',
           ),
         ),
         // E1 (milestone 2)
@@ -102,7 +103,8 @@ final appRouter = GoRouter(
           builder: (_, __) => const ComingSoonScreen(
             title: 'Gestion',
             milestone: 'Étape 6',
-            what: 'Utilisateurs, salles, matériel et toutes les règles réglables.',
+            what:
+                'Utilisateurs, salles, matériel et toutes les règles réglables.',
           ),
         ),
         // J1

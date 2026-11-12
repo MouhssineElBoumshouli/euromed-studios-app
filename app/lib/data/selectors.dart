@@ -53,7 +53,8 @@ List<LiveRoom> liveStatus(WorldState w) {
   final result = <LiveRoom>[];
   for (final s in DemoWorld.studios.where((s) => s.bookable)) {
     final m = w.maintenance.where(
-      (m) => m.roomId == s.roomId && !m.start.isAfter(now) && m.end.isAfter(now),
+      (m) =>
+          m.roomId == s.roomId && !m.start.isAfter(now) && m.end.isAfter(now),
     );
     if (m.isNotEmpty) {
       result.add(LiveRoom(s, LiveState.maintenance, until: m.first.end));

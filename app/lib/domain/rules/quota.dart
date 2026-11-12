@@ -19,11 +19,11 @@ class QuotaStatus {
   bool get unlimited => limitMinutes == null;
   int get remainingMinutes =>
       unlimited ? 1 << 30 : (limitMinutes! - usedMinutes).clamp(0, 1 << 30);
-  bool allows(int extraMinutes) => unlimited || extraMinutes <= remainingMinutes;
-  double get ratio =>
-      unlimited || limitMinutes == 0
-          ? 0
-          : (usedMinutes / limitMinutes!).clamp(0.0, 1.0);
+  bool allows(int extraMinutes) =>
+      unlimited || extraMinutes <= remainingMinutes;
+  double get ratio => unlimited || limitMinutes == 0
+      ? 0
+      : (usedMinutes / limitMinutes!).clamp(0.0, 1.0);
 }
 
 /// What [requesterId], booking as [type], has used in the week of [day].
@@ -43,8 +43,7 @@ QuotaStatus quotaFor({
   final to = from.add(const Duration(days: 7));
   var used = 0;
   for (final b in bookings) {
-    final counts =
-        b.status.holdsSlot || b.status == BookingStatus.completed;
+    final counts = b.status.holdsSlot || b.status == BookingStatus.completed;
     final sameOwner = type == RequesterType.club
         ? b.clubId == clubId && b.requesterType == RequesterType.club
         : b.requesterId == requesterId && b.requesterType == type;

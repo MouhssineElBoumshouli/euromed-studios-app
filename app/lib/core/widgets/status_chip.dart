@@ -20,9 +20,10 @@ class StatusChip extends StatelessWidget {
       BookingStatus.pendingStudio => (c.reviewBg, c.reviewText),
       BookingStatus.approved => (c.successBg, c.successText),
       BookingStatus.refused => (c.dangerBg, c.dangerText),
-      BookingStatus.cancelled ||
-      BookingStatus.completed =>
-        (c.neutralBg, c.neutralText),
+      BookingStatus.cancelled || BookingStatus.completed => (
+          c.neutralBg,
+          c.neutralText
+        ),
     };
     return Tag(label: status.label, background: bg, foreground: fg, dot: true);
   }

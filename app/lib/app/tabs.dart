@@ -11,7 +11,8 @@ class TabSpec {
   final IconData selectedIcon;
 }
 
-const _home = TabSpec('/home', 'Accueil', Icons.home_outlined, Icons.home_rounded);
+const _home =
+    TabSpec('/home', 'Accueil', Icons.home_outlined, Icons.home_rounded);
 const _studios = TabSpec(
   '/studios',
   'Studios',

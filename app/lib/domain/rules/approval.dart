@@ -41,7 +41,8 @@ List<Booking> inboxFor(Person person, List<Booking> bookings) {
   ];
   DateTime sentAt(Booking b) => b.history
       .lastWhere(
-        (e) => e.type == BookingEventType.submitted ||
+        (e) =>
+            e.type == BookingEventType.submitted ||
             e.type == BookingEventType.entityApproved,
         orElse: () => b.history.first,
       )

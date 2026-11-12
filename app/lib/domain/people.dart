@@ -3,7 +3,8 @@ library;
 
 /// A UEMF school or department a person belongs to.
 class Establishment {
-  const Establishment({required this.id, required this.short, required this.name});
+  const Establishment(
+      {required this.id, required this.short, required this.name});
   final String id;
   final String short;
   final String name;
@@ -83,7 +84,8 @@ class Person {
   /// Clubs this person may book for (as representative).
   final List<String> clubIds;
 
-  String get displayName => '$firstName ${lastName.isEmpty ? '' : '${lastName[0]}.'}'.trim();
+  String get displayName =>
+      '$firstName ${lastName.isEmpty ? '' : '${lastName[0]}.'}'.trim();
   String get fullName => '$firstName $lastName'.trim();
   String get initials =>
       '${firstName.isEmpty ? '' : firstName[0]}${lastName.isEmpty ? '' : lastName[0]}'

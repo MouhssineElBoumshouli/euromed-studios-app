@@ -11,7 +11,8 @@ void main() {
     await initializeDateFormatting('fr_FR');
   });
 
-  testWidgets('the app opens on the student home with real demo data', (t) async {
+  testWidgets('the app opens on the student home with real demo data',
+      (t) async {
     await t.binding.setSurfaceSize(const Size(400, 1600));
     await t.pumpWidget(const ProviderScope(child: EuromedStudiosApp()));
     await t.pumpAndSettle();

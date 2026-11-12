@@ -23,7 +23,8 @@ class ComingSoonScreen extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
       children: [
-        Text(title.toUpperCase(), style: EsText.displayL.copyWith(color: c.textPrimary)),
+        Text(title.toUpperCase(),
+            style: EsText.displayL.copyWith(color: c.textPrimary)),
         const SizedBox(height: 24),
         EmptyState(
           icon: Icons.construction_rounded,
