@@ -136,6 +136,6 @@ Loading (skeleton shapes, not spinners) · empty · error with retry · offline 
 
 | Wave | Screens | Why first |
 | --- | --- | --- |
-| 1 | A2–A3, A6, B1, C1–C3, D1–D7, E1–E3, G1–G5 | The core: book, approve, enter |
+| 1 ✅ | A2–A3, A6, B1, C1–C3, D1–D7, E1–E3, G1–G5 | The core: book, approve, enter |
 | 2 | F1–F8, H1–H7, E4–E5, B2 | Projects and day-to-day studio work |
 | 3 | I1–I9, J1–J4, A4–A7, B3, G6, all K states | Admin, settings, edge cases |
