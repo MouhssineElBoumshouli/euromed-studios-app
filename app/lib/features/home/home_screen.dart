@@ -190,10 +190,7 @@ class _NextSessionCard extends StatelessWidget {
             icon: Icons.qr_code_2_rounded,
             style: EsButtonStyle.secondary,
             size: EsButtonSize.medium,
-            onPressed: () => _soon(
-              context,
-              'Le QR code arrive à l’étape 2. Il ne sera actif que pendant le créneau.',
-            ),
+onPressed: () => context.push('/qr/${booking.id}'),
           ),
         ],
       ),
@@ -281,8 +278,7 @@ class _RequestRow extends StatelessWidget {
     final c = context.es;
     final s = studioById(booking.studioId);
     return InkWell(
-      onTap: () =>
-          _soon(context, 'Le détail de la demande arrive à l’étape 2.'),
+      onTap: () => context.push('/bookings/${booking.id}'),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(

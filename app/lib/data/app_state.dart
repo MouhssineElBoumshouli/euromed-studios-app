@@ -87,8 +87,10 @@ class WorldNotifier extends Notifier<WorldState> {
         bookings: List.of(DemoWorld.bookings),
         maintenance: List.of(DemoWorld.maintenance),
         signedCharterVersion: {
+          // Everyone signed already, except the external client, so the
+          // demo can show the charter step (A6).
           for (final p in DemoWorld.people)
-            p.id: DemoWorld.policy.charterVersion,
+            if (p.id != 'omar') p.id: DemoWorld.policy.charterVersion,
         },
       );
 
