@@ -5,6 +5,7 @@ Original material. **Do not edit these files.** If something here looks wrong, a
 | File | What it is |
 | --- | --- |
 | `cahier-des-charges-original.odt` | The Cahier des Charges as UEMF gave it to us. |
+| `uemf-brand-book.pdf` | UEMF logo page from the Direction de la Communication: official blue and green, Gotham font, logo versions. |
 | `cahier-des-charges-transcript.md` | The same text, converted so it's easy to search. No changes made. |
 | `photos/00-brochure-cover.jpg` | The cover of the Euromed Studios brochure. Shows the logo, the colors and the tagline "Crafting Vision into Reality". |
 | `photos/01-floor-plan.jpg` | The floor plan of the whole center. |

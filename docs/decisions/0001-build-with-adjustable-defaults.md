@@ -1,6 +1,6 @@
 # 0001: Build now with adjustable defaults
 
-Status: proposed, waiting for Mouhssine's OK
+Status: approved by Mouhssine, 2026-11-12
 Date: 2026-11-12
 
 ## The situation
@@ -22,3 +22,7 @@ The questions file becomes the **agenda for the meeting**. We don't send it befo
 ## The risk
 
 A default could be very far from what UEMF wants. For example, a single approver could turn out to be a group of people. To limit this, the parts most likely to change are built generically: the approval chain is a list of steps, not exactly 2 fixed people, and rooms and studios are data, not code.
+
+## Scope
+
+UEMF gave the team full freedom. The goal is a complete, polished app that UEMF can see working and then adjust. We do not wait for answers to build features. We build the full product and keep policy adjustable.

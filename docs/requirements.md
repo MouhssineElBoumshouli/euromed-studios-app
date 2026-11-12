@@ -86,9 +86,9 @@ These are points where two requirements pull against each other. We need a decis
 4. **R-09 vs R-18.** Does the Administrator give the final approval, or does the studio management? Are they the same person? → Q5
 5. **R-01 vs the floor plan.** Several studios are the same room. Booking Plateau TV probably blocks Euromed Radio. → Q1
 
-## Proposals from the old project (need Mouhssine's OK)
+## Proposals from the old project
 
-The old project agreed on these. They look sound, but they are not in the CdC, so each needs your yes or no.
+**Approved by Mouhssine on 2026-11-12.** All 13 are now rules.
 
 | ID | Proposal |
 | --- | --- |
