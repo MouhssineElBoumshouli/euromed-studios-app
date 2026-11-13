@@ -62,11 +62,15 @@ List<Notice> noticesFor(
 
   for (final b in bookings) {
     if (b.isPrivate) continue;
-    final what = describe(b);
+    late final what = describe(b);
+    // Old history isn't news: keep 30 days (waiting decisions always stay).
+    final since = now.subtract(const Duration(days: 30));
     final mine = b.requesterId == person.id;
 
     // Requests waiting for this person's decision.
-    if (b.status.isPending && canDecide(person, b, people: people)) {
+    if (b.status.isPending &&
+        b.history.last.actorId != person.id &&
+        canDecide(person, b, people: people)) {
       out.add(
         Notice(
           id: 'decide-${b.id}-${b.status.name}',
@@ -82,8 +86,10 @@ List<Notice> noticesFor(
       );
     }
 
+    final wasValidated =
+        b.history.any((x) => x.type == BookingEventType.studioApproved);
     for (final e in b.history) {
-      if (e.actorId == person.id) continue;
+      if (e.actorId == person.id || e.at.isBefore(since)) continue;
       final id = '${b.id}-${e.type.name}-${e.at.millisecondsSinceEpoch}';
       if (mine) {
         final n = switch (e.type) {
@@ -145,7 +151,7 @@ List<Notice> noticesFor(
         );
       } else if (staff &&
           e.type == BookingEventType.cancelled &&
-          b.history.any((x) => x.type == BookingEventType.studioApproved)) {
+          wasValidated) {
         out.add(
           Notice(
             id: id,

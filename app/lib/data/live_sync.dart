@@ -35,13 +35,22 @@ class LiveSync {
         ? LiveStatus.signedOut
         : LiveStatus.loading;
     db.auth.onAuthStateChange.listen((e) {
-      if (e.session == null) {
+      final session = e.session;
+      if (session == null) {
         _generation++;
+        _readyUid = null;
         _stop();
+        _clearWorld();
         liveStatus.value = LiveStatus.signedOut;
       } else if (e.event == AuthChangeEvent.signedIn ||
           e.event == AuthChangeEvent.initialSession) {
-        _enter(++_generation);
+        // Supabase may repeat "signed in" for the same person (e.g. when
+        // the tab regains focus): keep the current screen in that case.
+        if (_readyUid == session.user.id &&
+            liveStatus.value == LiveStatus.ready) {
+          return;
+        }
+        _enter(++_generation, session.user.id);
       }
     });
   }
@@ -57,19 +66,34 @@ class LiveSync {
   /// from a previous account is dropped instead of overwriting the new
   /// one (e.g. switching from Mehdi to Karim quickly).
   int _generation = 0;
+  String? _readyUid;
 
-  Future<void> _enter(int gen) async {
+  /// Empties the world so nothing of the previous account stays on screen.
+  void _clearWorld() {
+    final w = container.read(worldProvider);
+    if (gen != _generation) return;
+    container.read(worldProvider.notifier).load(
+          WorldState(
+            now: DateTime.now(),
+            policy: w.policy,
+            bookings: const [],
+            maintenance: const [],
+            signedCharterVersion: const {},
+          ),
+        );
+  }
+
+  Future<void> _enter(int gen, String uid) async {
     _stop();
+    _clearWorld();
     liveStatus.value = LiveStatus.loading;
-    final uid = db.auth.currentUser?.id;
-    if (uid == null) return;
     try {
       final me =
           await db.from('profiles').select('slug').eq('id', uid).single();
       if (gen != _generation) return;
       container.read(currentPersonIdProvider.notifier).state =
           me['slug'] as String;
-      await refresh();
+      await refresh(gen);
       if (gen != _generation) return;
       _channel = db
           .channel('world')
@@ -82,7 +106,11 @@ class LiveSync {
           .subscribe();
       // Keeps "now" moving (QR windows, live status) and catches up if a
       // realtime message was missed.
-      _clock = Timer.periodic(const Duration(seconds: 30), (_) => refresh());
+      _clock = Timer.periodic(
+        const Duration(seconds: 30),
+        (_) => refresh(gen),
+      );
+      _readyUid = uid;
       liveStatus.value = LiveStatus.ready;
     } catch (_) {
       if (gen == _generation) await db.auth.signOut();
@@ -98,13 +126,16 @@ class LiveSync {
 
   void _scheduleRefresh() {
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 250), refresh);
+    final gen = _generation;
+    _debounce = Timer(const Duration(milliseconds: 250), () => refresh(gen));
   }
 
   Map<String, String> _slugById = {};
 
-  /// Reloads everything this person may see.
-  Future<void> refresh() async {
+  /// Reloads everything this person may see. A load started for another
+  /// account ([gen] out of date) is thrown away instead of shown.
+  Future<void> refresh([int? gen]) async {
+    gen ??= _generation;
     final now = DateTime.now();
     if (_slugById.isEmpty) {
       final people = await db.from('profiles').select('id, slug');
@@ -124,12 +155,13 @@ class LiveSync {
       )),
       Future<dynamic>.value(db.from('maintenance').select()),
       Future<dynamic>.value(db.from('charter_signatures').select()),
+      // Private "read up to" time; a missing table must not block sign-in.
       Future<dynamic>.value(
         db
-            .from('profiles')
-            .select('slug, notifications_seen_at')
-            .eq('id', db.auth.currentUser!.id)
-            .single(),
+            .from('notification_reads')
+            .select('seen_at')
+            .maybeSingle()
+            .catchError((_) => null),
       ),
     ]);
     final settings = results[0] as Map<String, dynamic>;
@@ -181,9 +213,9 @@ class LiveSync {
             signedCharterVersion: signed,
             charterSignedAt: signedAt,
             noticesSeenAt: {
-              if (results[5]['notifications_seen_at'] != null)
-                results[5]['slug'] as String:
-                    _time(results[5]['notifications_seen_at']),
+              if (results[5] != null)
+                container.read(currentPersonIdProvider):
+                    _time(results[5]['seen_at']),
             },
           ),
         );

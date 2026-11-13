@@ -212,6 +212,7 @@ class BookingService {
   Future<void> markNoticesSeen(String personId) async {
     if (isLive) {
       await _call(() => _db.rpc('mark_notifications_seen'));
+      _world.markNoticesSeen(personId);
       return;
     }
     _world.markNoticesSeen(personId);

@@ -15,6 +15,9 @@ import 'demo_switcher.dart';
 import 'tabs.dart';
 
 /// The frame around every tab screen: demo bar on top, tabs at the bottom.
+/// Whose feed the live banner last looked at.
+String? _bannerPerson;
+
 class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.location, required this.child});
   final String location;
@@ -26,13 +29,18 @@ class AppShell extends ConsumerWidget {
     // A small banner when something new arrives while the app is open
     // (only for events from the last two minutes, never on sign-in).
     ref.listen(noticesProvider, (before, after) {
-      if (before == null) return;
+      // Never on sign-in, account switch or while loading.
+      final who = ref.read(currentPersonIdProvider);
+      final switched = _bannerPerson != who;
+      _bannerPerson = who;
+      if (before == null || switched || before.isEmpty) return;
+      if (isLive && liveStatus.value != LiveStatus.ready) return;
       final known = {for (final n in before) n.id};
       final now = ref.read(worldProvider).now;
       final fresh = [
         for (final n in after)
           if (!known.contains(n.id) &&
-              now.difference(n.at) < const Duration(minutes: 2))
+              now.difference(n.at) < const Duration(minutes: 5))
             n,
       ];
       if (fresh.isEmpty) return;
