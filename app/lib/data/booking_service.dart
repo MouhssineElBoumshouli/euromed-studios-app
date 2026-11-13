@@ -36,7 +36,7 @@ class BookingService {
     }
   }
 
-  Exception _translate(String m) {
+  Object _translate(String m) {
     if (m.startsWith('slot_taken')) {
       return const SubmitRejected(SubmitProblem.slotUnavailable);
     }

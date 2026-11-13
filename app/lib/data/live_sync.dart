@@ -108,18 +108,18 @@ class LiveSync {
         for (final p in people) p['id'] as String: p['slug'] as String,
       };
     }
-    final results = await Future.wait([
-      db.from('settings').select().single(),
-      db.from('bookings').select(),
-      db.rpc(
+    final results = await Future.wait<dynamic>([
+      Future<dynamic>.value(db.from('settings').select().single()),
+      Future<dynamic>.value(db.from('bookings').select()),
+      Future<dynamic>.value(db.rpc(
         'busy_slots',
         params: {
           'p_from': now.subtract(const Duration(days: 45)).toUtc().toIso8601String(),
           'p_to': now.add(const Duration(days: 60)).toUtc().toIso8601String(),
         },
-      ),
-      db.from('maintenance').select(),
-      db.from('charter_signatures').select(),
+      )),
+      Future<dynamic>.value(db.from('maintenance').select()),
+      Future<dynamic>.value(db.from('charter_signatures').select()),
     ]);
     final settings = results[0] as Map<String, dynamic>;
     final visible = [
