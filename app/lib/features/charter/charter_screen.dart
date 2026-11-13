@@ -55,11 +55,34 @@ class _CharterState extends ConsumerState<CharterScreen> {
     final c = context.es;
     final w = ref.watch(worldProvider);
     final me = ref.watch(currentPersonProvider);
+    const icons = [
+      Icons.schedule_rounded,
+      Icons.inventory_2_outlined,
+      Icons.report_problem_outlined,
+      Icons.qr_code_2_rounded,
+      Icons.event_busy_outlined,
+    ];
     return Scaffold(
-      appBar: AppBar(title: const Text('Règlement intérieur')),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        padding: EdgeInsets.fromLTRB(
+          EsSpace.page,
+          MediaQuery.paddingOf(context).top + EsSpace.s3,
+          EsSpace.page,
+          EsSpace.s6,
+        ),
         children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: EsBackButton(onPressed: () => context.pop(false)),
+          ),
+          const SizedBox(height: EsSpace.s4),
+          const Overline('Avant votre première demande'),
+          const SizedBox(height: 6),
+          Text(
+            'Règlement des studios',
+            style: EsText.displayL.copyWith(color: c.textPrimary),
+          ),
+          const SizedBox(height: EsSpace.s2),
           Text(
             'Avant votre première demande, lisez et signez le règlement des '
             'studios. Vous le signerez à nouveau s’il change.',
@@ -70,11 +93,33 @@ class _CharterState extends ConsumerState<CharterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                for (final (t, d) in _rules) ...[
-                  Text(t, style: EsText.titleS.copyWith(color: c.textPrimary)),
-                  const SizedBox(height: 2),
-                  Text(d, style: EsText.bodyM.copyWith(color: c.textSecondary)),
-                  const SizedBox(height: EsSpace.s3),
+                for (var i = 0; i < _rules.length; i++) ...[
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      IconTile(icons[i], size: 40),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _rules[i].$1,
+                              style: EsText.titleS
+                                  .copyWith(color: c.textPrimary),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              _rules[i].$2,
+                              style: EsText.bodyM
+                                  .copyWith(color: c.textSecondary),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: EsSpace.s4),
                 ],
                 Text(
                   'Version ${w.policy.charterVersion} · texte officiel à '
@@ -86,6 +131,9 @@ class _CharterState extends ConsumerState<CharterScreen> {
           ),
           const SizedBox(height: EsSpace.s3),
           CheckboxListTile(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(EsRadius.md),
+            ),
             value: accepted,
             onChanged: (v) => setState(() => accepted = v ?? false),
             controlAffinity: ListTileControlAffinity.leading,

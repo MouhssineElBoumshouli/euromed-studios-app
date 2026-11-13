@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/demo_mode.dart';
 import '../../app/demo_switcher.dart';
+import '../../app/shell.dart';
 import '../../core/theme/es_colors.dart';
 import '../../core/theme/es_text.dart';
 import '../../core/widgets/es_button.dart';
@@ -26,16 +28,16 @@ class ProfileScreen extends ConsumerWidget {
     final quota = isRequester ? weeklyQuota(w, me) : null;
 
     return ListView(
-      padding: EdgeInsets.zero,
+      padding: EdgeInsets.only(bottom: tabBarSpace(context)),
       children: [
         BrandHeader(
           title: me.fullName,
           overline: 'Mon profil',
           subtitle: me.title,
-          trailing: Avatar(me.initials, size: 56, onBrand: true),
+          trailing: Avatar(me.initials, size: 60),
         ),
         Padding(
-          padding: const EdgeInsets.all(EsSpace.s4),
+          padding: const EdgeInsets.symmetric(horizontal: EsSpace.page),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -75,6 +77,7 @@ class ProfileScreen extends ConsumerWidget {
                   ],
                 ),
               ),
+              if (kDemoMode) ...[
               const SizedBox(height: EsSpace.s5),
               EsButton(
                 'Voir l’application avec un autre rôle',
@@ -89,6 +92,7 @@ class ProfileScreen extends ConsumerWidget {
                 textAlign: TextAlign.center,
                 style: EsText.bodyS.copyWith(color: c.textSecondary),
               ),
+              ],
             ],
           ),
         ),

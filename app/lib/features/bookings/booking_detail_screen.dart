@@ -46,137 +46,193 @@ class BookingDetailScreen extends ConsumerWidget {
     final cancellable = canCancel(me, b, w.now);
 
     return Scaffold(
-      appBar: AppBar(title: Text('Demande ${b.reference}')),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-        children: [
-          EsCard(
-            padding: EdgeInsets.zero,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                AspectRatio(
-                  aspectRatio: 16 / 6,
-                  child: Image.asset(s.photo, fit: BoxFit.cover),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(EsSpace.s4),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              s.name,
-                              style: EsText.titleL.copyWith(color: c.textPrimary),
-                            ),
-                          ),
-                          StatusChip(b.status),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${Fmt.longDay(b.start)} · ${Fmt.range(b.start, b.end)} '
-                        '(${formatMinutes(b.duration.inMinutes)})',
-                        style: EsText.bodyM.copyWith(color: c.textPrimary),
-                      ),
-                      Text(
-                        [
-                          room.name,
-                          b.activity.label,
-                          if (club != null) 'Au nom de ${club.name}',
-                        ].join(' · '),
-                        style: EsText.bodyS.copyWith(color: c.textSecondary),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 240,
+            pinned: true,
+            backgroundColor: c.bgApp,
+            surfaceTintColor: Colors.transparent,
+            automaticallyImplyLeading: false,
+            leadingWidth: 72,
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 16),
+              child: Center(
+                child: EsBackButton(label: null, onPressed: () => context.pop()),
+              ),
+            ),
+            flexibleSpace: FlexibleSpaceBar(
+              background: Image.asset(s.photo, fit: BoxFit.cover),
             ),
           ),
-          if (b.status == BookingStatus.refused && b.refusalReason != null) ...[
-            const SizedBox(height: EsSpace.s3),
-            InfoBanner(
-              tone: BannerTone.danger,
-              text: 'Motif du refus : ${b.refusalReason}',
-            ),
-          ],
-          if (showQr) ...[
-            const SizedBox(height: EsSpace.s3),
-            EsButton(
-              'Afficher mon QR code',
-              icon: Icons.qr_code_2_rounded,
-              onPressed: () => context.push('/qr/${b.id}'),
-            ),
-          ],
-          const SizedBox(height: EsSpace.s4),
-          const SectionTitle('Suivi'),
-          EsCard(child: BookingTimeline(booking: b)),
-          if (b.equipment.isNotEmpty) ...[
-            const SizedBox(height: EsSpace.s4),
-            const SectionTitle('Matériel demandé'),
-            EsCard(
-              child: Column(
-                children: [
-                  for (final e in b.equipment)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
+          SliverToBoxAdapter(
+            child: Transform.translate(
+              offset: const Offset(0, -28),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: c.bgApp,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(EsRadius.xl),
+                  ),
+                ),
+                padding: const EdgeInsets.fromLTRB(
+                  EsSpace.page,
+                  EsSpace.s5,
+                  EsSpace.page,
+                  EsSpace.s8,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      children: [
+                        StatusChip(b.status),
+                        const Spacer(),
+                        Text(
+                          b.reference,
+                          style: EsText.labelS
+                              .copyWith(color: c.textSecondary),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: EsSpace.s3),
+                    Text(
+                      s.name,
+                      style: EsText.displayXL.copyWith(color: c.textPrimary),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      [
+                        room.name,
+                        b.activity.label,
+                        if (club != null) 'Au nom de ${club.name}',
+                      ].join(' · '),
+                      style: EsText.bodyM.copyWith(color: c.textSecondary),
+                    ),
+                    const SizedBox(height: EsSpace.s4),
+                    EsCard(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 14,
+                      ),
                       child: Row(
                         children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${equipmentById(e.itemId).name} × ${e.quantity}',
-                                  style: EsText.titleS.copyWith(color: c.textPrimary),
-                                ),
-                                Text(
-                                  e.required ? 'Indispensable' : 'Souhaité',
-                                  style: EsText.bodyS.copyWith(
-                                    color: c.textSecondary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          _Outcome(e.outcome),
+                          _Fact('Date', Fmt.shortDay(b.start)),
+                          _Divider(),
+                          _Fact('Horaire', Fmt.range(b.start, b.end)),
+                          _Divider(),
+                          _Fact('Durée', formatMinutes(b.duration.inMinutes)),
                         ],
                       ),
                     ),
-                ],
+                    if (b.status == BookingStatus.refused &&
+                        b.refusalReason != null) ...[
+                      const SizedBox(height: EsSpace.s3),
+                      InfoBanner(
+                        tone: BannerTone.danger,
+                        title: 'Motif du refus',
+                        text: b.refusalReason!,
+                      ),
+                    ],
+                    if (showQr) ...[
+                      const SizedBox(height: EsSpace.s4),
+                      EsButton(
+                        'Afficher mon QR code',
+                        icon: Icons.qr_code_2_rounded,
+                        onPressed: () => context.push('/qr/${b.id}'),
+                      ),
+                    ],
+                    const SizedBox(height: EsSpace.s4),
+                    const SectionTitle('Suivi de la demande'),
+                    const SizedBox(height: EsSpace.s2),
+                    EsCard(child: BookingTimeline(booking: b)),
+                    if (b.equipment.isNotEmpty) ...[
+                      const SizedBox(height: EsSpace.s4),
+                      const SectionTitle('Matériel demandé'),
+                      const SizedBox(height: EsSpace.s2),
+                      EsCard(
+                        child: Column(
+                          children: [
+                            for (var i = 0; i < b.equipment.length; i++) ...[
+                              if (i > 0) Divider(height: 20, color: c.border),
+                              Row(
+                                children: [
+                                  const IconTile(
+                                    Icons.inventory_2_outlined,
+                                    size: 38,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          '${equipmentById(b.equipment[i].itemId).name}'
+                                          ' × ${b.equipment[i].quantity}',
+                                          style: EsText.titleS
+                                              .copyWith(color: c.textPrimary),
+                                        ),
+                                        Text(
+                                          b.equipment[i].required
+                                              ? 'Indispensable'
+                                              : 'Souhaité',
+                                          style: EsText.bodyS.copyWith(
+                                            color: c.textSecondary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  _Outcome(b.equipment[i].outcome),
+                                ],
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ],
+                    if (b.note != null) ...[
+                      const SizedBox(height: EsSpace.s4),
+                      const SectionTitle('Votre note'),
+                      const SizedBox(height: EsSpace.s2),
+                      EsCard(
+                        child: Text(
+                          b.note!,
+                          style:
+                              EsText.bodyM.copyWith(color: c.textSecondary),
+                        ),
+                      ),
+                    ],
+                    if (b.technicianId != null) ...[
+                      const SizedBox(height: EsSpace.s4),
+                      InfoBanner(
+                        icon: Icons.engineering_outlined,
+                        title: 'Technicien affecté',
+                        text: personById(b.technicianId!).fullName,
+                      ),
+                    ],
+                    const SizedBox(height: EsSpace.s6),
+                    if (cancellable)
+                      EsButton(
+                        b.status == BookingStatus.approved
+                            ? 'Annuler la séance'
+                            : 'Annuler la demande',
+                        style: EsButtonStyle.destructive,
+                        onPressed: () => _confirmCancel(context, ref, b.id),
+                      ),
+                    if (b.status == BookingStatus.refused ||
+                        b.status == BookingStatus.cancelled)
+                      EsButton(
+                        'Faire une nouvelle demande',
+                        style: EsButtonStyle.secondary,
+                        onPressed: () => context.push('/book/${s.id}'),
+                      ),
+                  ],
+                ),
               ),
             ),
-          ],
-          if (b.note != null) ...[
-            const SizedBox(height: EsSpace.s4),
-            const SectionTitle('Votre note'),
-            Text(b.note!, style: EsText.bodyM.copyWith(color: c.textSecondary)),
-          ],
-          if (b.technicianId != null) ...[
-            const SizedBox(height: EsSpace.s4),
-            InfoBanner(
-              icon: Icons.engineering_outlined,
-              text: 'Technicien affecté : ${personById(b.technicianId!).fullName}',
-            ),
-          ],
-          const SizedBox(height: EsSpace.s5),
-          if (cancellable)
-            EsButton(
-              b.status == BookingStatus.approved
-                  ? 'Annuler la séance'
-                  : 'Annuler la demande',
-              style: EsButtonStyle.destructive,
-              onPressed: () => _confirmCancel(context, ref, b.id),
-            ),
-          if (b.status == BookingStatus.refused ||
-              b.status == BookingStatus.cancelled)
-            EsButton(
-              'Faire une nouvelle demande',
-              style: EsButtonStyle.secondary,
-              onPressed: () => context.push('/book/${s.id}'),
-            ),
+          ),
         ],
       ),
     );
@@ -196,7 +252,7 @@ class BookingDetailScreen extends ConsumerWidget {
         return Padding(
           padding: EdgeInsets.fromLTRB(
             24,
-            0,
+            8,
             24,
             24 + MediaQuery.viewInsetsOf(ctx).bottom,
           ),
@@ -267,4 +323,34 @@ class _Outcome extends StatelessWidget {
     };
     return Tag(label: t, background: bg, foreground: fg);
   }
+}
+
+class _Fact extends StatelessWidget {
+  const _Fact(this.label, this.value);
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.es;
+    return Expanded(
+      child: Column(
+        children: [
+          Text(label, style: EsText.bodyS.copyWith(color: c.textSecondary)),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            textAlign: TextAlign.center,
+            style: EsText.titleS.copyWith(color: c.textPrimary),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Divider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) =>
+      Container(width: 1, height: 34, color: context.es.border);
 }

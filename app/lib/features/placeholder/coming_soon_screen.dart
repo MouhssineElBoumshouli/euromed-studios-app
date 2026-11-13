@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/es_colors.dart';
-import '../../core/theme/es_text.dart';
+import '../../app/shell.dart';
 import '../../core/widgets/layout.dart';
 
 /// Temporary screen for tabs built in a later milestone.
@@ -19,16 +18,13 @@ class ComingSoonScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = context.es;
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+      padding: EdgeInsets.only(bottom: tabBarSpace(context)),
       children: [
-        Text(title.toUpperCase(),
-            style: EsText.displayL.copyWith(color: c.textPrimary)),
-        const SizedBox(height: 24),
+        BrandHeader(title: title, subtitle: milestone),
         EmptyState(
           icon: Icons.construction_rounded,
-          title: 'En construction · $milestone',
+          title: 'Bientôt ici',
           message: what,
         ),
       ],
