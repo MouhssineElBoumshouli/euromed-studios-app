@@ -309,10 +309,7 @@ class _NextSessionHero extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Hero(
-                tag: 'photo-${booking.id}',
-                child: Image.asset(s.photo, fit: BoxFit.cover),
-              ),
+              Image.asset(s.photo, fit: BoxFit.cover),
               DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(

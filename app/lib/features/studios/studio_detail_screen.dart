@@ -223,18 +223,37 @@ class StudioDetailScreen extends ConsumerWidget {
                           ],
                         ],
                       ),
-                    const SizedBox(height: 110),
+                    const SizedBox(height: EsSpace.s6),
                   ],
                 ),
               ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: EsSpace.page),
-        child: EsButton(
-          'Réserver ce studio',
-          trailingIcon: Icons.arrow_forward_rounded,
-          onPressed: () => context.push('/book/${s.id}'),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: c.bgApp,
+          boxShadow: [
+            BoxShadow(
+              color: c.bgApp,
+              blurRadius: 24,
+              spreadRadius: 8,
+              offset: const Offset(0, -12),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              EsSpace.page,
+              EsSpace.s2,
+              EsSpace.page,
+              EsSpace.s3,
+            ),
+            child: EsButton(
+              'Réserver ce studio',
+              trailingIcon: Icons.arrow_forward_rounded,
+              onPressed: () => context.push('/book/${s.id}'),
+            ),
+          ),
         ),
       ),
     );

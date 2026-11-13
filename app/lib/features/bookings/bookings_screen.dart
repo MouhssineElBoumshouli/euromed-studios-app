@@ -80,7 +80,7 @@ class BookingsScreen extends ConsumerWidget {
     }
 
     Tab tab(String label, int n) => Tab(
-          height: 40,
+          height: 44,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

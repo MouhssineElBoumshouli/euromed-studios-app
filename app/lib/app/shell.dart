@@ -41,15 +41,15 @@ class AppShell extends ConsumerWidget {
       body: Column(
         children: [
           if (kDemoMode) const DemoBar(),
-          // The demo bar already handles the status-bar space.
+          // Pages read the padding from outside this Scaffold, so the
+          // floating tab bar's room is added once, by tabBarSpace().
+          // In demo mode the demo bar already covers the status bar.
           Expanded(
-            child: kDemoMode
-                ? MediaQuery.removePadding(
-                    context: context,
-                    removeTop: true,
-                    child: page,
-                  )
-                : page,
+            child: MediaQuery.removePadding(
+              context: context,
+              removeTop: kDemoMode,
+              child: page,
+            ),
           ),
         ],
       ),
@@ -65,7 +65,7 @@ class AppShell extends ConsumerWidget {
 /// Height the floating tab bar takes at the bottom of the screen, so
 /// scrolling content can leave room for it.
 double tabBarSpace(BuildContext context) =>
-    96 + MediaQuery.paddingOf(context).bottom;
+    100 + MediaQuery.paddingOf(context).bottom;
 
 /// The floating pill tab bar from the original design, refined: the
 /// selected tab sits in a lilac capsule that slides between tabs.
@@ -110,7 +110,7 @@ class PillTabBar extends StatelessWidget {
                     children: [
                       AnimatedPositioned(
                         duration: EsMotion.medium,
-                        curve: Curves.easeOutBack,
+                        curve: EsMotion.curve,
                         left: w * selected,
                         top: 0,
                         bottom: 0,
@@ -165,7 +165,9 @@ class _PillTab extends StatelessWidget {
       selected: selected,
       label: spec.label,
       excludeSemantics: true,
-      child: InkWell(
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(EsRadius.lg),
         child: Column(
@@ -193,6 +195,7 @@ class _PillTab extends StatelessWidget {
               ),
             ),
           ],
+        ),
         ),
       ),
     );

@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../theme/es_colors.dart';
 import '../theme/es_text.dart';
@@ -519,9 +520,21 @@ class _FadeInUpState extends State<FadeInUp>
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(milliseconds: 40 * widget.index.clamp(0, 8)), () {
-      if (mounted) _a.forward();
-    });
+    // Only the first screenful settles in; later items (and items that
+    // scroll back into view) appear at once.
+    if (widget.index > 6) {
+      _a.value = 1;
+    } else {
+      Future.delayed(Duration(milliseconds: 40 * widget.index), () {
+        if (mounted) _a.forward();
+      });
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) _a.value = 1;
   }
 
   @override
@@ -575,7 +588,9 @@ class PhotoPage extends StatelessWidget {
       excludeFromSemantics: true,
     );
     if (heroTag != null) image = Hero(tag: heroTag!, child: image);
-    return Stack(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: Stack(
       children: [
         Positioned.fill(child: ColoredBox(color: c.bgApp)),
         SingleChildScrollView(
@@ -604,6 +619,7 @@ class PhotoPage extends StatelessWidget {
           child: _PinnedBack(onPressed: onBack),
         ),
       ],
+      ),
     );
   }
 }
@@ -628,8 +644,8 @@ class _PinnedBack extends StatelessWidget {
           customBorder: const CircleBorder(),
           onTap: onPressed,
           child: SizedBox(
-            width: 42,
-            height: 42,
+            width: 44,
+            height: 44,
             child: Icon(
               Icons.arrow_back_ios_new_rounded,
               size: 17,

@@ -92,7 +92,7 @@ class _EsButtonState extends State<EsButton> {
         curve: EsMotion.curve,
         child: AnimatedOpacity(
           duration: EsMotion.fast,
-          opacity: enabled || widget.loading ? 1 : 0.42,
+          opacity: enabled || widget.loading ? 1 : 0.55,
           child: DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(EsRadius.pill),
@@ -163,8 +163,8 @@ class EsBackButton extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 40,
-                height: 40,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
                   color: onDark
                       ? Colors.white.withValues(alpha: 0.12)

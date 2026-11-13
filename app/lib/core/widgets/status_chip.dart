@@ -137,7 +137,8 @@ class _LiveDotState extends State<LiveDot> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     final reduce = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
     final s = widget.size;
-    return SizedBox(
+    return RepaintBoundary(
+      child: SizedBox(
       width: s * 2.2,
       height: s * 2.2,
       child: AnimatedBuilder(
@@ -162,6 +163,7 @@ class _LiveDotState extends State<LiveDot> with SingleTickerProviderStateMixin {
             ),
           ],
         ),
+      ),
       ),
     );
   }

@@ -358,20 +358,25 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
                 ),
               ),
             ),
+            _BottomBar(
+              summary: step == 0 && rangeStart != null
+                  ? '${Fmt.shortDay(day)} · ${Fmt.range(rangeStart!, rangeEnd!)}'
+                  : null,
+              duration: step == 0 && rangeStart != null
+                  ? formatMinutes(_minutes)
+                  : null,
+              label: switch (step) {
+            0 when rangeStart == null => 'Choisissez un créneau',
+            1 when activity == null => 'Choisissez une activité',
+            0 || 1 => 'Continuer',
+            _ => 'Envoyer la demande',
+          },
+              loading: sending,
+              onPressed: canContinue
+                  ? () => step < 2 ? setState(() => step++) : _send()
+                  : null,
+            ),
           ],
-        ),
-        bottomNavigationBar: _BottomBar(
-          summary: step == 0 && rangeStart != null
-              ? '${Fmt.shortDay(day)} · ${Fmt.range(rangeStart!, rangeEnd!)}'
-              : null,
-          duration: step == 0 && rangeStart != null
-              ? formatMinutes(_minutes)
-              : null,
-          label: step < 2 ? 'Continuer' : 'Envoyer la demande',
-          loading: sending,
-          onPressed: canContinue
-              ? () => step < 2 ? setState(() => step++) : _send()
-              : null,
         ),
       ),
     );
@@ -1376,8 +1381,7 @@ class _EquipRow extends StatelessWidget {
                   children: [
                     IconButton(
                       tooltip: 'Retirer un',
-                      visualDensity: VisualDensity.compact,
-                      onPressed: e.qty == 0
+                                            onPressed: e.qty == 0
                           ? null
                           : () {
                               e.qty--;
@@ -1396,8 +1400,7 @@ class _EquipRow extends StatelessWidget {
                     ),
                     IconButton(
                       tooltip: 'Ajouter un',
-                      visualDensity: VisualDensity.compact,
-                      onPressed: e.qty >= e.item.stock
+                                            onPressed: e.qty >= e.item.stock
                           ? null
                           : () {
                               e.qty++;

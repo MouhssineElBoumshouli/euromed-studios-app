@@ -97,7 +97,7 @@ class StudiosScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: EsSpace.s3),
                   SizedBox(
-                    height: 40,
+                    height: 44,
                     child: ListView(
                       clipBehavior: Clip.none,
                       scrollDirection: Axis.horizontal,
@@ -201,7 +201,7 @@ class _FilterChip extends StatelessWidget {
             customBorder: const StadiumBorder(),
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Text(
                 label,
                 style: EsText.labelS.copyWith(
