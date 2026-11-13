@@ -32,8 +32,17 @@ final appRouter = GoRouter(
   redirect: (context, state) {
     if (!isLive) return null;
     final atLogin = state.matchedLocation == '/login';
-    if (liveStatus.value != LiveStatus.ready) return atLogin ? null : '/login';
-    return atLogin ? '/home' : null;
+    if (liveStatus.value != LiveStatus.ready) {
+      // Remember where the person was going, to land there after sign-in.
+      return atLogin
+          ? null
+          : '/login?from=${Uri.encodeComponent(state.uri.toString())}';
+    }
+    if (!atLogin) return null;
+    final from = state.uri.queryParameters['from'];
+    return from != null && from.startsWith('/') && !from.startsWith('/login')
+        ? from
+        : '/home';
   },
   routes: [
     ShellRoute(

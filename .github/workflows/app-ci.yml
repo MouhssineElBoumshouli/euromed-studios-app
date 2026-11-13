@@ -43,8 +43,8 @@ jobs:
           if [ -n "$(git status --porcelain lib test)" ]; then
             echo "Formatting changed files:"; git status --porcelain lib test
             if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref_name }}" != "main" ]; then
-              git config user.name "github-actions[bot]"
-              git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+              git config --global user.name "github-actions[bot]"
+              git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
               git add lib test && git commit -m "style: dart format"
               git pull --rebase -q origin "${{ github.ref_name }}" && git push || echo "Could not save formatting (branch moved); continuing."
             fi
@@ -71,8 +71,8 @@ jobs:
           rm -rf /tmp/pv && mkdir -p /tmp/pv
           cp -r app/build/web /tmp/pv/site
           find /tmp/pv/site -name '*.symbols' -delete
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin preview:preview 2>/dev/null || true
           if git show-ref --quiet refs/heads/preview; then
             git worktree add /tmp/pvwt preview
@@ -120,12 +120,13 @@ jobs:
       - name: Save screenshots to the "e2e-screens" branch
         if: always()
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          cp -r e2e/out /tmp/e2e-out
-          git checkout --orphan e2e-screens
-          git rm -rfq .
-          cp -r /tmp/e2e-out/. .
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          mkdir /tmp/shots && cd /tmp/shots && git init -q -b e2e-screens
+          cp -r "$GITHUB_WORKSPACE/e2e/out/." .
           git add -A
           git commit -qm "Live demo screenshots for ${GITHUB_SHA::7}"
-          git push -f origin e2e-screens
+          git remote add origin "$(git -C "$GITHUB_WORKSPACE" remote get-url origin)"
+          git -C "$GITHUB_WORKSPACE" config --get-all http.https://github.com/.extraheader | head -1 > /tmp/h
+          git -c http.https://github.com/.extraheader="$(cat /tmp/h)" push -f origin e2e-screens
+          exit 0

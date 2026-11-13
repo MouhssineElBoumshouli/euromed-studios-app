@@ -97,7 +97,7 @@ await laptop.screenshot({ path: 'e2e/out/2-manager-live-update.png' });
 
 // Approve in the manager's UI (Flutter exposes its accessibility tree).
 try {
-  await laptop.locator('flt-semantics-placeholder').click({ force: true }).catch(() => {});
+  await laptop.evaluate(() => document.querySelector('flt-semantics-placeholder')?.click());
   await laptop.waitForTimeout(2000);
   fs.writeFileSync('e2e/out/semantics.txt',
     (await laptop.locator('flt-semantics[role], [aria-label]').evaluateAll(
