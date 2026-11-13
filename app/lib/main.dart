@@ -31,7 +31,7 @@ Future<void> main() async {
   if (kLiveBuild) {
     await Supabase.initialize(
       url: kSupabaseUrl,
-      anonKey: kSupabasePublishableKey,
+      publishableKey: kSupabasePublishableKey,
     );
     liveSync = LiveSync(container);
     await liveSync!.start();

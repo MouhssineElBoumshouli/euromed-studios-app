@@ -11,7 +11,6 @@ import '../../core/widgets/layout.dart';
 import '../../core/widgets/status_chip.dart';
 import '../../data/app_state.dart';
 import '../../data/booking_service.dart';
-import '../../data/demo_world.dart';
 import '../../domain/bookings.dart';
 import '../../domain/rules/sessions.dart';
 
