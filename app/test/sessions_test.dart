@@ -1,6 +1,7 @@
 import 'package:euromed_studios/data/app_state.dart';
 import 'package:euromed_studios/data/demo_world.dart';
 import 'package:euromed_studios/domain/bookings.dart';
+import 'package:euromed_studios/domain/people.dart';
 import 'package:euromed_studios/domain/rules/approval.dart';
 import 'package:euromed_studios/domain/rules/sessions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
