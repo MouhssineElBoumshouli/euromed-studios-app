@@ -95,6 +95,8 @@ jobs:
   # commit message contains "[e2e]", because it resets the demo data.
   live-demo:
     needs: check-test-build
+    permissions:
+      contents: write
     if: github.event_name == 'push' && contains(github.event.head_commit.message, '[e2e]')
     runs-on: ubuntu-latest
     steps:
@@ -115,8 +117,15 @@ jobs:
         run: (cd site && python3 -m http.server 8080 &) && sleep 2
       - name: Run the live demo
         run: node e2e/live_demo.mjs
-      - uses: actions/upload-artifact@v4
+      - name: Save screenshots to the "e2e-screens" branch
         if: always()
-        with:
-          name: live-demo-screens
-          path: e2e/out
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          cp -r e2e/out /tmp/e2e-out
+          git checkout --orphan e2e-screens
+          git rm -rfq .
+          cp -r /tmp/e2e-out/. .
+          git add -A
+          git commit -qm "Live demo screenshots for ${GITHUB_SHA::7}"
+          git push -f origin e2e-screens

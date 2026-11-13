@@ -98,8 +98,11 @@ await laptop.screenshot({ path: 'e2e/out/2-manager-live-update.png' });
 // Approve in the manager's UI (Flutter exposes its accessibility tree).
 try {
   await laptop.locator('flt-semantics-placeholder').click({ force: true }).catch(() => {});
-  await laptop.waitForTimeout(1500);
-  await laptop.getByText('Espace Montage').first().click();
+  await laptop.waitForTimeout(2000);
+  fs.writeFileSync('e2e/out/semantics.txt',
+    (await laptop.locator('flt-semantics[role], [aria-label]').evaluateAll(
+      (els) => els.map((e) => `${e.getAttribute('role')} | ${e.getAttribute('aria-label') ?? e.textContent}`).join('\n'))));
+  await laptop.getByRole('button', { name: /Espace Montage/ }).first().click();
   await laptop.waitForTimeout(1500);
   await laptop.getByRole('button', { name: /Valider la séance/ }).first().click();
   await laptop.waitForTimeout(1200);
