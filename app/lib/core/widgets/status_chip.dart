@@ -4,28 +4,43 @@ import '../../domain/bookings.dart';
 import '../theme/es_colors.dart';
 import '../theme/es_text.dart';
 
-/// Booking status label (Figma "StatusChip").
+/// Colors for a booking status: (background, text).
+(Color, Color) statusColors(EsColors c, BookingStatus s) => switch (s) {
+      BookingStatus.pendingEntity => (c.pendingBg, c.pendingText),
+      BookingStatus.pendingStudio => (c.reviewBg, c.reviewText),
+      BookingStatus.approved => (c.successBg, c.successText),
+      BookingStatus.refused => (c.dangerBg, c.dangerText),
+      BookingStatus.cancelled ||
+      BookingStatus.completed =>
+        (c.neutralBg, c.neutralText),
+    };
+
+IconData statusIcon(BookingStatus s) => switch (s) {
+      BookingStatus.pendingEntity => Icons.hourglass_top_rounded,
+      BookingStatus.pendingStudio => Icons.hourglass_bottom_rounded,
+      BookingStatus.approved => Icons.check_rounded,
+      BookingStatus.refused => Icons.close_rounded,
+      BookingStatus.cancelled => Icons.block_rounded,
+      BookingStatus.completed => Icons.done_all_rounded,
+    };
+
+/// Booking status label.
 ///
-/// The status is always written in words. Color is a second signal,
-/// never the only one.
+/// The status is always written in words, with an icon. Color is a
+/// second signal, never the only one.
 class StatusChip extends StatelessWidget {
   const StatusChip(this.status, {super.key});
   final BookingStatus status;
 
   @override
   Widget build(BuildContext context) {
-    final c = context.es;
-    final (Color bg, Color fg) = switch (status) {
-      BookingStatus.pendingEntity => (c.pendingBg, c.pendingText),
-      BookingStatus.pendingStudio => (c.reviewBg, c.reviewText),
-      BookingStatus.approved => (c.successBg, c.successText),
-      BookingStatus.refused => (c.dangerBg, c.dangerText),
-      BookingStatus.cancelled || BookingStatus.completed => (
-          c.neutralBg,
-          c.neutralText
-        ),
-    };
-    return Tag(label: status.label, background: bg, foreground: fg, dot: true);
+    final (bg, fg) = statusColors(context.es, status);
+    return Tag(
+      label: status.label,
+      background: bg,
+      foreground: fg,
+      icon: statusIcon(status),
+    );
   }
 }
 
@@ -48,7 +63,7 @@ class Tag extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.fromLTRB(9, 4, 11, 4),
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(999),
@@ -58,8 +73,8 @@ class Tag extends StatelessWidget {
         children: [
           if (dot) ...[
             Container(
-              width: 6,
-              height: 6,
+              width: 7,
+              height: 7,
               decoration: BoxDecoration(
                 color: foreground,
                 shape: BoxShape.circle,
@@ -68,11 +83,87 @@ class Tag extends StatelessWidget {
             const SizedBox(width: 6),
           ],
           if (icon != null) ...[
-            Icon(icon, size: 14, color: foreground),
+            Icon(icon, size: 13, color: foreground),
             const SizedBox(width: 4),
           ],
-          Text(label, style: EsText.labelS.copyWith(color: foreground)),
+          Flexible(
+            child: Text(
+              label,
+              overflow: TextOverflow.ellipsis,
+              style: EsText.labelS.copyWith(color: foreground),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+/// A pulsing dot for things happening right now.
+class LiveDot extends StatefulWidget {
+  const LiveDot({super.key, required this.color, this.size = 8});
+  final Color color;
+  final double size;
+
+  @override
+  State<LiveDot> createState() => _LiveDotState();
+}
+
+class _LiveDotState extends State<LiveDot> with SingleTickerProviderStateMixin {
+  late final AnimationController _a = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1600),
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Respect "reduce motion" (and keeps widget tests able to settle).
+    final reduce = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    if (reduce) {
+      _a.stop();
+    } else if (!_a.isAnimating) {
+      _a.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _a.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final reduce = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    final s = widget.size;
+    return RepaintBoundary(
+      child: SizedBox(
+      width: s * 2.2,
+      height: s * 2.2,
+      child: AnimatedBuilder(
+        animation: _a,
+        builder: (context, _) => Stack(
+          alignment: Alignment.center,
+          children: [
+            if (!reduce)
+              Container(
+                width: s + s * 1.2 * _a.value,
+                height: s + s * 1.2 * _a.value,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: widget.color.withValues(alpha: 0.35 * (1 - _a.value)),
+                ),
+              ),
+            Container(
+              width: s,
+              height: s,
+              decoration:
+                  BoxDecoration(shape: BoxShape.circle, color: widget.color),
+            ),
+          ],
+        ),
+      ),
       ),
     );
   }

@@ -78,14 +78,19 @@ class BookingTimeline extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 SizedBox(
-                  width: 20,
+                  width: 24,
                   child: Column(
                     children: [
-                      const SizedBox(height: 3),
                       _Dot(state: steps[i].$4),
                       if (i < steps.length - 1)
                         Expanded(
-                          child: Container(width: 2, color: c.border),
+                          child: Container(
+                            width: 2,
+                            margin: const EdgeInsets.symmetric(vertical: 3),
+                            color: steps[i].$4 == _StepState.done
+                                ? c.successFill.withValues(alpha: 0.4)
+                                : c.border,
+                          ),
                         ),
                     ],
                   ),
@@ -93,7 +98,7 @@ class BookingTimeline extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.only(bottom: 14),
+                    padding: const EdgeInsets.only(top: 2, bottom: 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -143,21 +148,23 @@ class _Dot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.es;
+    final (Color bg, Color fg, IconData? icon) = switch (state) {
+      _StepState.done => (c.successBg, c.successText, Icons.check_rounded),
+      _StepState.now => (c.pendingBg, c.pendingText, Icons.more_horiz_rounded),
+      _StepState.failed => (c.dangerBg, c.dangerText, Icons.close_rounded),
+      _StepState.next => (c.bgSubtle, c.textDisabled, null),
+    };
     return Container(
-      width: 14,
-      height: 14,
+      width: 24,
+      height: 24,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: switch (state) {
-          _StepState.done => c.successFill,
-          _StepState.now => c.brandAccent,
-          _StepState.failed => c.dangerText,
-          _StepState.next => Colors.transparent,
-        },
+        color: bg,
         border: state == _StepState.next
-            ? Border.all(color: c.textDisabled, width: 2)
+            ? Border.all(color: c.borderStrong, width: 1.5)
             : null,
       ),
+      child: icon == null ? null : Icon(icon, size: 15, color: fg),
     );
   }
 }

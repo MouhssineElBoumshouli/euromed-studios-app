@@ -64,12 +64,15 @@ void main() {
   });
 
   testWidgets('Studios tab lists studios by zone', (t) async {
+    t.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(disableAnimations: true);
+    addTearDown(t.platformDispatcher.clearAccessibilityFeaturesTestValue);
     await t.binding.setSurfaceSize(const Size(400, 2400));
     await t.pumpWidget(const ProviderScope(child: EuromedStudiosApp()));
     await t.pumpAndSettle();
     await t.tap(find.text('Studios').last);
     await t.pumpAndSettle();
-    expect(find.text('STUDIOS'), findsOneWidget);
+    expect(find.text('Studios'), findsNWidgets(2)); // title + tab
     expect(find.text('PRODUCTION'), findsOneWidget);
     expect(find.text('Studio Podcast'), findsOneWidget);
   });

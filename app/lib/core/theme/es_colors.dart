@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
-/// Brand colors, one-to-one with the Figma "Color" variables
-/// (see docs/decisions/0002-brand-system.md).
+/// Color roles for the "Studio Light" look (decision 0003).
 ///
-/// Screens never use raw hex values. They read these roles with
-/// `context.es` so light and dark mode always stay correct.
+/// Light, airy surfaces with soft lilac shapes, a deep Euromed navy for
+/// actions and a bright blue for highlights. Screens never use raw hex
+/// values: they read these roles with `context.es`, so light and dark
+/// mode always stay correct.
 @immutable
 class EsColors extends ThemeExtension<EsColors> {
   const EsColors({
@@ -15,6 +16,11 @@ class EsColors extends ThemeExtension<EsColors> {
     required this.bgBrandRaised,
     required this.actionPrimary,
     required this.onActionPrimary,
+    required this.accent,
+    required this.lilac,
+    required this.onLilac,
+    required this.blob,
+    required this.shadow,
     required this.textPrimary,
     required this.textSecondary,
     required this.textDisabled,
@@ -38,20 +44,42 @@ class EsColors extends ThemeExtension<EsColors> {
     required this.neutralText,
   });
 
+  /// Page background.
   final Color bgApp;
+
+  /// Cards and sheets.
   final Color bgSurface;
+
+  /// Quiet fills: inputs, disabled slots, skeletons.
   final Color bgSubtle;
+
+  /// Deep navy surfaces (QR ticket, hero overlays).
   final Color bgBrand;
   final Color bgBrandRaised;
+
+  /// Main buttons and selected states.
   final Color actionPrimary;
   final Color onActionPrimary;
+
+  /// Bright blue for highlighted words and live dots.
+  final Color accent;
+
+  /// Soft lilac behind selected tabs and icon tiles.
+  final Color lilac;
+  final Color onLilac;
+
+  /// The large soft shapes behind content.
+  final Color blob;
+
+  /// Card shadow tint.
+  final Color shadow;
   final Color textPrimary;
   final Color textSecondary;
   final Color textDisabled;
   final Color textOnBrand;
   final Color textOnBrandMuted;
 
-  /// Euromed Studios gold. Only on the navy brand surface.
+  /// Euromed Studios gold. Small touches on navy only.
   final Color brandAccent;
 
   /// Darker gold that passes contrast on light backgrounds.
@@ -73,101 +101,76 @@ class EsColors extends ThemeExtension<EsColors> {
   final Color neutralBg;
   final Color neutralText;
 
-  // Primitives (Figma "Primitives" collection).
-  static const _night900 = Color(0xFF070B1F);
-  static const _night800 = Color(0xFF0A1230);
-  static const _night700 = Color(0xFF111833);
-  static const _night600 = Color(0xFF1A2142);
-  static const _night500 = Color(0xFF263056);
-  static const _studiosBlue = Color(0xFF1C2B6B);
-  static const _gold500 = Color(0xFFB39467);
-  static const _gold700 = Color(0xFF8A6A3A);
-  static const _gold200 = Color(0xFFE3C98E);
-  static const _uemfBlue700 = Color(0xFF003882);
-  static const _uemfBlue400 = Color(0xFF3D7BD9);
-  static const _uemfBlue200 = Color(0xFF9DBBEA);
-  static const _uemfBlue100 = Color(0xFFE3EAF6);
-  static const _uemfBlue900 = Color(0xFF13254A);
-  static const _uemfGreen500 = Color(0xFF0DB02B);
-  static const _uemfGreen700 = Color(0xFF0B7A23);
-  static const _uemfGreen200 = Color(0xFF7FD48F);
-  static const _uemfGreen100 = Color(0xFFE7F3E9);
-  static const _uemfGreen900 = Color(0xFF0F3318);
-  static const _white = Color(0xFFFFFFFF);
-  static const _stone100 = Color(0xFFF5F1EA);
-  static const _stone200 = Color(0xFFEDE6D8);
-  static const _stone300 = Color(0xFFE4DDD0);
-  static const _stone500 = Color(0xFF8A8270);
-  static const _ink600 = Color(0xFF5A5F73);
-  static const _ink300 = Color(0xFFAEB4CB);
-  static const _amber100 = Color(0xFFF6EEDD);
-  static const _amber700 = Color(0xFF6E5321);
-  static const _amber900 = Color(0xFF3A2E14);
-  static const _red100 = Color(0xFFFBE9E7);
-  static const _red700 = Color(0xFFB42318);
-  static const _red300 = Color(0xFFF2A39B);
-  static const _red900 = Color(0xFF3D1210);
-
   static const light = EsColors(
-    bgApp: _stone100,
-    bgSurface: _white,
-    bgSubtle: _stone200,
-    bgBrand: _night800,
-    bgBrandRaised: _studiosBlue,
-    actionPrimary: _uemfBlue700,
-    onActionPrimary: _white,
-    textPrimary: _night800,
-    textSecondary: _ink600,
-    textDisabled: _stone500,
-    textOnBrand: _stone100,
-    textOnBrandMuted: _ink300,
-    brandAccent: _gold500,
-    textGold: _gold700,
-    textLink: _uemfBlue700,
-    border: _stone300,
-    borderStrong: _stone500,
-    pendingBg: _amber100,
-    pendingText: _amber700,
-    reviewBg: _uemfBlue100,
-    reviewText: _uemfBlue700,
-    successBg: _uemfGreen100,
-    successText: _uemfGreen700,
-    successFill: _uemfGreen500,
-    dangerBg: _red100,
-    dangerText: _red700,
-    neutralBg: _stone200,
-    neutralText: _ink600,
+    bgApp: Color(0xFFF6F7FD),
+    bgSurface: Color(0xFFFFFFFF),
+    bgSubtle: Color(0xFFEFF1F8),
+    bgBrand: Color(0xFF141D52),
+    bgBrandRaised: Color(0xFF1E2A6E),
+    actionPrimary: Color(0xFF1C2B6B),
+    onActionPrimary: Color(0xFFFFFFFF),
+    accent: Color(0xFF2563EB),
+    lilac: Color(0xFFE8E7FC),
+    onLilac: Color(0xFF3F3AB8),
+    blob: Color(0xFFE6E8FB),
+    shadow: Color(0xFF1C2B6B),
+    textPrimary: Color(0xFF0E1433),
+    textSecondary: Color(0xFF5B6180),
+    textDisabled: Color(0xFF9AA0B8),
+    textOnBrand: Color(0xFFFFFFFF),
+    textOnBrandMuted: Color(0xFFB9C0E0),
+    brandAccent: Color(0xFFD9BC8C),
+    textGold: Color(0xFF8A6A3A),
+    textLink: Color(0xFF1C2B6B),
+    border: Color(0xFFE3E6F2),
+    borderStrong: Color(0xFFC5CADF),
+    pendingBg: Color(0xFFFFF1D6),
+    pendingText: Color(0xFF8A5300),
+    reviewBg: Color(0xFFECEBFF),
+    reviewText: Color(0xFF4338CA),
+    successBg: Color(0xFFE2F6EA),
+    successText: Color(0xFF0B7A3E),
+    successFill: Color(0xFF0DB02B),
+    dangerBg: Color(0xFFFDE8E8),
+    dangerText: Color(0xFFB42318),
+    neutralBg: Color(0xFFEEF0F6),
+    neutralText: Color(0xFF5B6180),
   );
 
   static const dark = EsColors(
-    bgApp: _night900,
-    bgSurface: _night700,
-    bgSubtle: _night600,
-    bgBrand: _night800,
-    bgBrandRaised: _studiosBlue,
-    actionPrimary: _uemfBlue400,
-    onActionPrimary: _white,
-    textPrimary: _stone100,
-    textSecondary: _ink300,
-    textDisabled: _stone500,
-    textOnBrand: _stone100,
-    textOnBrandMuted: _ink300,
-    brandAccent: _gold500,
-    textGold: _gold200,
-    textLink: _uemfBlue200,
-    border: _night500,
-    borderStrong: _ink600,
-    pendingBg: _amber900,
-    pendingText: _gold200,
-    reviewBg: _uemfBlue900,
-    reviewText: _uemfBlue200,
-    successBg: _uemfGreen900,
-    successText: _uemfGreen200,
-    successFill: _uemfGreen500,
-    dangerBg: _red900,
-    dangerText: _red300,
-    neutralBg: _night600,
-    neutralText: _ink300,
+    bgApp: Color(0xFF0A0E24),
+    bgSurface: Color(0xFF141A38),
+    bgSubtle: Color(0xFF1C2347),
+    bgBrand: Color(0xFF0E1540),
+    bgBrandRaised: Color(0xFF1E2A6E),
+    actionPrimary: Color(0xFF4B63E6),
+    onActionPrimary: Color(0xFFFFFFFF),
+    accent: Color(0xFF8FB0FF),
+    lilac: Color(0xFF262C5E),
+    onLilac: Color(0xFFC9C6FF),
+    blob: Color(0xFF151B42),
+    shadow: Color(0xFF000000),
+    textPrimary: Color(0xFFF2F4FF),
+    textSecondary: Color(0xFFA9B0CF),
+    textDisabled: Color(0xFF6B7296),
+    textOnBrand: Color(0xFFFFFFFF),
+    textOnBrandMuted: Color(0xFFB9C0E0),
+    brandAccent: Color(0xFFD9BC8C),
+    textGold: Color(0xFFE3C98E),
+    textLink: Color(0xFFAFC2FF),
+    border: Color(0xFF262D52),
+    borderStrong: Color(0xFF3A4270),
+    pendingBg: Color(0xFF3A2E14),
+    pendingText: Color(0xFFF5CF85),
+    reviewBg: Color(0xFF26245A),
+    reviewText: Color(0xFFC4C0FF),
+    successBg: Color(0xFF0F3320),
+    successText: Color(0xFF86E0A8),
+    successFill: Color(0xFF0DB02B),
+    dangerBg: Color(0xFF3D1210),
+    dangerText: Color(0xFFF2A39B),
+    neutralBg: Color(0xFF1C2347),
+    neutralText: Color(0xFFA9B0CF),
   );
 
   @override
@@ -185,6 +188,11 @@ class EsColors extends ThemeExtension<EsColors> {
       bgBrandRaised: l(bgBrandRaised, other.bgBrandRaised),
       actionPrimary: l(actionPrimary, other.actionPrimary),
       onActionPrimary: l(onActionPrimary, other.onActionPrimary),
+      accent: l(accent, other.accent),
+      lilac: l(lilac, other.lilac),
+      onLilac: l(onLilac, other.onLilac),
+      blob: l(blob, other.blob),
+      shadow: l(shadow, other.shadow),
       textPrimary: l(textPrimary, other.textPrimary),
       textSecondary: l(textSecondary, other.textSecondary),
       textDisabled: l(textDisabled, other.textDisabled),

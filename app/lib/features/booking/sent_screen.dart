@@ -22,56 +22,112 @@ class SentScreen extends ConsumerWidget {
     final b = w.bookings.firstWhere((x) => x.id == bookingId);
     final s = studioById(b.studioId);
     return Scaffold(
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(24, 48, 24, 24),
-          children: [
-            Center(
-              child: CircleAvatar(
-                radius: 44,
-                backgroundColor: c.successBg,
-                child: Icon(Icons.check_rounded, size: 48, color: c.successText),
+      body: BlobBackground(
+        child: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(
+              EsSpace.page,
+              EsSpace.s10,
+              EsSpace.page,
+              EsSpace.s6,
+            ),
+            children: [
+              Center(
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.4, end: 1),
+                  duration: const Duration(milliseconds: 650),
+                  curve: Curves.elasticOut,
+                  builder: (context, v, child) =>
+                      Transform.scale(scale: v, child: child),
+                  child: Container(
+                    width: 104,
+                    height: 104,
+                    decoration: BoxDecoration(
+                      color: c.successBg,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: c.bgSurface, width: 6),
+                      boxShadow: esShadow(c, strength: 2),
+                    ),
+                    child: Icon(
+                      Icons.check_rounded,
+                      size: 52,
+                      color: c.successText,
+                    ),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'DEMANDE ENVOYÉE',
-              textAlign: TextAlign.center,
-              style: EsText.displayL.copyWith(color: c.textPrimary),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '${s.name} · ${Fmt.longDay(b.start)} · ${Fmt.range(b.start, b.end)}\n'
-              'Référence ${b.reference}',
-              textAlign: TextAlign.center,
-              style: EsText.bodyM.copyWith(color: c.textSecondary),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Le créneau est bloqué « En attente ». Vous recevrez une '
-              'notification à chaque étape.',
-              textAlign: TextAlign.center,
-              style: EsText.bodyM.copyWith(color: c.textSecondary),
-            ),
-            const SizedBox(height: 24),
-            EsCard(child: BookingTimeline(booking: b)),
-          ],
+              const SizedBox(height: EsSpace.s5),
+              Text(
+                'Demande envoyée !',
+                textAlign: TextAlign.center,
+                style: EsText.displayXL.copyWith(color: c.textPrimary),
+              ),
+              const SizedBox(height: EsSpace.s2),
+              Text(
+                'Le créneau est bloqué « En attente ». Vous serez prévenu·e '
+                'à chaque étape.',
+                textAlign: TextAlign.center,
+                style: EsText.bodyL.copyWith(color: c.textSecondary),
+              ),
+              const SizedBox(height: EsSpace.s6),
+              EsCard(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    PhotoThumb(s.photo, size: 60),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            s.name,
+                            style:
+                                EsText.titleM.copyWith(color: c.textPrimary),
+                          ),
+                          Text(
+                            '${Fmt.shortDay(b.start)} · '
+                            '${Fmt.range(b.start, b.end)}',
+                            style: EsText.bodyS
+                                .copyWith(color: c.textSecondary),
+                          ),
+                          Text(
+                            'Réf. ${b.reference}',
+                            style: EsText.bodyS
+                                .copyWith(color: c.textDisabled),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: EsSpace.s3),
+              EsCard(child: BookingTimeline(booking: b)),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+          padding: const EdgeInsets.fromLTRB(
+            EsSpace.page,
+            8,
+            EsSpace.page,
+            12,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               EsButton(
                 'Voir ma demande',
+                trailingIcon: Icons.arrow_forward_rounded,
                 onPressed: () {
                   context.go('/bookings');
                   context.push('/bookings/${b.id}');
                 },
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               EsButton(
                 'Retour à l’accueil',
                 style: EsButtonStyle.ghost,

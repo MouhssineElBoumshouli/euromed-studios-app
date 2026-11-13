@@ -24,7 +24,14 @@ abstract final class AppTheme {
       useMaterial3: true,
       brightness: b,
       colorScheme: scheme,
-      fontFamily: 'Montserrat',
+      fontFamily: 'DMSans',
+      splashFactory: InkRipple.splashFactory,
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+          TargetPlatform.iOS: FadeForwardsPageTransitionsBuilder(),
+        },
+      ),
       scaffoldBackgroundColor: c.bgApp,
       extensions: [c],
       textTheme: TextTheme(
@@ -83,11 +90,12 @@ abstract final class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: c.bgSurface,
+        prefixIconColor: c.textSecondary,
         hintStyle: EsText.bodyM.copyWith(color: c.textDisabled),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(EsRadius.md),
+          borderRadius: BorderRadius.circular(EsRadius.lg),
           borderSide: BorderSide(color: c.border),
         ),
         enabledBorder: OutlineInputBorder(
@@ -107,6 +115,18 @@ abstract final class AppTheme {
         backgroundColor: c.bgBrand,
         contentTextStyle: EsText.bodyM.copyWith(color: c.textOnBrand),
         behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(EsRadius.md),
+        ),
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: c.actionPrimary,
+        linearTrackColor: c.lilac,
+      ),
+      switchTheme: SwitchThemeData(
+        trackColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.selected) ? c.actionPrimary : c.bgSubtle,
+        ),
       ),
     );
   }

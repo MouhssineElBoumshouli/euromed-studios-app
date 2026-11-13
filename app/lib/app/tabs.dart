@@ -16,20 +16,20 @@ const _home =
 const _studios = TabSpec(
   '/studios',
   'Studios',
-  Icons.videocam_outlined,
-  Icons.videocam_rounded,
+  Icons.mic_none_rounded,
+  Icons.mic_rounded,
 );
 const _bookings = TabSpec(
   '/bookings',
-  'Réservations',
-  Icons.event_note_outlined,
-  Icons.event_note_rounded,
+  'Sessions',
+  Icons.calendar_today_outlined,
+  Icons.calendar_today_rounded,
 );
 const _projects = TabSpec(
   '/projects',
   'Projets',
-  Icons.folder_outlined,
-  Icons.folder_rounded,
+  Icons.layers_outlined,
+  Icons.layers_rounded,
 );
 const _profile = TabSpec(
   '/profile',
@@ -69,7 +69,7 @@ const _maintenance = TabSpec(
 );
 const _dashboard = TabSpec(
   '/dashboard',
-  'Tableau de bord',
+  'Pilotage',
   Icons.space_dashboard_outlined,
   Icons.space_dashboard_rounded,
 );

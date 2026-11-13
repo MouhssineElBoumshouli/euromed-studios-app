@@ -13,18 +13,22 @@ void main() {
 
   testWidgets('the app opens on the student home with real demo data',
       (t) async {
+    t.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(disableAnimations: true);
+    addTearDown(t.platformDispatcher.clearAccessibilityFeaturesTestValue);
     await t.binding.setSurfaceSize(const Size(400, 1600));
     await t.pumpWidget(const ProviderScope(child: EuromedStudiosApp()));
     await t.pumpAndSettle();
 
-    expect(find.text('BONJOUR, YASMINE'), findsOneWidget);
+    expect(find.text('Bonjour Yasmine,'), findsOneWidget);
     // Next session: Plateau TV tomorrow 14:00–15:00 (booking b1).
     expect(find.text('Plateau TV'), findsWidgets);
-    expect(find.textContaining('Demain · 14:00–15:00'), findsOneWidget);
+    expect(find.text('Demain'), findsOneWidget);
+    expect(find.textContaining('14:00–15:00 · Area 2'), findsOneWidget);
     // Quota: 1 h used out of 2 h.
-    expect(find.text('1 h / 2 h'), findsOneWidget);
+    expect(find.textContaining('1 h utilisées sur 2 h'), findsOneWidget);
     // Bottom tabs for a student.
-    expect(find.text('Réservations'), findsOneWidget);
-    expect(find.text('Projets'), findsOneWidget);
+    expect(find.text('Sessions'), findsOneWidget);
+    expect(find.text('Projets'), findsNWidgets(2)); // quick action + tab
   });
 }
