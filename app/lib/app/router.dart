@@ -1,8 +1,16 @@
 import 'package:go_router/go_router.dart';
 
+import '../features/booking/booking_flow_screen.dart';
+import '../features/booking/sent_screen.dart';
+import '../features/bookings/booking_detail_screen.dart';
+import '../features/bookings/bookings_screen.dart';
+import '../features/bookings/qr_pass_screen.dart';
+import '../features/charter/charter_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/placeholder/coming_soon_screen.dart';
 import '../features/profile/profile_screen.dart';
+import '../features/studios/studio_detail_screen.dart';
+import '../features/studios/studios_screen.dart';
 import 'shell.dart';
 
 /// All the app's screens and their addresses.
@@ -17,24 +25,29 @@ final appRouter = GoRouter(
       routes: [
         // B1
         GoRoute(path: '/home', builder: (_, __) => const HomeScreen()),
-        // C1 (milestone 2)
+        // C1, C2
         GoRoute(
           path: '/studios',
-          builder: (_, __) => const ComingSoonScreen(
-            title: 'Studios',
-            milestone: 'Étape 2',
-            what:
-                'La liste des studios par zone, avec filtres et disponibilité en direct.',
-          ),
+          builder: (_, __) => const StudiosScreen(),
+          routes: [
+            GoRoute(
+              path: ':id',
+              builder: (_, st) =>
+                  StudioDetailScreen(studioId: st.pathParameters['id']!),
+            ),
+          ],
         ),
-        // E1 (milestone 2)
+        // E1, E2
         GoRoute(
           path: '/bookings',
-          builder: (_, __) => const ComingSoonScreen(
-            title: 'Réservations',
-            milestone: 'Étape 2',
-            what: 'Vos demandes à venir, en attente, passées et refusées.',
-          ),
+          builder: (_, __) => const BookingsScreen(),
+          routes: [
+            GoRoute(
+              path: ':id',
+              builder: (_, st) =>
+                  BookingDetailScreen(bookingId: st.pathParameters['id']!),
+            ),
+          ],
         ),
         // F1 (milestone 4)
         GoRoute(
@@ -110,5 +123,26 @@ final appRouter = GoRouter(
         GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
       ],
     ),
+    // Full-screen flows, without the tab bar.
+    // D1–D3
+    GoRoute(
+      path: '/book/:studioId',
+      builder: (_, st) => BookingFlowScreen(
+        studioId: st.pathParameters['studioId']!,
+        initialDay: DateTime.tryParse(st.uri.queryParameters['day'] ?? ''),
+      ),
+    ),
+    // D4
+    GoRoute(
+      path: '/sent/:id',
+      builder: (_, st) => SentScreen(bookingId: st.pathParameters['id']!),
+    ),
+    // E3
+    GoRoute(
+      path: '/qr/:id',
+      builder: (_, st) => QrPassScreen(bookingId: st.pathParameters['id']!),
+    ),
+    // A6
+    GoRoute(path: '/charter', builder: (_, __) => const CharterScreen()),
   ],
 );
