@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/booking/booking_flow_screen.dart';
@@ -16,7 +17,11 @@ import 'shell.dart';
 /// All the app's screens and their addresses.
 ///
 /// Screen IDs in comments match docs/blueprint.md and the Figma frames.
+/// Detail screens open on this navigator so they cover the tab bar.
+final _rootKey = GlobalKey<NavigatorState>();
+
 final appRouter = GoRouter(
+  navigatorKey: _rootKey,
   initialLocation: '/home',
   routes: [
     ShellRoute(
@@ -32,6 +37,7 @@ final appRouter = GoRouter(
           routes: [
             GoRoute(
               path: ':id',
+              parentNavigatorKey: _rootKey,
               builder: (_, st) =>
                   StudioDetailScreen(studioId: st.pathParameters['id']!),
             ),
@@ -44,6 +50,7 @@ final appRouter = GoRouter(
           routes: [
             GoRoute(
               path: ':id',
+              parentNavigatorKey: _rootKey,
               builder: (_, st) =>
                   BookingDetailScreen(bookingId: st.pathParameters['id']!),
             ),
@@ -105,7 +112,7 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/dashboard',
           builder: (_, __) => const ComingSoonScreen(
-            title: 'Tableau de bord',
+            title: 'Pilotage',
             milestone: 'Étape 6',
             what: 'Occupation, demandes en attente et incidents ouverts.',
           ),

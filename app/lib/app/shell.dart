@@ -37,6 +37,7 @@ class AppShell extends ConsumerWidget {
           );
 
     return Scaffold(
+      extendBody: true,
       body: Column(
         children: [
           if (kDemoMode) const DemoBar(),
@@ -52,17 +53,147 @@ class AppShell extends ConsumerWidget {
           ),
         ],
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: index < 0 ? 0 : index,
-        onDestinationSelected: (i) => context.go(tabs[i].path),
-        destinations: [
-          for (final t in tabs)
-            NavigationDestination(
-              icon: Icon(t.icon),
-              selectedIcon: Icon(t.selectedIcon),
-              label: t.label,
+      bottomNavigationBar: PillTabBar(
+        tabs: tabs,
+        selected: index < 0 ? 0 : index,
+        onSelect: (i) => context.go(tabs[i].path),
+      ),
+    );
+  }
+}
+
+/// Height the floating tab bar takes at the bottom of the screen, so
+/// scrolling content can leave room for it.
+double tabBarSpace(BuildContext context) =>
+    96 + MediaQuery.paddingOf(context).bottom;
+
+/// The floating pill tab bar from the original design, refined: the
+/// selected tab sits in a lilac capsule that slides between tabs.
+class PillTabBar extends StatelessWidget {
+  const PillTabBar({
+    super.key,
+    required this.tabs,
+    required this.selected,
+    required this.onSelect,
+  });
+  final List<TabSpec> tabs;
+  final int selected;
+  final ValueChanged<int> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.es;
+    final bottom = MediaQuery.paddingOf(context).bottom;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(14, 0, 14, 12 + bottom),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(EsRadius.xl),
+          boxShadow: esShadow(c, strength: 2.2),
+        ),
+        child: Material(
+          color: c.bgSurface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(EsRadius.xl),
+            side: Theme.of(context).brightness == Brightness.dark
+                ? BorderSide(color: c.border)
+                : BorderSide.none,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(6),
+            child: LayoutBuilder(
+              builder: (context, box) {
+                final w = box.maxWidth / tabs.length;
+                return SizedBox(
+                  height: 60,
+                  child: Stack(
+                    children: [
+                      AnimatedPositioned(
+                        duration: EsMotion.medium,
+                        curve: Curves.easeOutBack,
+                        left: w * selected,
+                        top: 0,
+                        bottom: 0,
+                        width: w,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: c.lilac,
+                            borderRadius: BorderRadius.circular(EsRadius.lg),
+                          ),
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          for (var i = 0; i < tabs.length; i++)
+                            Expanded(
+                              child: _PillTab(
+                                spec: tabs[i],
+                                selected: i == selected,
+                                onTap: () => onSelect(i),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
-        ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PillTab extends StatelessWidget {
+  const _PillTab({
+    required this.spec,
+    required this.selected,
+    required this.onTap,
+  });
+  final TabSpec spec;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.es;
+    final fg = selected ? c.onLilac : c.textSecondary;
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: spec.label,
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(EsRadius.lg),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AnimatedSwitcher(
+              duration: EsMotion.fast,
+              child: Icon(
+                selected ? spec.selectedIcon : spec.icon,
+                key: ValueKey(selected),
+                size: 23,
+                color: fg,
+              ),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              spec.label,
+              maxLines: 1,
+              overflow: TextOverflow.fade,
+              softWrap: false,
+              style: EsText.labelS.copyWith(
+                color: fg,
+                fontSize: 11.5,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -83,26 +214,43 @@ class DemoBar extends ConsumerWidget {
       excludeSemantics: true,
       child: Material(
       color: c.bgBrand,
+      elevation: 0,
       child: InkWell(
         onTap: () => showDemoSwitcher(context, ref),
         child: Padding(
-          padding: EdgeInsets.fromLTRB(16, top + 12, 12, 12),
+          padding: EdgeInsets.fromLTRB(16, top + 8, 12, 8),
           child: Row(
             children: [
               Icon(Icons.swap_horiz_rounded, size: 18, color: c.brandAccent),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Démo · ${p.displayName} · ${p.title ?? ''}',
+                  'Démo · ${p.displayName}${p.title == null ? '' : ' · ${p.title}'}',
                   overflow: TextOverflow.ellipsis,
                   style: EsText.labelS.copyWith(color: c.textOnBrand),
                 ),
               ),
-              Text(
-                'Changer',
-                style: EsText.labelM.copyWith(color: c.textOnBrand),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(EsRadius.pill),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Changer de rôle',
+                      style: EsText.labelS.copyWith(color: c.textOnBrand),
+                    ),
+                    Icon(
+                      Icons.expand_more_rounded,
+                      size: 16,
+                      color: c.textOnBrand,
+                    ),
+                  ],
+                ),
               ),
-              Icon(Icons.expand_more_rounded, size: 18, color: c.textOnBrand),
             ],
           ),
         ),
