@@ -43,8 +43,8 @@ jobs:
           if [ -n "$(git status --porcelain lib test)" ]; then
             echo "Formatting changed files:"; git status --porcelain lib test
             if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref_name }}" != "main" ]; then
-              git config user.name "github-actions[bot]"
-              git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+              git config --global user.name "github-actions[bot]"
+              git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
               git add lib test && git commit -m "style: dart format"
               git pull --rebase -q origin "${{ github.ref_name }}" && git push || echo "Could not save formatting (branch moved); continuing."
             fi
@@ -71,8 +71,8 @@ jobs:
           rm -rf /tmp/pv && mkdir -p /tmp/pv
           cp -r app/build/web /tmp/pv/site
           find /tmp/pv/site -name '*.symbols' -delete
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin preview:preview 2>/dev/null || true
           if git show-ref --quiet refs/heads/preview; then
             git worktree add /tmp/pvwt preview
@@ -90,3 +90,43 @@ jobs:
           name: web-preview
           path: app/build/web
           retention-days: 14
+
+  # Two-device live demo check against the demo database. Runs only when the
+  # commit message contains "[e2e]", because it resets the demo data.
+  live-demo:
+    needs: check-test-build
+    permissions:
+      contents: write
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[e2e]')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: web-preview
+          path: site
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null
+          npm install playwright@1.48.2
+          npx playwright install --with-deps chromium
+      - name: Serve the app
+        run: (cd site && python3 -m http.server 8080 &) && sleep 2
+      - name: Run the live demo
+        run: node e2e/live_demo.mjs
+      - name: Save screenshots to the "e2e-screens" branch
+        if: always()
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          mkdir /tmp/shots && cd /tmp/shots && git init -q -b e2e-screens
+          cp -r "$GITHUB_WORKSPACE/e2e/out/." .
+          git add -A
+          git commit -qm "Live demo screenshots for ${GITHUB_SHA::7}"
+          git remote add origin "$(git -C "$GITHUB_WORKSPACE" remote get-url origin)"
+          git -C "$GITHUB_WORKSPACE" config --get-all http.https://github.com/.extraheader | head -1 > /tmp/h
+          git -c http.https://github.com/.extraheader="$(cat /tmp/h)" push -f origin e2e-screens
+          exit 0

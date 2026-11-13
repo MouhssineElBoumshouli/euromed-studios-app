@@ -335,6 +335,9 @@ class WorldNotifier extends Notifier<WorldState> {
 
   /// Puts the demo back to its starting story.
   void reset() => state = build();
+
+  /// Replaces the whole world with what the server sent (live mode).
+  void load(WorldState fresh) => state = fresh;
 }
 
 final worldProvider =
@@ -348,7 +351,18 @@ final currentPersonProvider = Provider<Person>((ref) {
   return DemoWorld.people.firstWhere((p) => p.id == id);
 });
 
-Person personById(String id) => DemoWorld.people.firstWhere((p) => p.id == id);
+/// Stands for "another person" on bookings you may not see in detail.
+const otherPersonId = '_other';
+
+Person personById(String id) => DemoWorld.people.firstWhere(
+      (p) => p.id == id,
+      orElse: () => const Person(
+        id: otherPersonId,
+        firstName: 'Autre',
+        lastName: 'demandeur',
+        roles: {},
+      ),
+    );
 
 Studio studioById(String id) => DemoWorld.studios.firstWhere((s) => s.id == id);
 
