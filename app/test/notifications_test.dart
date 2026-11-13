@@ -6,12 +6,19 @@ import 'package:euromed_studios/domain/people.dart';
 import 'package:euromed_studios/domain/rules/notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 
 ProviderContainer asPerson(String id) => ProviderContainer(
       overrides: [currentPersonIdProvider.overrideWith((ref) => id)],
     );
 
 void main() {
+  setUpAll(() async {
+    Intl.defaultLocale = 'fr_FR';
+    await initializeDateFormatting('fr_FR');
+  });
+
   test('approvers see what waits for them, as actionable notices', () {
     final c = asPerson('tazi');
     addTearDown(c.dispose);
