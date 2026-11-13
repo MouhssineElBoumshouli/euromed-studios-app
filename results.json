@@ -1,0 +1,67 @@
+[
+  {
+    "name": "reset demo as admin",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "student submits a booking",
+    "ok": true,
+    "detail": "ES-2026-0147"
+  },
+  {
+    "name": "same slot is locked for others",
+    "ok": true,
+    "detail": "slot_taken: Créneau déjà en attente pour Espace Montage (ES-2026-0147)."
+  },
+  {
+    "name": "student cannot approve",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "direct table edits are blocked",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "level 1 approves",
+    "ok": true,
+    "detail": "pendingStudio"
+  },
+  {
+    "name": "level 1 approver cannot give level 2",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "student sees the final status",
+    "ok": true,
+    "detail": "approved"
+  },
+  {
+    "name": "check-in refused before the session",
+    "ok": true,
+    "detail": "too_early"
+  },
+  {
+    "name": "absence refused before the session",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "cannot close a session nobody entered",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "students cannot check anyone in",
+    "ok": true,
+    "detail": ""
+  },
+  {
+    "name": "no app errors in the browser",
+    "ok": true,
+    "detail": ""
+  }
+]

@@ -1,0 +1,127 @@
+group | Validations
+3 demandes à traiterÀ traiter · 3Déjà traitées · 5Demande de Adam Kettani, Plateau TV, Mar. 17 nov. 15:00–17:00
+AK
+Adam Kettani
+Club étudiant · EMADU
+Niveau 2
+Plateau TV
+Mar. 17 nov. · 15:00–17:00 · Captation d’image
+Reçue il y a 16 h
+2 matériel
+ES-2026-0140Demande de Yasmine Mansouri, Studio Podcast, Mer. 18 nov. 10:00–11:00
+YM
+Yasmine Mansouri
+Étudiant · EIDIA
+Niveau 2
+Studio Podcast
+Mer. 18 nov. · 10:00–11:00 · Enregistrement
+Reçue il y a 50 min
+1 matériel
+ES-2026-0142Demande de Yasmine Mansouri, Espace Montage, Ven. 27 nov. 15:00–16:00
+YM
+Yasmine Mansouri
+Étudiant · EIDIA
+Niveau 2
+Espace Montage
+Ven. 27 nov. · 15:00–16:00 · Montage
+Reçue à l’instant
+ES-2026-0147BIENTÔT CHEZ VOUS · 4 EN ATTENTE DU NIVEAU 1Vous les validerez après l’accord du responsable de l’entité.Demande de Hind Benjelloun, SpeedMOOC, Mar. 17 nov. 10:00–11:00
+HB
+Hind Benjelloun
+Professeur · EIDIA
+Niveau 1
+SpeedMOOC
+Mar. 17 nov. · 10:00–11:00 · Enregistrement
+Reçue il y a 5 h
+ES-2026-0143
+Attend : Administration (repli)Demande de Adam Kettani, Studio Photographie, Ven. 20 nov. 14:00–15:00
+AK
+Adam Kettani
+Étudiant · EMADU
+Niveau 1
+Studio Photographie
+Ven. 20 nov. · 14:00–15:00 · Captation d’image
+Reçue il y a 25 min
+ES-2026-0146
+Attend : Vie Étudiante de l’établissement
+button | À traiter · 3
+button | Déjà traitées · 5
+button | Demande de Adam Kettani, Plateau TV, Mar. 17 nov. 15:00–17:00
+AK
+Adam Kettani
+Club étudiant · EMADU
+Niveau 2
+Plateau TV
+Mar. 17 nov. · 15:00–17:00 · Captation d’image
+Reçue il y a 16 h
+2 matériel
+ES-2026-0140
+button | Demande de Yasmine Mansouri, Studio Podcast, Mer. 18 nov. 10:00–11:00
+YM
+Yasmine Mansouri
+Étudiant · EIDIA
+Niveau 2
+Studio Podcast
+Mer. 18 nov. · 10:00–11:00 · Enregistrement
+Reçue il y a 50 min
+1 matériel
+ES-2026-0142
+button | Demande de Yasmine Mansouri, Espace Montage, Ven. 27 nov. 15:00–16:00
+YM
+Yasmine Mansouri
+Étudiant · EIDIA
+Niveau 2
+Espace Montage
+Ven. 27 nov. · 15:00–16:00 · Montage
+Reçue à l’instant
+ES-2026-0147
+button | Demande de Hind Benjelloun, SpeedMOOC, Mar. 17 nov. 10:00–11:00
+HB
+Hind Benjelloun
+Professeur · EIDIA
+Niveau 1
+SpeedMOOC
+Mar. 17 nov. · 10:00–11:00 · Enregistrement
+Reçue il y a 5 h
+ES-2026-0143
+Attend : Administration (repli)
+button | Demande de Adam Kettani, Studio Photographie, Ven. 20 nov. 14:00–15:00
+AK
+Adam Kettani
+Étudiant · EMADU
+Niveau 1
+Studio Photographie
+Ven. 20 nov. · 14:00–15:00 · Captation d’image
+Reçue il y a 25 min
+ES-2026-0146
+Attend : Vie Étudiante de l’établissement
+group | NIVEAU 2 · DIRECTION DES STUDIOS
+En attente studioDemande ES-2026-0140AK
+Adam Kettani
+Club étudiant · Étudiant · EMADU · Club Audiovisuel
+Au nom de Club Audiovisuel UEMF
+Règlement v1.0 signéCe jour-là dans la salleAucune autre réservation dans Area 2 ce jour-là.Matériel : que pouvez-vous fournir ?DisponibleRemplacéIndisponibleDisponibleRemplacéIndisponibleTechnicien pour la séanceMessage du demandeur« Tournage de l’émission du club, 3 invités. »Historique
+img | Plateau TV
+Area 2
+Date
+Mar. 17 nov.
+Horaire
+15:00–17:00
+Activité
+Captation d’image
+group | Micro main × 2
+Indispensable · stock 4
+button | Disponible
+button | Remplacé
+button | Indisponible
+group | Kit éclairage LED × 1
+Souhaité · stock 2
+button | Disponible
+button | Remplacé
+button | Indisponible
+checkbox | Aucun
+checkbox | Samir Haddad
+button | Refuser
+button | Valider la séance
+group | Demande à valider (niveau 2) · Yasmine M. · Espace Montage · Ven. 27 nov. 15:00
+button | Voir
