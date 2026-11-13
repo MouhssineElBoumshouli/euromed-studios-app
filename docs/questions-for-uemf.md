@@ -107,3 +107,7 @@ Combien de temps avant le début de son créneau une personne peut-elle entrer a
 **Q20 ⏳ — Absence sans prévenir**
 Si une personne réserve et ne vient pas, faut-il le noter ? Faut-il appliquer une règle, par exemple bloquer de nouvelles réservations après plusieurs absences ?
 *Proposition :* le régisseur note l’absence. L’application compte les absences, mais n’applique aucune sanction sans votre accord.
+
+**Q21 ⏳ — Rappels et canaux de notification**
+Les personnes doivent-elles recevoir les notifications par e-mail ou sur le téléphone, en plus de l'application ? Combien de temps avant la séance faut-il envoyer le rappel ?
+*Proposition :* dans l'application, rappel 1 heure avant. E-mail et notifications sur le téléphone dans la version officielle, avec le service de messagerie de l'université.

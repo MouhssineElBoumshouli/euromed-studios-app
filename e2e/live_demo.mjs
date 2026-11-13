@@ -142,6 +142,12 @@ const phone = await browser.newPage({ viewport: { width: 390, height: 844 } });
 await phone.goto(`${APP}?as=yasmine#/bookings`);
 await phone.waitForTimeout(12000);
 await phone.screenshot({ path: 'e2e/out/5-student-phone.png' });
+await phone.goto(`${APP}?as=yasmine#/notifications`);
+await phone.waitForTimeout(8000);
+await phone.screenshot({ path: 'e2e/out/8-student-notifications.png' });
+await laptop.goto(`${APP}?as=amrani#/validations`);
+await laptop.waitForTimeout(10000);
+await laptop.screenshot({ path: 'e2e/out/9-approver-bell.png' });
 
 check('no app errors in the browser', errors.length === 0, errors.slice(0, 3).join(' | '));
 await browser.close();

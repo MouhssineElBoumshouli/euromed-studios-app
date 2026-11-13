@@ -29,19 +29,28 @@ class LiveSync {
   RealtimeChannel? _channel;
   Timer? _clock;
   Timer? _debounce;
-  bool _entering = false;
 
   Future<void> start() async {
     liveStatus.value = db.auth.currentSession == null
         ? LiveStatus.signedOut
         : LiveStatus.loading;
     db.auth.onAuthStateChange.listen((e) {
-      if (e.session == null) {
+      final session = e.session;
+      if (session == null) {
+        _generation++;
+        _readyUid = null;
         _stop();
+        _clearWorld();
         liveStatus.value = LiveStatus.signedOut;
       } else if (e.event == AuthChangeEvent.signedIn ||
           e.event == AuthChangeEvent.initialSession) {
-        _enter();
+        // Supabase may repeat "signed in" for the same person (e.g. when
+        // the tab regains focus): keep the current screen in that case.
+        if (_readyUid == session.user.id &&
+            liveStatus.value == LiveStatus.ready) {
+          return;
+        }
+        _enter(++_generation, session.user.id);
       }
     });
   }
@@ -53,19 +62,38 @@ class LiveSync {
 
   Future<void> signOut() => db.auth.signOut();
 
-  Future<void> _enter() async {
-    if (_entering || liveStatus.value == LiveStatus.ready) return;
-    _entering = true;
+  /// Each sign-in or sign-out starts a new "generation". A slower load
+  /// from a previous account is dropped instead of overwriting the new
+  /// one (e.g. switching from Mehdi to Karim quickly).
+  int _generation = 0;
+  String? _readyUid;
+
+  /// Empties the world so nothing of the previous account stays on screen.
+  void _clearWorld() {
+    final w = container.read(worldProvider);
+    container.read(worldProvider.notifier).load(
+          WorldState(
+            now: DateTime.now(),
+            policy: w.policy,
+            bookings: const [],
+            maintenance: const [],
+            signedCharterVersion: const {},
+          ),
+        );
+  }
+
+  Future<void> _enter(int gen, String uid) async {
+    _stop();
+    _clearWorld();
     liveStatus.value = LiveStatus.loading;
     try {
-      final me = await db
-          .from('profiles')
-          .select('slug')
-          .eq('id', db.auth.currentUser!.id)
-          .single();
+      final me =
+          await db.from('profiles').select('slug').eq('id', uid).single();
+      if (gen != _generation) return;
       container.read(currentPersonIdProvider.notifier).state =
           me['slug'] as String;
-      await refresh();
+      await refresh(gen);
+      if (gen != _generation) return;
       _channel = db
           .channel('world')
           .onPostgresChanges(
@@ -77,12 +105,14 @@ class LiveSync {
           .subscribe();
       // Keeps "now" moving (QR windows, live status) and catches up if a
       // realtime message was missed.
-      _clock = Timer.periodic(const Duration(seconds: 30), (_) => refresh());
+      _clock = Timer.periodic(
+        const Duration(seconds: 30),
+        (_) => refresh(gen),
+      );
+      _readyUid = uid;
       liveStatus.value = LiveStatus.ready;
     } catch (_) {
-      await db.auth.signOut();
-    } finally {
-      _entering = false;
+      if (gen == _generation) await db.auth.signOut();
     }
   }
 
@@ -95,13 +125,16 @@ class LiveSync {
 
   void _scheduleRefresh() {
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 250), refresh);
+    final gen = _generation;
+    _debounce = Timer(const Duration(milliseconds: 250), () => refresh(gen));
   }
 
   Map<String, String> _slugById = {};
 
-  /// Reloads everything this person may see.
-  Future<void> refresh() async {
+  /// Reloads everything this person may see. A load started for another
+  /// account ([gen] out of date) is thrown away instead of shown.
+  Future<void> refresh([int? gen]) async {
+    gen ??= _generation;
     final now = DateTime.now();
     if (_slugById.isEmpty) {
       final people = await db.from('profiles').select('id, slug');
@@ -121,6 +154,14 @@ class LiveSync {
       )),
       Future<dynamic>.value(db.from('maintenance').select()),
       Future<dynamic>.value(db.from('charter_signatures').select()),
+      // Private "read up to" time; a missing table must not block sign-in.
+      Future<dynamic>.value(
+        db
+            .from('notification_reads')
+            .select('seen_at')
+            .maybeSingle()
+            .catchError((_) => null),
+      ),
     ]);
     final settings = results[0] as Map<String, dynamic>;
     final known = {for (final s in DemoWorld.studios) s.id};
@@ -154,6 +195,7 @@ class LiveSync {
         signedAt[slug] = _time(r['signed_at']);
       }
     }
+    if (gen != _generation) return;
     container.read(worldProvider.notifier).load(
           WorldState(
             now: now,
@@ -170,6 +212,11 @@ class LiveSync {
             ],
             signedCharterVersion: signed,
             charterSignedAt: signedAt,
+            noticesSeenAt: {
+              if (results[5] != null)
+                container.read(currentPersonIdProvider):
+                    _time(results[5]['seen_at']),
+            },
           ),
         );
   }

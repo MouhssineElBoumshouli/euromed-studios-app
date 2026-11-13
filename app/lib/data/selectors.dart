@@ -1,8 +1,12 @@
 /// Read-only views of the state that several screens share.
 library;
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../core/format.dart';
 import '../domain/bookings.dart';
 import '../domain/people.dart';
+import '../domain/rules/notifications.dart';
 import '../domain/rules/quota.dart';
 import '../domain/studios.dart';
 import 'app_state.dart';
@@ -79,3 +83,29 @@ List<LiveRoom> liveStatus(WorldState w) {
   }
   return result;
 }
+
+/// The signed-in person's notifications, newest first.
+final noticesProvider = Provider<List<Notice>>((ref) {
+  final w = ref.watch(worldProvider);
+  final me = ref.watch(currentPersonProvider);
+  return noticesFor(
+    me,
+    w.bookings,
+    w.now,
+    people: DemoWorld.people,
+    describe: (b) =>
+        '${studioById(b.studioId).name} · ${Fmt.shortDay(b.start)} '
+        '${Fmt.time(b.start)}',
+    nameOf: (id) => personById(id).displayName,
+  );
+});
+
+final unreadNoticesProvider = Provider<int>((ref) {
+  final w = ref.watch(worldProvider);
+  final me = ref.watch(currentPersonProvider);
+  return unreadCount(
+    ref.watch(noticesProvider),
+    w.noticesSeenAt[me.id],
+    w.now,
+  );
+});

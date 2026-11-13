@@ -9,6 +9,7 @@ import '../features/bookings/bookings_screen.dart';
 import '../features/bookings/qr_pass_screen.dart';
 import '../features/charter/charter_screen.dart';
 import '../features/home/home_screen.dart';
+import '../features/notifications/notifications_screen.dart';
 import '../features/placeholder/coming_soon_screen.dart';
 import '../features/planning/planning_screen.dart';
 import '../features/profile/profile_screen.dart';
@@ -163,6 +164,10 @@ final appRouter = GoRouter(
     ),
     // A6
     GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
+    GoRoute(
+      path: '/notifications',
+      builder: (_, __) => const WideFrame(child: NotificationsScreen()),
+    ),
     GoRoute(
       path: '/scanner',
       builder: (_, __) => const WideFrame(child: ScannerScreen()),

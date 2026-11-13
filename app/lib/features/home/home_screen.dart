@@ -14,6 +14,7 @@ import '../../data/selectors.dart';
 import '../../domain/bookings.dart';
 import '../../domain/rules/approval.dart';
 import '../../domain/rules/quota.dart';
+import '../notifications/notifications_screen.dart';
 
 /// B1 · Home. Requesters see their next session, quota and requests.
 /// The studio manager sees what is waiting for them.
@@ -45,11 +46,6 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-void _soon(BuildContext context, String msg) {
-  ScaffoldMessenger.of(context)
-    ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(content: Text(msg)));
-}
 
 /// UEMF wordmark on the left, notifications and profile on the right.
 class _TopRow extends ConsumerWidget {
@@ -89,11 +85,12 @@ class _TopRow extends ConsumerWidget {
           ),
         ),
         const Spacer(),
-        _RoundIcon(
-          icon: Icons.notifications_none_rounded,
-          label: 'Notifications',
-          onTap: () =>
-              _soon(context, 'Les notifications arrivent à l’étape 7.'),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            boxShadow: esShadow(context.es),
+          ),
+          child: const NoticeBell(),
         ),
         const SizedBox(width: 10),
         Semantics(
@@ -115,45 +112,6 @@ class _TopRow extends ConsumerWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _RoundIcon extends StatelessWidget {
-  const _RoundIcon({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.es;
-    return Semantics(
-      button: true,
-      label: label,
-      excludeSemantics: true,
-      child: Material(
-        color: c.bgSurface,
-        shape: const CircleBorder(),
-        elevation: 0,
-        child: InkWell(
-          customBorder: const CircleBorder(),
-          onTap: onTap,
-          child: Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              boxShadow: esShadow(c),
-            ),
-            child: Icon(icon, color: c.textPrimary, size: 22),
-          ),
-        ),
-      ),
     );
   }
 }

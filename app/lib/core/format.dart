@@ -29,6 +29,7 @@ abstract final class Fmt {
   /// "il y a 26 h", "il y a 15 min".
   static String ago(DateTime then, DateTime now) {
     final m = now.difference(then).inMinutes;
+    if (m < 1) return 'à l’instant';
     if (m < 60) return 'il y a $m min';
     final h = m ~/ 60;
     if (h < 48) return 'il y a $h h';

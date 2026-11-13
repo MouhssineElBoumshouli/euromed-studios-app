@@ -8,11 +8,16 @@ import '../core/widgets/es_button.dart';
 import '../core/widgets/layout.dart';
 import '../data/app_state.dart';
 import '../data/backend.dart';
+import '../data/selectors.dart' show noticesProvider;
+import '../features/notifications/notifications_screen.dart';
 import 'demo_mode.dart';
 import 'demo_switcher.dart';
 import 'tabs.dart';
 
 /// The frame around every tab screen: demo bar on top, tabs at the bottom.
+/// Whose feed the live banner last looked at.
+String? _bannerPerson;
+
 class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.location, required this.child});
   final String location;
@@ -21,6 +26,37 @@ class AppShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final person = ref.watch(currentPersonProvider);
+    // A small banner when something new arrives while the app is open
+    // (only for events from the last two minutes, never on sign-in).
+    ref.listen(noticesProvider, (before, after) {
+      // Never on sign-in, account switch or while loading.
+      final who = ref.read(currentPersonIdProvider);
+      final switched = _bannerPerson != who;
+      _bannerPerson = who;
+      if (before == null || switched || before.isEmpty) return;
+      if (isLive && liveStatus.value != LiveStatus.ready) return;
+      final known = {for (final n in before) n.id};
+      final now = ref.read(worldProvider).now;
+      final fresh = [
+        for (final n in after)
+          if (!known.contains(n.id) &&
+              now.difference(n.at) < const Duration(minutes: 5))
+            n,
+      ];
+      if (fresh.isEmpty) return;
+      final n = fresh.first;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text('${n.title} · ${n.body}'),
+            action: SnackBarAction(
+              label: 'Voir',
+              onPressed: () => context.push(n.route),
+            ),
+          ),
+        );
+    });
     // Staff on a computer get the "Espace Studios" workspace: more sections
     // than fit in a phone tab bar.
     final console = isWide(context) && isStaff(person);
@@ -308,8 +344,10 @@ class SideMenu extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Column(
+            padding: const EdgeInsets.only(left: 8),
+            child: Row(
+              children: [
+                Expanded(child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
@@ -328,6 +366,9 @@ class SideMenu extends ConsumerWidget {
                     letterSpacing: 1.6,
                   ),
                 ),
+              ],
+            )),
+                NoticeBell(onDark: console),
               ],
             ),
           ),

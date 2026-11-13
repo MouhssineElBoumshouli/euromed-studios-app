@@ -51,6 +51,7 @@ class WorldState {
     required this.maintenance,
     required this.signedCharterVersion,
     this.charterSignedAt = const {},
+    this.noticesSeenAt = const {},
   });
 
   final DateTime now;
@@ -64,10 +65,14 @@ class WorldState {
   /// When each person signed, for the record (Q11).
   final Map<String, DateTime> charterSignedAt;
 
+  /// When each person last opened their notifications.
+  final Map<String, DateTime> noticesSeenAt;
+
   WorldState copyWith({
     List<Booking>? bookings,
     Map<String, String>? signedCharterVersion,
     Map<String, DateTime>? charterSignedAt,
+    Map<String, DateTime>? noticesSeenAt,
     Policy? policy,
   }) =>
       WorldState(
@@ -77,6 +82,7 @@ class WorldState {
         maintenance: maintenance,
         signedCharterVersion: signedCharterVersion ?? this.signedCharterVersion,
         charterSignedAt: charterSignedAt ?? this.charterSignedAt,
+        noticesSeenAt: noticesSeenAt ?? this.noticesSeenAt,
       );
 }
 
@@ -399,6 +405,11 @@ class WorldNotifier extends Notifier<WorldState> {
       charterSignedAt: {...state.charterSignedAt, personId: state.now},
     );
   }
+
+  /// The person opened their notifications: everything so far is read.
+  void markNoticesSeen(String personId) => state = state.copyWith(
+        noticesSeenAt: {...state.noticesSeenAt, personId: state.now},
+      );
 
   void updatePolicy(Policy policy) => state = state.copyWith(policy: policy);
 
