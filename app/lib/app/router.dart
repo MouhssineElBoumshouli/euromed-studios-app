@@ -12,6 +12,8 @@ import '../features/placeholder/coming_soon_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/studios/studio_detail_screen.dart';
 import '../features/studios/studios_screen.dart';
+import '../features/validations/decision_screen.dart';
+import '../features/validations/validations_screen.dart';
 import 'shell.dart';
 
 /// All the app's screens and their addresses.
@@ -39,7 +41,7 @@ final appRouter = GoRouter(
               path: ':id',
               parentNavigatorKey: _rootKey,
               builder: (_, st) =>
-                  StudioDetailScreen(studioId: st.pathParameters['id']!),
+                  WideFrame(child: StudioDetailScreen(studioId: st.pathParameters['id']!)),
             ),
           ],
         ),
@@ -52,7 +54,7 @@ final appRouter = GoRouter(
               path: ':id',
               parentNavigatorKey: _rootKey,
               builder: (_, st) =>
-                  BookingDetailScreen(bookingId: st.pathParameters['id']!),
+                  WideFrame(child: BookingDetailScreen(bookingId: st.pathParameters['id']!)),
             ),
           ],
         ),
@@ -68,11 +70,15 @@ final appRouter = GoRouter(
         // G1 (milestone 3)
         GoRoute(
           path: '/validations',
-          builder: (_, __) => const ComingSoonScreen(
-            title: 'Validations',
-            milestone: 'Étape 3',
-            what: 'Les demandes qui attendent votre décision.',
-          ),
+          builder: (_, __) => const ValidationsScreen(),
+          routes: [
+            GoRoute(
+              path: ':id',
+              parentNavigatorKey: _rootKey,
+              builder: (_, st) =>
+                  WideFrame(child: DecisionScreen(bookingId: st.pathParameters['id']!)),
+            ),
+          ],
         ),
         // I2 (milestone 6)
         GoRoute(
@@ -134,22 +140,25 @@ final appRouter = GoRouter(
     // D1–D3
     GoRoute(
       path: '/book/:studioId',
-      builder: (_, st) => BookingFlowScreen(
+      builder: (_, st) => WideFrame(child: BookingFlowScreen(
         studioId: st.pathParameters['studioId']!,
         initialDay: DateTime.tryParse(st.uri.queryParameters['day'] ?? ''),
-      ),
+      )),
     ),
     // D4
     GoRoute(
       path: '/sent/:id',
-      builder: (_, st) => SentScreen(bookingId: st.pathParameters['id']!),
+      builder: (_, st) => WideFrame(child: SentScreen(bookingId: st.pathParameters['id']!)),
     ),
     // E3
     GoRoute(
       path: '/qr/:id',
-      builder: (_, st) => QrPassScreen(bookingId: st.pathParameters['id']!),
+      builder: (_, st) => WideFrame(child: QrPassScreen(bookingId: st.pathParameters['id']!)),
     ),
     // A6
-    GoRoute(path: '/charter', builder: (_, __) => const CharterScreen()),
+    GoRoute(
+      path: '/charter',
+      builder: (_, __) => const WideFrame(child: CharterScreen()),
+    ),
   ],
 );

@@ -36,6 +36,33 @@ class AppShell extends ConsumerWidget {
             ),
           );
 
+    if (isWide(context)) {
+      return Scaffold(
+        body: Row(
+          children: [
+            SideMenu(
+              tabs: tabs,
+              selected: index < 0 ? 0 : index,
+              onSelect: (i) => context.go(tabs[i].path),
+            ),
+            Expanded(
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  // Lists and boards use the room; reading screens stay
+                  // at a comfortable width.
+                  constraints: BoxConstraints(
+                    maxWidth: _roomy.any(location.startsWith) ? 1280 : 760,
+                  ),
+                  child: page,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Scaffold(
       extendBody: true,
       body: Column(
@@ -62,10 +89,46 @@ class AppShell extends ConsumerWidget {
   }
 }
 
+const _roomy = ['/studios', '/validations', '/planning', '/dashboard', '/admin'];
+
+/// Shows a full-screen page (detail, booking flow, QR…) as a centered
+/// column on computers, instead of stretching it edge to edge.
+class WideFrame extends StatelessWidget {
+  const WideFrame({super.key, required this.child, this.maxWidth = 720});
+  final Widget child;
+  final double maxWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!isWide(context)) return child;
+    return ColoredBox(
+      color: context.es.bgSubtle,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth),
+          child: DecoratedBox(
+            decoration: BoxDecoration(boxShadow: esShadow(context.es, strength: 2)),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Screens at least this wide (computers, tablets in landscape) get the
+/// side menu and roomier layouts instead of the phone tab bar.
+const wideBreakpoint = 900.0;
+
+bool isWide(BuildContext context) =>
+    MediaQuery.sizeOf(context).width >= wideBreakpoint;
+
 /// Height the floating tab bar takes at the bottom of the screen, so
-/// scrolling content can leave room for it.
-double tabBarSpace(BuildContext context) =>
-    100 + MediaQuery.paddingOf(context).bottom;
+/// scrolling content can leave room for it. On computers there is no
+/// bottom bar, only a normal margin.
+double tabBarSpace(BuildContext context) => isWide(context)
+    ? EsSpace.s8
+    : 100 + MediaQuery.paddingOf(context).bottom;
 
 /// The floating pill tab bar from the original design, refined: the
 /// selected tab sits in a lilac capsule that slides between tabs.
@@ -197,6 +260,145 @@ class _PillTab extends StatelessWidget {
           ],
         ),
         ),
+      ),
+    );
+  }
+}
+
+/// The computer layout's left menu: brand, sections, and who you are.
+class SideMenu extends ConsumerWidget {
+  const SideMenu({
+    super.key,
+    required this.tabs,
+    required this.selected,
+    required this.onSelect,
+  });
+  final List<TabSpec> tabs;
+  final int selected;
+  final ValueChanged<int> onSelect;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = context.es;
+    final me = ref.watch(currentPersonProvider);
+    return Container(
+      width: 264,
+      decoration: BoxDecoration(
+        color: c.bgSurface,
+        border: Border(right: BorderSide(color: c.border)),
+      ),
+      padding: const EdgeInsets.fromLTRB(16, 28, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'UEMF',
+                  style: EsText.displayM.copyWith(
+                    color: c.actionPrimary,
+                    fontSize: 26,
+                    height: 1,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'EUROMED STUDIOS',
+                  style: EsText.overline.copyWith(
+                    color: c.textSecondary,
+                    letterSpacing: 1.6,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 32),
+          for (var i = 0; i < tabs.length; i++)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Material(
+                color: i == selected ? c.lilac : Colors.transparent,
+                borderRadius: BorderRadius.circular(EsRadius.md),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(EsRadius.md),
+                  onTap: () => onSelect(i),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          i == selected ? tabs[i].selectedIcon : tabs[i].icon,
+                          size: 22,
+                          color: i == selected ? c.onLilac : c.textSecondary,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          tabs[i].label,
+                          style: EsText.labelM.copyWith(
+                            color:
+                                i == selected ? c.onLilac : c.textPrimary,
+                            fontWeight: i == selected
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          const Spacer(),
+          if (kDemoMode)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: EsButton(
+                'Changer de rôle (démo)',
+                style: EsButtonStyle.secondary,
+                size: EsButtonSize.medium,
+                icon: Icons.swap_horiz_rounded,
+                onPressed: () => showDemoSwitcher(context, ref),
+              ),
+            ),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: c.bgSubtle,
+              borderRadius: BorderRadius.circular(EsRadius.md),
+            ),
+            child: Row(
+              children: [
+                Avatar(me.initials, size: 38),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        me.fullName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: EsText.titleS.copyWith(color: c.textPrimary),
+                      ),
+                      Text(
+                        me.title ?? me.roles.first.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: EsText.bodyS.copyWith(color: c.textSecondary),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

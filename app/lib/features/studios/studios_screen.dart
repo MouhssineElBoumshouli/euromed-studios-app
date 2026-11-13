@@ -149,21 +149,43 @@ class StudiosScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            SliverList.separated(
-              itemCount: studios.length,
-              separatorBuilder: (_, __) => const SizedBox(height: EsSpace.s4),
-              itemBuilder: (context, i) => Padding(
+            if (isWide(context))
+              SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: EsSpace.page),
-                child: FadeInUp(
-                  index: i,
-                  child: StudioCard(
+                sliver: SliverGrid.builder(
+                  gridDelegate:
+                      const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 420,
+                    mainAxisSpacing: EsSpace.s4,
+                    crossAxisSpacing: EsSpace.s4,
+                    mainAxisExtent: 340,
+                  ),
+                  itemCount: studios.length,
+                  itemBuilder: (context, i) => StudioCard(
                     studio: studios[i],
                     live: live[studios[i].id],
                     onTap: () => context.push('/studios/${studios[i].id}'),
                   ),
                 ),
+              )
+            else
+              SliverList.separated(
+                itemCount: studios.length,
+                separatorBuilder: (_, __) =>
+                    const SizedBox(height: EsSpace.s4),
+                itemBuilder: (context, i) => Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: EsSpace.page),
+                  child: FadeInUp(
+                    index: i,
+                    child: StudioCard(
+                      studio: studios[i],
+                      live: live[studios[i].id],
+                      onTap: () => context.push('/studios/${studios[i].id}'),
+                    ),
+                  ),
+                ),
               ),
-            ),
           ],
           SliverToBoxAdapter(child: SizedBox(height: tabBarSpace(context))),
         ],
