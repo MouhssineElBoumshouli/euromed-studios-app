@@ -29,7 +29,6 @@ class LiveSync {
   RealtimeChannel? _channel;
   Timer? _clock;
   Timer? _debounce;
-  bool _entering = false;
 
   Future<void> start() async {
     liveStatus.value = db.auth.currentSession == null
@@ -37,11 +36,12 @@ class LiveSync {
         : LiveStatus.loading;
     db.auth.onAuthStateChange.listen((e) {
       if (e.session == null) {
+        _generation++;
         _stop();
         liveStatus.value = LiveStatus.signedOut;
       } else if (e.event == AuthChangeEvent.signedIn ||
           e.event == AuthChangeEvent.initialSession) {
-        _enter();
+        _enter(++_generation);
       }
     });
   }
@@ -53,19 +53,24 @@ class LiveSync {
 
   Future<void> signOut() => db.auth.signOut();
 
-  Future<void> _enter() async {
-    if (_entering || liveStatus.value == LiveStatus.ready) return;
-    _entering = true;
+  /// Each sign-in or sign-out starts a new "generation". A slower load
+  /// from a previous account is dropped instead of overwriting the new
+  /// one (e.g. switching from Mehdi to Karim quickly).
+  int _generation = 0;
+
+  Future<void> _enter(int gen) async {
+    _stop();
     liveStatus.value = LiveStatus.loading;
+    final uid = db.auth.currentUser?.id;
+    if (uid == null) return;
     try {
-      final me = await db
-          .from('profiles')
-          .select('slug')
-          .eq('id', db.auth.currentUser!.id)
-          .single();
+      final me =
+          await db.from('profiles').select('slug').eq('id', uid).single();
+      if (gen != _generation) return;
       container.read(currentPersonIdProvider.notifier).state =
           me['slug'] as String;
       await refresh();
+      if (gen != _generation) return;
       _channel = db
           .channel('world')
           .onPostgresChanges(
@@ -80,9 +85,7 @@ class LiveSync {
       _clock = Timer.periodic(const Duration(seconds: 30), (_) => refresh());
       liveStatus.value = LiveStatus.ready;
     } catch (_) {
-      await db.auth.signOut();
-    } finally {
-      _entering = false;
+      if (gen == _generation) await db.auth.signOut();
     }
   }
 

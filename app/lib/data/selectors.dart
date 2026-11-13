@@ -103,5 +103,9 @@ final noticesProvider = Provider<List<Notice>>((ref) {
 final unreadNoticesProvider = Provider<int>((ref) {
   final w = ref.watch(worldProvider);
   final me = ref.watch(currentPersonProvider);
-  return unreadCount(ref.watch(noticesProvider), w.noticesSeenAt[me.id]);
+  return unreadCount(
+    ref.watch(noticesProvider),
+    w.noticesSeenAt[me.id],
+    w.now,
+  );
 });

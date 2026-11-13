@@ -45,8 +45,7 @@ class _NotificationsState extends ConsumerState<NotificationsScreen> {
     final feed = ref.watch(noticesProvider);
     final todo = feed.where((n) => n.actionable).toList();
     final rest = feed.where((n) => !n.actionable).toList();
-    bool unread(Notice n) =>
-        n.actionable || seenBefore == null || n.at.isAfter(seenBefore!);
+    bool unread(Notice n) => isUnread(n, seenBefore, w.now);
     final unreadCount = feed.where(unread).length;
 
     final today = <Notice>[], week = <Notice>[], older = <Notice>[];

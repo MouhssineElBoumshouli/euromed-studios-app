@@ -185,8 +185,12 @@ List<Notice> noticesFor(
   return out;
 }
 
-/// Unread = newer than the last time this person opened the feed. Requests
-/// waiting for a decision count until they are handled.
-int unreadCount(List<Notice> feed, DateTime? seenAt) => feed
-    .where((n) => n.actionable || seenAt == null || n.at.isAfter(seenAt))
-    .length;
+/// Unread = newer than the last time this person opened the feed (or, if
+/// they never did, from the last 24 hours). Requests waiting for a decision
+/// count until they are handled.
+bool isUnread(Notice n, DateTime? seenAt, DateTime now) =>
+    n.actionable ||
+    n.at.isAfter(seenAt ?? now.subtract(const Duration(hours: 24)));
+
+int unreadCount(List<Notice> feed, DateTime? seenAt, DateTime now) =>
+    feed.where((n) => isUnread(n, seenAt, now)).length;
