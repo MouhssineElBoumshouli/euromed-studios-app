@@ -50045,8 +50045,8 @@ A.aEe.prototype={
 $0(){return A.dK(this.a).fC("/bookings",null)},
 $S:0}
 A.a3q.prototype={
-I(a5){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1=null,a2="S\xe9ance en cours",a3="Prochaine s\xe9ance",a4=t.n.a(A.G(a5).c.h(0,A.ai(t.W)))
-a4.toString
+I(a4){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0=null,a1="S\xe9ance en cours",a2="Prochaine s\xe9ance",a3=t.n.a(A.G(a4).c.h(0,A.ai(t.W)))
+a3.toString
 s=this.c
 r=A.eZ(s.r)
 q=B.b.f3(B.ei,new A.aC0(r))
@@ -50057,26 +50057,27 @@ m=p.ef(o)
 if(n)l="En cours \xb7 jusqu\u2019\xe0 "+$.h4().bC(s.x)
 else{k=m.a
 j=B.f.c6(k,36e8)
-if(j<24){j=j>0?""+j+" h ":""
-k="Dans "+j+B.f.ab(B.f.c6(k,6e7),60)+" min"
+if(j<24){i=A.ml(p,o)
+j=j>0?""+j+" h ":""
+k=i+" \xb7 dans "+j+B.f.ab(B.f.c6(k,6e7),60)+" min"
 l=k}else{k=A.ml(p,o)
-l=k}}k=n?a2:a3
+l=k}}k=n?a1:a2
 j=r.b
-i=A.ml(p,o)
-h=s.x
-g=$.h4()
-f=g.bC(p)
-e=g.bC(h)
-s=A.ahm(A.ro(r.e,a1,!1,B.e8,a1,a1,a1),a1,a1,a1,"photo-"+s.a,!1)
-d=a4.d
-c=A.ih(a1,new A.aY(a1,a1,a1,a1,a1,new A.k1(B.f2,B.f1,B.eV,A.b([B.K,d.ds(0.92)],t.t_),B.a6q,a1),B.W),B.cf)
-b=n?a4.k1:a4.CW
-a=n?a2:a3
-a0=t.p
-a=A.kd(a1,new A.a26(A.bo(A.b([new A.rA(b,7,a1),A.a_(a,a1,a1,a1,a1,a1,B.b2.S(B.n),a1,a1)],a0),B.x,B.o,B.be,0),a1),a1,a1,14,a1,14,a1)
-h=A.cs(A.aZ(A.b([A.a_(l,a1,a1,a1,a1,a1,B.b2.hy(a4.CW,12.5),a1,a1),B.d2,A.a_(j,a1,a1,a1,a1,a1,B.k_.S(B.n),a1,a1),B.d2,A.a_(A.ml(p,o)+" \xb7 "+(g.bC(p)+"\u2013"+g.bC(h))+" \xb7 "+q.b,a1,1,B.aW,a1,a1,B.a9.S(B.n.ds(0.85)),a1,a1)],a0),B.Y,B.o,B.r),1)
-g=A.bR(16)
-return A.b6(!0,a1,A.dW(A.cv(A.en(B.bC,A.b([s,c,a,A.kd(16,A.bo(A.b([h,B.bf,A.bn(a1,A.ct(B.hf,d,a1,a1,30),B.t,a1,a1,new A.aY(B.n,a1,a1,g,a1,a1,B.W),a1,52,a1,a1,a1,a1,52)],a0),B.fd,B.o,B.r,0),a1,a1,18,18,a1,a1)],a0),B.G,B.r6),228,a1),a1,new A.aC1(this,a5),B.ad,28,a1),!1,a1,a1,!0,!1,a1,a1,a1,a1,a1,a1,a1,a1,k+" : "+j+", "+i+", "+(f+"\u2013"+e)+". Ouvrir le QR code.",a1,a1,a1,a1,a1,a1,a1,a1,a1,a1,a1,a1,a1,a1,a1,a1,a1,a1,a1,a1,a1,a1,a1,a1,a1,a1,a1)}}
+o=A.ml(p,o)
+i=s.x
+h=$.h4()
+g=h.bC(p)
+f=h.bC(i)
+s=A.ahm(A.ro(r.e,a0,!1,B.e8,a0,a0,a0),a0,a0,a0,"photo-"+s.a,!1)
+e=a3.d
+d=A.ih(a0,new A.aY(a0,a0,a0,a0,a0,new A.k1(B.f2,B.f1,B.eV,A.b([B.K,e.ds(0.92)],t.t_),B.a6q,a0),B.W),B.cf)
+c=n?a3.k1:a3.CW
+b=n?a1:a2
+a=t.p
+b=A.kd(a0,new A.a26(A.bo(A.b([new A.rA(c,7,a0),A.a_(b,a0,a0,a0,a0,a0,B.b2.S(B.n),a0,a0)],a),B.x,B.o,B.be,0),a0),a0,a0,14,a0,14,a0)
+i=A.cs(A.aZ(A.b([A.a_(l,a0,a0,a0,a0,a0,B.b2.hy(a3.CW,12.5),a0,a0),B.d2,A.a_(j,a0,a0,a0,a0,a0,B.k_.S(B.n),a0,a0),B.d2,A.a_(h.bC(p)+"\u2013"+h.bC(i)+" \xb7 "+q.b,a0,1,B.aW,a0,a0,B.a9.S(B.n.ds(0.85)),a0,a0)],a),B.Y,B.o,B.r),1)
+h=A.bR(16)
+return A.b6(!0,a0,A.dW(A.cv(A.en(B.bC,A.b([s,d,b,A.kd(16,A.bo(A.b([i,B.bf,A.bn(a0,A.ct(B.hf,e,a0,a0,30),B.t,a0,a0,new A.aY(B.n,a0,a0,h,a0,a0,B.W),a0,52,a0,a0,a0,a0,52)],a),B.fd,B.o,B.r,0),a0,a0,18,18,a0,a0)],a),B.G,B.r6),228,a0),a0,new A.aC1(this,a4),B.ad,28,a0),!1,a0,a0,!0,!1,a0,a0,a0,a0,a0,a0,a0,a0,k+" : "+j+", "+o+", "+(g+"\u2013"+f)+". Ouvrir le QR code.",a0,a0,a0,a0,a0,a0,a0,a0,a0,a0,a0,a0,a0,a0,a0,a0,a0,a0,a0,a0,a0,a0,a0,a0,a0,a0,a0)}}
 A.aC0.prototype={
 $1(a){return a.a===this.a.d},
 $S:39}
