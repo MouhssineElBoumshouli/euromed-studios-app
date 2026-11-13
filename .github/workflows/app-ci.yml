@@ -1,0 +1,92 @@
+name: App CI
+
+# Runs on every push and pull request that touches the app.
+# GitHub's machines install Flutter, check the code, run the tests,
+# and build the web preview.
+
+on:
+  push:
+    paths: ["app/**", ".github/workflows/app-ci.yml"]
+  pull_request:
+    paths: ["app/**", ".github/workflows/app-ci.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check-test-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Flutter version
+        run: flutter --version
+
+      - name: Add missing platform files (web)
+        run: flutter create --platforms=web --project-name euromed_studios --org ma.ueuromed . --no-overwrite
+
+      - name: Get packages
+        run: flutter pub get
+
+      - name: Format code (auto-fix on branches)
+        run: |
+          dart format lib test
+          if [ -n "$(git status --porcelain lib test)" ]; then
+            echo "Formatting changed files:"; git status --porcelain lib test
+            if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref_name }}" != "main" ]; then
+              git config user.name "github-actions[bot]"
+              git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+              git add lib test && git commit -m "style: dart format"
+              git pull --rebase -q origin "${{ github.ref_name }}" && git push || echo "Could not save formatting (branch moved); continuing."
+            fi
+          fi
+
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos
+
+      - name: Tests
+        run: flutter test --reporter expanded
+
+      - name: Build web preview
+        run: |
+          flutter build web --release --base-href / --no-web-resources-cdn
+          # Make the preview work from any folder, not only the site root.
+          sed -i 's#<base href="/">#<base href="./">#' build/web/index.html
+
+      - name: Save preview to the "preview" branch
+        if: github.event_name == 'push'
+        working-directory: .
+        run: |
+          set -e
+          SLUG=$(echo "${{ github.ref_name }}" | tr '/' '-')
+          rm -rf /tmp/pv && mkdir -p /tmp/pv
+          cp -r app/build/web /tmp/pv/site
+          find /tmp/pv/site -name '*.symbols' -delete
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin preview:preview 2>/dev/null || true
+          if git show-ref --quiet refs/heads/preview; then
+            git worktree add /tmp/pvwt preview
+          else
+            git worktree add --detach /tmp/pvwt && (cd /tmp/pvwt && git checkout --orphan preview && git rm -rf . -q || true)
+          fi
+          rm -rf "/tmp/pvwt/$SLUG" && mkdir -p "/tmp/pvwt/$SLUG"
+          cp -r /tmp/pv/site/. "/tmp/pvwt/$SLUG/"
+          echo "${{ github.sha }}" > "/tmp/pvwt/$SLUG/BUILD_SHA"
+          cd /tmp/pvwt && git add -A && git commit -qm "preview: $SLUG @ ${{ github.sha }}" && git push -q origin preview
+
+      - name: Upload web preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-preview
+          path: app/build/web
+          retention-days: 14

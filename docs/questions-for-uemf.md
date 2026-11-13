@@ -93,3 +93,9 @@ Pourriez-vous nous envoyer la charte graphique officielle : logo en haute qualit
 **Q17 ⏳ — Langues**
 L'application doit-elle être en français seulement, ou aussi en arabe et en anglais ?
 *Proposition :* le français d'abord, l'anglais ensuite. L'arabe si vous le demandez.
+
+## Ajoutées pendant le développement
+
+**Q18 ⏳ — Demande d’un validateur pour lui-même**
+Un directeur ou une directrice d’établissement est aussi enseignant·e. Sa propre demande ne peut pas être validée par lui-même ou elle-même. Qui la valide au niveau 1 ?
+*Proposition :* l’administrateur des Studios, ou un supérieur hiérarchique désigné. Réglable dans l’application.
