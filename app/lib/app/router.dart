@@ -113,11 +113,6 @@ final appRouter = GoRouter(
           builder: (_, __) => const RegieScreen(),
         ),
         GoRoute(
-          path: '/scanner',
-          parentNavigatorKey: _rootKey,
-          builder: (_, __) => const WideFrame(child: ScannerScreen()),
-        ),
-        GoRoute(
           path: '/maintenance',
           builder: (_, __) => const ComingSoonScreen(
             title: 'Maintenance',
@@ -168,6 +163,10 @@ final appRouter = GoRouter(
     ),
     // A6
     GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
+    GoRoute(
+      path: '/scanner',
+      builder: (_, __) => const WideFrame(child: ScannerScreen()),
+    ),
     GoRoute(
       path: '/charter',
       builder: (_, __) => const WideFrame(child: CharterScreen()),
