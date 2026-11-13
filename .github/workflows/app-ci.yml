@@ -6,9 +6,9 @@ name: App CI
 
 on:
   push:
-    paths: ["app/**", ".github/workflows/app-ci.yml"]
+    paths: ["app/**", "e2e/**", "supabase/**", ".github/workflows/app-ci.yml"]
   pull_request:
-    paths: ["app/**", ".github/workflows/app-ci.yml"]
+    paths: ["app/**", "e2e/**", "supabase/**", ".github/workflows/app-ci.yml"]
   workflow_dispatch:
 
 permissions:
