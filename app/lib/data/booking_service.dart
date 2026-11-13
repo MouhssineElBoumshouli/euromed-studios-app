@@ -172,6 +172,33 @@ class BookingService {
     _world.cancel(bookingId, by: by, reason: reason);
   }
 
+  Future<void> checkIn(String bookingId, {required Person by}) async {
+    if (isLive) {
+      await _call(() => _db.rpc('check_in_booking', params: {'p_id': bookingId}));
+      return;
+    }
+    await Future<void>.delayed(_latency);
+    _world.checkIn(bookingId, by: by);
+  }
+
+  Future<void> complete(
+    String bookingId, {
+    required Person by,
+    String? report,
+  }) async {
+    if (isLive) {
+      await _call(
+        () => _db.rpc(
+          'complete_booking',
+          params: {'p_id': bookingId, 'p_report': report},
+        ),
+      );
+      return;
+    }
+    await Future<void>.delayed(_latency);
+    _world.complete(bookingId, by: by, report: report);
+  }
+
   Future<void> signCharter(String personId) async {
     if (isLive) {
       await _call(() => _db.rpc('sign_charter'));

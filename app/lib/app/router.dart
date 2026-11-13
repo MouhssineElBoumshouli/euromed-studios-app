@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import '../data/backend.dart';
 import '../features/booking/booking_flow_screen.dart';
 import '../features/booking/sent_screen.dart';
 import '../features/bookings/booking_detail_screen.dart';
@@ -9,12 +10,14 @@ import '../features/bookings/qr_pass_screen.dart';
 import '../features/charter/charter_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/placeholder/coming_soon_screen.dart';
+import '../features/planning/planning_screen.dart';
 import '../features/profile/profile_screen.dart';
+import '../features/regie/regie_screen.dart';
+import '../features/regie/scanner_screen.dart';
 import '../features/studios/studio_detail_screen.dart';
 import '../features/studios/studios_screen.dart';
 import '../features/validations/decision_screen.dart';
 import '../features/validations/validations_screen.dart';
-import '../data/backend.dart';
 import 'login_screen.dart';
 import 'shell.dart';
 
@@ -102,28 +105,17 @@ final appRouter = GoRouter(
         // I2 (milestone 6)
         GoRoute(
           path: '/planning',
-          builder: (_, __) => const ComingSoonScreen(
-            title: 'Planning',
-            milestone: 'Étape 5',
-            what: 'Toutes les salles sur une même frise horaire.',
-          ),
+          builder: (_, __) => const PlanningScreen(),
         ),
         // H1 (milestone 5)
         GoRoute(
           path: '/regie',
-          builder: (_, __) => const ComingSoonScreen(
-            title: 'Régie',
-            milestone: 'Étape 5',
-            what: 'L’occupation des studios en direct.',
-          ),
+          builder: (_, __) => const RegieScreen(),
         ),
         GoRoute(
           path: '/scanner',
-          builder: (_, __) => const ComingSoonScreen(
-            title: 'Scanner',
-            milestone: 'Étape 5',
-            what: 'Scanner les QR codes d’accès à l’entrée.',
-          ),
+          parentNavigatorKey: _rootKey,
+          builder: (_, __) => const WideFrame(child: ScannerScreen()),
         ),
         GoRoute(
           path: '/maintenance',

@@ -21,7 +21,10 @@ class AppShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final person = ref.watch(currentPersonProvider);
-    final tabs = tabsFor(person);
+    // Staff on a computer get the "Espace Studios" workspace: more sections
+    // than fit in a phone tab bar.
+    final console = isWide(context) && isStaff(person);
+    final tabs = console ? consoleTabsFor(person) : tabsFor(person);
     final index = tabs.indexWhere((t) => location.startsWith(t.path));
     // A role never sees a screen that isn't one of its tabs (route guard).
     final Widget page = index >= 0
@@ -42,6 +45,7 @@ class AppShell extends ConsumerWidget {
         body: Row(
           children: [
             SideMenu(
+              console: console,
               tabs: tabs,
               selected: index < 0 ? 0 : index,
               onSelect: (i) => context.go(tabs[i].path),
@@ -53,7 +57,8 @@ class AppShell extends ConsumerWidget {
                   // Lists and boards use the room; reading screens stay
                   // at a comfortable width.
                   constraints: BoxConstraints(
-                    maxWidth: _roomy.any(location.startsWith) ? 1280 : 760,
+                    maxWidth:
+                        console || _roomy.any(location.startsWith) ? 1440 : 760,
                   ),
                   child: page,
                 ),
@@ -267,26 +272,36 @@ class _PillTab extends StatelessWidget {
 }
 
 /// The computer layout's left menu: brand, sections, and who you are.
+///
+/// Staff get the darker "Espace Studios" version, so their workspace reads
+/// as a professional tool, distinct from the students' app.
 class SideMenu extends ConsumerWidget {
   const SideMenu({
     super.key,
     required this.tabs,
     required this.selected,
     required this.onSelect,
+    this.console = false,
   });
   final List<TabSpec> tabs;
   final int selected;
   final ValueChanged<int> onSelect;
+  final bool console;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.es;
     final me = ref.watch(currentPersonProvider);
+    final bg = console ? c.bgBrand : c.bgSurface;
+    final text = console ? c.textOnBrand : c.textPrimary;
+    final muted = console ? c.textOnBrandMuted : c.textSecondary;
+    final selBg = console ? Colors.white.withValues(alpha: 0.12) : c.lilac;
+    final selFg = console ? Colors.white : c.onLilac;
     return Container(
       width: 264,
       decoration: BoxDecoration(
-        color: c.bgSurface,
-        border: Border(right: BorderSide(color: c.border)),
+        color: bg,
+        border: console ? null : Border(right: BorderSide(color: c.border)),
       ),
       padding: const EdgeInsets.fromLTRB(16, 28, 16, 16),
       child: Column(
@@ -300,16 +315,16 @@ class SideMenu extends ConsumerWidget {
                 Text(
                   'UEMF',
                   style: EsText.displayM.copyWith(
-                    color: c.actionPrimary,
+                    color: console ? Colors.white : c.actionPrimary,
                     fontSize: 26,
                     height: 1,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'EUROMED STUDIOS',
+                  console ? 'ESPACE STUDIOS' : 'EUROMED STUDIOS',
                   style: EsText.overline.copyWith(
-                    color: c.textSecondary,
+                    color: console ? c.brandAccent : c.textSecondary,
                     letterSpacing: 1.6,
                   ),
                 ),
@@ -321,7 +336,7 @@ class SideMenu extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 4),
               child: Material(
-                color: i == selected ? c.lilac : Colors.transparent,
+                color: i == selected ? selBg : Colors.transparent,
                 borderRadius: BorderRadius.circular(EsRadius.md),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(EsRadius.md),
@@ -329,21 +344,20 @@ class SideMenu extends ConsumerWidget {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
-                      vertical: 12,
+                      vertical: 11,
                     ),
                     child: Row(
                       children: [
                         Icon(
                           i == selected ? tabs[i].selectedIcon : tabs[i].icon,
-                          size: 22,
-                          color: i == selected ? c.onLilac : c.textSecondary,
+                          size: 21,
+                          color: i == selected ? selFg : muted,
                         ),
                         const SizedBox(width: 12),
                         Text(
                           tabs[i].label,
                           style: EsText.labelM.copyWith(
-                            color:
-                                i == selected ? c.onLilac : c.textPrimary,
+                            color: i == selected ? selFg : text,
                             fontWeight: i == selected
                                 ? FontWeight.w700
                                 : FontWeight.w500,
@@ -359,23 +373,31 @@ class SideMenu extends ConsumerWidget {
           if (kDemoMode)
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
-              child: EsButton(
-                'Changer de rôle (démo)',
-                style: EsButtonStyle.secondary,
-                size: EsButtonSize.medium,
-                icon: Icons.swap_horiz_rounded,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: text,
+                  side: BorderSide(
+                    color: console
+                        ? Colors.white.withValues(alpha: 0.3)
+                        : c.borderStrong,
+                  ),
+                  minimumSize: const Size.fromHeight(44),
+                  shape: const StadiumBorder(),
+                ),
                 onPressed: () => showDemoSwitcher(context, ref),
+                icon: const Icon(Icons.swap_horiz_rounded, size: 18),
+                label: Text(isLive ? 'Changer de compte' : 'Changer de rôle'),
               ),
             ),
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: c.bgSubtle,
+              color: console ? c.bgBrandRaised : c.bgSubtle,
               borderRadius: BorderRadius.circular(EsRadius.md),
             ),
             child: Row(
               children: [
-                Avatar(me.initials, size: 38),
+                Avatar(me.initials, size: 38, onBrand: console),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
@@ -385,13 +407,13 @@ class SideMenu extends ConsumerWidget {
                         me.fullName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: EsText.titleS.copyWith(color: c.textPrimary),
+                        style: EsText.titleS.copyWith(color: text),
                       ),
                       Text(
                         me.title ?? me.roles.first.label,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: EsText.bodyS.copyWith(color: c.textSecondary),
+                        style: EsText.bodyS.copyWith(color: muted),
                       ),
                     ],
                   ),
