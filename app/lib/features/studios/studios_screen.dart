@@ -158,7 +158,7 @@ class StudiosScreen extends ConsumerWidget {
                     maxCrossAxisExtent: 420,
                     mainAxisSpacing: EsSpace.s4,
                     crossAxisSpacing: EsSpace.s4,
-                    mainAxisExtent: 340,
+                    mainAxisExtent: 322,
                   ),
                   itemCount: studios.length,
                   itemBuilder: (context, i) => StudioCard(
