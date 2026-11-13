@@ -119,6 +119,21 @@ const mine = await fetch(`${URL}/rest/v1/bookings?id=eq.${id}&select=status,hist
 }).then((r) => r.json());
 check('student sees the final status', mine[0]?.status === 'approved', mine[0]?.status);
 
+// Régie: only door staff may check people in, and only at the right time.
+const haddad = await signIn('haddad');
+const early = await rpc(haddad, 'check_in_booking', { p_id: id });
+check('check-in refused before the session', !early.ok && early.body?.message === 'too_early', early.body?.message);
+const byStudent = await rpc(yasmine, 'check_in_booking', { p_id: id });
+check('students cannot check anyone in', !byStudent.ok && byStudent.body?.message === 'not_allowed');
+
+await laptop.goto(`${APP}?as=tazi#/planning`);
+await laptop.waitForTimeout(12000);
+await laptop.screenshot({ path: 'e2e/out/6-planning.png' });
+const desk = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+await desk.goto(`${APP}?as=haddad#/regie`);
+await desk.waitForTimeout(12000);
+await desk.screenshot({ path: 'e2e/out/7-regie.png' });
+
 const phone = await browser.newPage({ viewport: { width: 390, height: 844 } });
 await phone.goto(`${APP}?as=yasmine#/bookings`);
 await phone.waitForTimeout(12000);
