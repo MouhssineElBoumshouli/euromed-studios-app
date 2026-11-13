@@ -27,14 +27,21 @@ class RegieScreen extends ConsumerWidget {
       for (final b in w.bookings)
         if (!b.isPrivate &&
             (b.status == BookingStatus.approved ||
-                b.status == BookingStatus.completed) &&
+                b.status == BookingStatus.completed ||
+                b.status == BookingStatus.noShow) &&
             b.start.year == w.now.year &&
             b.start.month == w.now.month &&
             b.start.day == w.now.day)
           b,
     ]..sort((a, b) => a.start.compareTo(b.start));
     int count(Set<SessionPhase> p) =>
-        today.where((b) => p.contains(phaseOf(b, w.now))).length;
+        today
+            .where(
+              (b) => p.contains(
+                phaseOf(b, w.now, earlyMinutes: w.policy.qrGraceMinutes),
+              ),
+            )
+            .length;
 
     return ListView(
       padding: EdgeInsets.only(bottom: tabBarSpace(context)),
@@ -149,10 +156,13 @@ class _SessionCardState extends ConsumerState<SessionCard> {
     final b = widget.booking;
     final s = studioById(b.studioId);
     final who = personById(b.requesterId);
-    final phase = phaseOf(b, widget.now);
+    final early = ref.watch(worldProvider).policy.qrGraceMinutes;
+    final phase = phaseOf(b, widget.now, earlyMinutes: early);
     final (label, bg, fg) = phaseLabel(c, phase);
-    final canIn = checkInProblem(b, widget.now) == null;
+    final canIn =
+        checkInProblem(b, widget.now, earlyMinutes: early) == null;
     final canClose = canComplete(b, widget.now);
+    final canAbsent = canMarkNoShow(b, widget.now);
     return EsCard(
       padding: const EdgeInsets.all(14),
       onTap: () => context.push('/bookings/${b.id}'),
@@ -204,8 +214,16 @@ class _SessionCardState extends ConsumerState<SessionCard> {
               ],
             ),
           ],
-          if (canIn || canClose) ...[
+          if (canIn || canClose || canAbsent) ...[
             const SizedBox(height: 12),
+            if (canAbsent && canIn) ...[
+              Text(
+                'Pas encore arrivé·e. Vous pouvez encore l’accueillir, ou '
+                'noter l’absence.',
+                style: EsText.bodyS.copyWith(color: c.pendingText),
+              ),
+              const SizedBox(height: 8),
+            ],
             if (canIn)
               EsButton(
                 'Enregistrer l’arrivée',
@@ -220,7 +238,7 @@ class _SessionCardState extends ConsumerState<SessionCard> {
                 ),
               )
             else
-              EsButton(
+              if (canClose) EsButton(
                 'Clôturer la séance',
                 icon: Icons.task_alt_rounded,
                 style: EsButtonStyle.secondary,
@@ -244,6 +262,24 @@ class _SessionCardState extends ConsumerState<SessionCard> {
                   );
                 },
               ),
+            if (canAbsent) ...[
+              const SizedBox(height: 8),
+              EsButton(
+                'Noter l’absence',
+                icon: Icons.person_off_outlined,
+                style: EsButtonStyle.ghost,
+                size: EsButtonSize.medium,
+                onPressed: busy
+                    ? null
+                    : () => _run(
+                          () => ref.read(bookingServiceProvider).markNoShow(
+                                b.id,
+                                by: ref.read(currentPersonProvider),
+                              ),
+                          'Absence notée.',
+                        ),
+              ),
+            ],
           ],
         ],
       ),

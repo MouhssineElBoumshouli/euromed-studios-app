@@ -123,6 +123,10 @@ check('student sees the final status', mine[0]?.status === 'approved', mine[0]?.
 const haddad = await signIn('haddad');
 const early = await rpc(haddad, 'check_in_booking', { p_id: id });
 check('check-in refused before the session', !early.ok && early.body?.message === 'too_early', early.body?.message);
+const absentEarly = await rpc(haddad, 'mark_no_show', { p_id: id });
+check('absence refused before the session', !absentEarly.ok);
+const closeEarly = await rpc(haddad, 'complete_booking', { p_id: id });
+check('cannot close a session nobody entered', !closeEarly.ok);
 const byStudent = await rpc(yasmine, 'check_in_booking', { p_id: id });
 check('students cannot check anyone in', !byStudent.ok && byStudent.body?.message === 'not_allowed');
 

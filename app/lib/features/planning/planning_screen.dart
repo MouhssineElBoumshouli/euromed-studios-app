@@ -339,7 +339,7 @@ class _Timeline extends StatelessWidget {
         padding: EdgeInsets.zero,
         child: LayoutBuilder(
           builder: (context, box) {
-            final hourW = (box.maxWidth - _label) / hours;
+            final hourW = (box.maxWidth - _label) / (hours <= 0 ? 1 : hours);
             double x(DateTime t) =>
                 _label +
                 ((t.hour + t.minute / 60) - opening).clamp(0, hours) * hourW;
@@ -392,10 +392,11 @@ class _Timeline extends StatelessWidget {
                           hours: hours,
                           blocks: [
                             for (final m in maintenance)
-                              if (m.roomId == studios[i].roomId)
+                              if (m.roomId == studios[i].roomId &&
+                                  x(m.end) - x(m.start) > 8)
                                 Positioned(
                                   left: x(m.start) + 2,
-                                  width: x(m.end) - x(m.start) - 4,
+                                  width: (x(m.end) - x(m.start) - 4).clamp(0, double.infinity),
                                   top: 8,
                                   bottom: 8,
                                   child: Container(
@@ -417,10 +418,11 @@ class _Timeline extends StatelessWidget {
                                   ),
                                 ),
                             for (final b in bookings)
-                              if (_inRow(b, studios[i]))
+                              if (_inRow(b, studios[i]) &&
+                                  x(b.end) - x(b.start) > 8)
                                 Positioned(
                                   left: x(b.start) + 2,
-                                  width: x(b.end) - x(b.start) - 4,
+                                  width: (x(b.end) - x(b.start) - 4).clamp(0, double.infinity),
                                   top: 6,
                                   bottom: 6,
                                   child: _Block(
@@ -469,8 +471,9 @@ class _Timeline extends StatelessWidget {
   /// studio in the same room shows faded, because it blocks this one too.
   bool _inRow(Booking b, Studio s) {
     if (b.studioId == s.id) return true;
-    final other = DemoWorld.studios.firstWhere((x) => x.id == b.studioId);
-    return other.roomId == s.roomId && b.status.holdsSlot;
+    final other =
+        DemoWorld.studios.where((x) => x.id == b.studioId).firstOrNull;
+    return other?.roomId == s.roomId && b.status.holdsSlot;
   }
 }
 

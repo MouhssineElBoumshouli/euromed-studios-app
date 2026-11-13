@@ -199,6 +199,15 @@ class BookingService {
     _world.complete(bookingId, by: by, report: report);
   }
 
+  Future<void> markNoShow(String bookingId, {required Person by}) async {
+    if (isLive) {
+      await _call(() => _db.rpc('mark_no_show', params: {'p_id': bookingId}));
+      return;
+    }
+    await Future<void>.delayed(_latency);
+    _world.markNoShow(bookingId, by: by);
+  }
+
   Future<void> signCharter(String personId) async {
     if (isLive) {
       await _call(() => _db.rpc('sign_charter'));

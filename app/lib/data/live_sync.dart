@@ -16,6 +16,7 @@ import '../domain/people.dart';
 import '../domain/policy.dart';
 import 'app_state.dart';
 import 'backend.dart';
+import 'demo_world.dart';
 
 /// Set by main() when the app runs against the server.
 LiveSync? liveSync;
@@ -122,13 +123,16 @@ class LiveSync {
       Future<dynamic>.value(db.from('charter_signatures').select()),
     ]);
     final settings = results[0] as Map<String, dynamic>;
+    final known = {for (final s in DemoWorld.studios) s.id};
     final visible = [
-      for (final r in results[1] as List) bookingFromRow(r as Map<String, dynamic>),
+      for (final r in results[1] as List)
+        if (known.contains(r['studio_id'])) bookingFromRow(r as Map<String, dynamic>),
     ];
     final seen = {for (final b in visible) b.id};
     final busy = [
       for (final r in results[2] as List)
-        if (!seen.contains(r['id'])) _privateFromRow(r as Map<String, dynamic>),
+        if (!seen.contains(r['id']) && known.contains(r['studio_id']))
+          _privateFromRow(r as Map<String, dynamic>),
     ];
     final quota = settings['student_quota_minutes'] as int?;
     final policy = Policy(
@@ -206,6 +210,7 @@ Booking bookingFromRow(Map<String, dynamic> r) => Booking(
       technicianId: r['technician_slug'] as String?,
       equipment: [
         for (final e in (r['equipment'] as List? ?? const []))
+          if (DemoWorld.equipment.any((x) => x.id == e['item_id']))
           EquipmentRequest(
             itemId: e['item_id'] as String,
             quantity: e['quantity'] as int,

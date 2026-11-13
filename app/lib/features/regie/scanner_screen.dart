@@ -56,6 +56,15 @@ class _ScannerState extends ConsumerState<ScannerScreen> {
   Widget build(BuildContext context) {
     final c = context.es;
     final w = ref.watch(worldProvider);
+    if (!canOperate(ref.watch(currentPersonProvider))) {
+      return const Scaffold(
+        body: EmptyState(
+          icon: Icons.lock_outline_rounded,
+          title: 'Réservé à la régie',
+          message: 'Seule l’équipe des studios peut contrôler les accès.',
+        ),
+      );
+    }
     final found = scanned == null ? null : _lookup(scanned!, w.bookings);
 
     return Scaffold(
@@ -156,6 +165,7 @@ class _ScannerState extends ConsumerState<ScannerScreen> {
                             booking: found,
                             now: w.now,
                             busy: busy,
+                            early: w.policy.qrGraceMinutes,
                             onCheckIn: found == null ? null : () => _checkIn(found),
                           ),
                   ),
@@ -220,7 +230,9 @@ class _Result extends StatelessWidget {
     required this.now,
     required this.busy,
     required this.onCheckIn,
+    required this.early,
   });
+  final int early;
   final Booking? booking;
   final DateTime now;
   final bool busy;
@@ -237,7 +249,7 @@ class _Result extends StatelessWidget {
         text: 'Aucune réservation ne correspond. Vérifiez la référence.',
       );
     }
-    final problem = checkInProblem(b, now);
+    final problem = checkInProblem(b, now, earlyMinutes: early);
     final inside = isCheckedIn(b);
     final ok = problem == null;
     final s = studioById(b.studioId);

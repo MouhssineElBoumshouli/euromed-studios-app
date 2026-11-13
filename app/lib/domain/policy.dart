@@ -14,7 +14,7 @@ class Policy {
     this.openWeekdays = const {1, 2, 3, 4, 5},
     this.maxAdvanceDays = 30,
     this.weeklyQuotaMinutes = const {RequesterType.student: 120},
-    this.qrGraceMinutes = 0,
+    this.qrGraceMinutes = 15,
     this.charterVersion = '1.0',
   });
 

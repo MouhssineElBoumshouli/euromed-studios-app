@@ -324,7 +324,11 @@ class WorldNotifier extends Notifier<WorldState> {
   /// The régisseur lets the person in (QR scanned or reference typed).
   void checkIn(String bookingId, {required Person by}) {
     final b = _find(bookingId);
-    final problem = checkInProblem(b, state.now);
+    final problem = checkInProblem(
+      b,
+      state.now,
+      earlyMinutes: state.policy.qrGraceMinutes,
+    );
     if (!canOperate(by) || problem != null) {
       throw StateError(problem ?? '${by.id} cannot check in');
     }
@@ -358,6 +362,27 @@ class WorldNotifier extends Notifier<WorldState> {
             at: state.now,
             actorId: by.id,
             comment: report,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Nobody came: recorded as an absence, not as a finished session.
+  void markNoShow(String bookingId, {required Person by}) {
+    final b = _find(bookingId);
+    if (!canOperate(by) || !canMarkNoShow(b, state.now)) {
+      throw StateError('${by.id} cannot mark ${b.id} as no-show');
+    }
+    _replace(
+      b.copyWith(
+        status: BookingStatus.noShow,
+        history: [
+          ...b.history,
+          BookingEvent(
+            type: BookingEventType.noShow,
+            at: state.now,
+            actorId: by.id,
           ),
         ],
       ),
