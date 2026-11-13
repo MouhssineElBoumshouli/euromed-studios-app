@@ -125,6 +125,7 @@ class Booking {
     this.equipment = const [],
     this.technicianId,
     this.refusalReason,
+    this.isPrivate = false,
   });
 
   final String id;
@@ -146,6 +147,10 @@ class Booking {
   final List<EquipmentRequest> equipment;
   final String? technicianId;
   final String? refusalReason;
+
+  /// Someone else's booking that this person may not see in detail: only
+  /// its time and room are known (they still block the slot).
+  final bool isPrivate;
 
   Duration get duration => end.difference(start);
 
@@ -176,6 +181,7 @@ class Booking {
         equipment: equipment ?? this.equipment,
         technicianId: technicianId ?? this.technicianId,
         refusalReason: refusalReason ?? this.refusalReason,
+        isPrivate: isPrivate,
       );
 }
 

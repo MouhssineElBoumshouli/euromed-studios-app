@@ -7,6 +7,7 @@ import '../core/theme/es_text.dart';
 import '../core/widgets/es_button.dart';
 import '../core/widgets/layout.dart';
 import '../data/app_state.dart';
+import '../data/backend.dart';
 import 'demo_mode.dart';
 import 'demo_switcher.dart';
 import 'tabs.dart';
@@ -430,7 +431,8 @@ class DemoBar extends ConsumerWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Démo · ${p.displayName}${p.title == null ? '' : ' · ${p.title}'}',
+                  '${isLive ? 'En direct' : 'Démo'} · ${p.displayName}'
+                  '${p.title == null ? '' : ' · ${p.title}'}',
                   overflow: TextOverflow.ellipsis,
                   style: EsText.labelS.copyWith(color: c.textOnBrand),
                 ),

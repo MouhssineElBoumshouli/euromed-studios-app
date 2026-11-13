@@ -14,6 +14,8 @@ import '../features/studios/studio_detail_screen.dart';
 import '../features/studios/studios_screen.dart';
 import '../features/validations/decision_screen.dart';
 import '../features/validations/validations_screen.dart';
+import '../data/backend.dart';
+import 'login_screen.dart';
 import 'shell.dart';
 
 /// All the app's screens and their addresses.
@@ -25,6 +27,14 @@ final _rootKey = GlobalKey<NavigatorState>();
 final appRouter = GoRouter(
   navigatorKey: _rootKey,
   initialLocation: '/home',
+  // Live demo: nobody gets past the sign-in screen without an account.
+  refreshListenable: liveStatus,
+  redirect: (context, state) {
+    if (!isLive) return null;
+    final atLogin = state.matchedLocation == '/login';
+    if (liveStatus.value != LiveStatus.ready) return atLogin ? null : '/login';
+    return atLogin ? '/home' : null;
+  },
   routes: [
     ShellRoute(
       builder: (context, state, child) =>
@@ -156,6 +166,7 @@ final appRouter = GoRouter(
       builder: (_, st) => WideFrame(child: QrPassScreen(bookingId: st.pathParameters['id']!)),
     ),
     // A6
+    GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
     GoRoute(
       path: '/charter',
       builder: (_, __) => const WideFrame(child: CharterScreen()),
