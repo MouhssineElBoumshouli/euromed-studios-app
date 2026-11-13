@@ -11,6 +11,7 @@ import '../../core/widgets/status_chip.dart';
 import '../../data/app_state.dart';
 import '../../data/demo_world.dart';
 import '../../domain/bookings.dart';
+import '../../domain/people.dart';
 import '../../domain/rules/approval.dart';
 import '../notifications/notifications_screen.dart';
 import 'decision_screen.dart';
@@ -49,6 +50,18 @@ class _ValidationsState extends ConsumerState<ValidationsScreen> {
           b,
     ]..sort((a, b) => _lastAt(b).compareTo(_lastAt(a)));
     final items = showDone ? done : inbox;
+    // The studio team also sees what is on its way: requests still waiting
+    // for their level 1 approver (read-only here), so nothing surprises them.
+    final upcoming = !showDone &&
+            (me.has(Role.studioManager) || me.has(Role.admin))
+        ? ([
+            for (final b in w.bookings)
+              if (!b.isPrivate &&
+                  b.status == BookingStatus.pendingEntity &&
+                  !inbox.contains(b))
+                b,
+          ]..sort((a, b) => a.start.compareTo(b.start)))
+        : const <Booking>[];
     final wide = isWide(context);
     final current = wide
         ? (items.any((b) => b.id == selectedId)
@@ -113,6 +126,62 @@ class _ValidationsState extends ConsumerState<ValidationsScreen> {
                 ),
               ),
             ),
+          if (upcoming.isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                EsSpace.page,
+                EsSpace.s4,
+                EsSpace.page,
+                EsSpace.s1,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Overline(
+                      'Bientôt chez vous · ${upcoming.length} en attente du '
+                      'niveau 1',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                EsSpace.page,
+                0,
+                EsSpace.page,
+                EsSpace.s3,
+              ),
+              child: Text(
+                'Vous les validerez après l’accord du responsable de '
+                'l’entité.',
+                style: EsText.bodyS.copyWith(color: c.textSecondary),
+              ),
+            ),
+            for (final b in upcoming)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  EsSpace.page,
+                  0,
+                  EsSpace.page,
+                  EsSpace.s3,
+                ),
+                child: Opacity(
+                  opacity: 0.85,
+                  child: RequestReviewCard(
+                    booking: b,
+                    now: w.now,
+                    waitingFor: needsLevel1Fallback(b, DemoWorld.people)
+                        ? 'Administration (repli)'
+                        : level1Label(b.requesterType),
+                    selected: b.id == current,
+                    onTap: wide
+                        ? () => setState(() => selectedId = b.id)
+                        : () => context.push('/validations/${b.id}'),
+                  ),
+                ),
+              ),
+          ],
         ],
     );
 
@@ -213,7 +282,11 @@ class RequestReviewCard extends StatelessWidget {
     required this.onTap,
     this.conflict,
     this.selected = false,
+    this.waitingFor,
   });
+
+  /// Shown when the request waits for someone else (read-only).
+  final String? waitingFor;
   final Booking booking;
   final DateTime now;
   final VoidCallback onTap;
@@ -341,6 +414,21 @@ class RequestReviewCard extends StatelessWidget {
           if (conflict != null) ...[
             const SizedBox(height: 10),
             InfoBanner(tone: BannerTone.danger, text: conflict!),
+          ],
+          if (waitingFor != null) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.hourglass_top_rounded, size: 15, color: c.pendingText),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    'Attend : $waitingFor',
+                    style: EsText.labelS.copyWith(color: c.pendingText),
+                  ),
+                ),
+              ],
+            ),
           ],
         ],
       ),
