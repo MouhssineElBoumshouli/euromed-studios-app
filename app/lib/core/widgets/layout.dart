@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -517,28 +518,27 @@ class _FadeInUpState extends State<FadeInUp>
   late final AnimationController _a =
       AnimationController(vsync: this, duration: EsMotion.slow);
 
-  @override
-  void initState() {
-    super.initState();
-    // Only the first screenful settles in; later items (and items that
-    // scroll back into view) appear at once.
-    if (widget.index > 6) {
-      _a.value = 1;
-    } else {
-      Future.delayed(Duration(milliseconds: 40 * widget.index), () {
-        if (mounted) _a.forward();
-      });
-    }
-  }
+  Timer? _timer;
+  bool _started = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) _a.value = 1;
+    if (_started) return;
+    _started = true;
+    // Only the first screenful settles in. Later items, and everything
+    // when the system asks for reduced motion, appear at once.
+    final reduce = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    if (reduce || widget.index > 6) {
+      _a.value = 1;
+    } else {
+      _timer = Timer(Duration(milliseconds: 40 * widget.index), _a.forward);
+    }
   }
 
   @override
   void dispose() {
+    _timer?.cancel();
     _a.dispose();
     super.dispose();
   }
