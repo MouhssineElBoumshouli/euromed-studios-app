@@ -71,7 +71,6 @@ class LiveSync {
   /// Empties the world so nothing of the previous account stays on screen.
   void _clearWorld() {
     final w = container.read(worldProvider);
-    if (gen != _generation) return;
     container.read(worldProvider.notifier).load(
           WorldState(
             now: DateTime.now(),
@@ -196,6 +195,7 @@ class LiveSync {
         signedAt[slug] = _time(r['signed_at']);
       }
     }
+    if (gen != _generation) return;
     container.read(worldProvider.notifier).load(
           WorldState(
             now: now,

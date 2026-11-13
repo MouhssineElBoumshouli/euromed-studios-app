@@ -8,7 +8,7 @@ import '../core/widgets/es_button.dart';
 import '../core/widgets/layout.dart';
 import '../data/app_state.dart';
 import '../data/backend.dart';
-import '../data/selectors.dart';
+import '../data/selectors.dart' show noticesProvider;
 import '../features/notifications/notifications_screen.dart';
 import 'demo_mode.dart';
 import 'demo_switcher.dart';
