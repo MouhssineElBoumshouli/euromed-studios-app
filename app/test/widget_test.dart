@@ -28,6 +28,6 @@ void main() {
     expect(find.textContaining('1 h utilisées sur 2 h'), findsOneWidget);
     // Bottom tabs for a student.
     expect(find.text('Sessions'), findsOneWidget);
-    expect(find.text('Projets'), findsOneWidget);
+    expect(find.text('Projets'), findsNWidgets(2)); // quick action + tab
   });
 }
