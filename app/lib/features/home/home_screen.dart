@@ -103,7 +103,15 @@ class _TopRow extends ConsumerWidget {
           child: InkWell(
             customBorder: const CircleBorder(),
             onTap: () => context.go('/profile'),
-            child: Avatar(me.initials, size: 44),
+            child: Container(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color: context.es.bgSurface,
+                shape: BoxShape.circle,
+                boxShadow: esShadow(context.es),
+              ),
+              child: Avatar(me.initials, size: 40),
+            ),
           ),
         ),
       ],

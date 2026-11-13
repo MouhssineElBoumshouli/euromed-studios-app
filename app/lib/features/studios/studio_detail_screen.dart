@@ -55,43 +55,11 @@ class StudioDetailScreen extends ConsumerWidget {
         '${w.policy.closingHour.toString().padLeft(2, '0')}:00';
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 320,
-            pinned: true,
-            stretch: true,
-            backgroundColor: c.bgApp,
-            surfaceTintColor: Colors.transparent,
-            automaticallyImplyLeading: false,
-            leadingWidth: 72,
-            leading: Padding(
-              padding: const EdgeInsets.only(left: 16),
-              child: Center(
-                child: EsBackButton(
-                  label: null,
-                  onPressed: () => context.pop(),
-                ),
-              ),
-            ),
-            flexibleSpace: FlexibleSpaceBar(
-              stretchModes: const [StretchMode.zoomBackground],
-              background: Hero(
-                tag: 'studio-${s.id}',
-                child: Image.asset(s.photo, fit: BoxFit.cover),
-              ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Transform.translate(
-              offset: const Offset(0, -28),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: c.bgApp,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(EsRadius.xl),
-                  ),
-                ),
+      body: PhotoPage(
+        photo: s.photo,
+        heroTag: 'studio-${s.id}',
+        onBack: () => context.pop(),
+        sheet: Container(
                 padding: const EdgeInsets.fromLTRB(
                   EsSpace.page,
                   EsSpace.s6,
@@ -259,9 +227,6 @@ class StudioDetailScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-            ),
-          ),
-        ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: Padding(

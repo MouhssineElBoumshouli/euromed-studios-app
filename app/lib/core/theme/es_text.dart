@@ -14,21 +14,21 @@ abstract final class EsText {
     fontWeight: FontWeight.w800,
     fontSize: 36,
     height: 40 / 36,
-    letterSpacing: -1.1,
+    letterSpacing: -0.8,
   );
   static const displayXL = TextStyle(
     fontFamily: _h,
     fontWeight: FontWeight.w800,
     fontSize: 30,
     height: 36 / 30,
-    letterSpacing: -0.8,
+    letterSpacing: -0.5,
   );
   static const displayL = TextStyle(
     fontFamily: _h,
     fontWeight: FontWeight.w800,
     fontSize: 26,
     height: 32 / 26,
-    letterSpacing: -0.6,
+    letterSpacing: -0.4,
   );
   static const displayM = TextStyle(
     fontFamily: _h,

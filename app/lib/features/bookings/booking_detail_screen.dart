@@ -46,35 +46,10 @@ class BookingDetailScreen extends ConsumerWidget {
     final cancellable = canCancel(me, b, w.now);
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            expandedHeight: 240,
-            pinned: true,
-            backgroundColor: c.bgApp,
-            surfaceTintColor: Colors.transparent,
-            automaticallyImplyLeading: false,
-            leadingWidth: 72,
-            leading: Padding(
-              padding: const EdgeInsets.only(left: 16),
-              child: Center(
-                child: EsBackButton(label: null, onPressed: () => context.pop()),
-              ),
-            ),
-            flexibleSpace: FlexibleSpaceBar(
-              background: Image.asset(s.photo, fit: BoxFit.cover),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Transform.translate(
-              offset: const Offset(0, -28),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: c.bgApp,
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(EsRadius.xl),
-                  ),
-                ),
+      body: PhotoPage(
+        photo: s.photo,
+        onBack: () => context.pop(),
+        sheet: Container(
                 padding: const EdgeInsets.fromLTRB(
                   EsSpace.page,
                   EsSpace.s5,
@@ -231,9 +206,6 @@ class BookingDetailScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-            ),
-          ),
-        ],
       ),
     );
   }

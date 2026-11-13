@@ -546,3 +546,98 @@ class _FadeInUpState extends State<FadeInUp>
     );
   }
 }
+
+/// A detail page with a large photo on top and a rounded sheet that
+/// slides up over it. The back button stays pinned while scrolling.
+class PhotoPage extends StatelessWidget {
+  const PhotoPage({
+    super.key,
+    required this.photo,
+    required this.sheet,
+    required this.onBack,
+    this.height = 300,
+    this.heroTag,
+  });
+  final String photo;
+  final Widget sheet;
+  final VoidCallback onBack;
+  final double height;
+  final String? heroTag;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.es;
+    Widget image = Image.asset(
+      photo,
+      height: height,
+      width: double.infinity,
+      fit: BoxFit.cover,
+      excludeFromSemantics: true,
+    );
+    if (heroTag != null) image = Hero(tag: heroTag!, child: image);
+    return Stack(
+      children: [
+        Positioned.fill(child: ColoredBox(color: c.bgApp)),
+        SingleChildScrollView(
+          child: Stack(
+            children: [
+              image,
+              Padding(
+                padding: EdgeInsets.only(top: height - 28),
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: c.bgApp,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(EsRadius.xl),
+                    ),
+                  ),
+                  child: sheet,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Positioned(
+          top: MediaQuery.paddingOf(context).top + 10,
+          left: 16,
+          child: _PinnedBack(onPressed: onBack),
+        ),
+      ],
+    );
+  }
+}
+
+class _PinnedBack extends StatelessWidget {
+  const _PinnedBack({required this.onPressed});
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.es;
+    return Semantics(
+      button: true,
+      label: 'Retour',
+      excludeSemantics: true,
+      child: Material(
+        color: c.bgSurface,
+        shape: const CircleBorder(),
+        elevation: 4,
+        shadowColor: Colors.black26,
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onPressed,
+          child: SizedBox(
+            width: 42,
+            height: 42,
+            child: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              size: 17,
+              color: c.textPrimary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
