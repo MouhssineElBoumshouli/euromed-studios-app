@@ -13,6 +13,7 @@ import '../domain/policy.dart';
 import '../domain/rules/approval.dart';
 import '../domain/rules/availability.dart';
 import '../domain/rules/quota.dart';
+import '../domain/rules/sessions.dart';
 import '../domain/studios.dart';
 import 'demo_world.dart';
 
@@ -314,6 +315,74 @@ class WorldNotifier extends Notifier<WorldState> {
             at: state.now,
             actorId: by.id,
             comment: reason,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// The régisseur lets the person in (QR scanned or reference typed).
+  void checkIn(String bookingId, {required Person by}) {
+    final b = _find(bookingId);
+    final problem = checkInProblem(
+      b,
+      state.now,
+      earlyMinutes: state.policy.qrGraceMinutes,
+    );
+    if (!canOperate(by) || problem != null) {
+      throw StateError(problem ?? '${by.id} cannot check in');
+    }
+    _replace(
+      b.copyWith(
+        history: [
+          ...b.history,
+          BookingEvent(
+            type: BookingEventType.checkedIn,
+            at: state.now,
+            actorId: by.id,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Closes the session with a short end-of-session report.
+  void complete(String bookingId, {required Person by, String? report}) {
+    final b = _find(bookingId);
+    if (!canOperate(by) || !canComplete(b, state.now)) {
+      throw StateError('${by.id} cannot complete ${b.id}');
+    }
+    _replace(
+      b.copyWith(
+        status: BookingStatus.completed,
+        history: [
+          ...b.history,
+          BookingEvent(
+            type: BookingEventType.completed,
+            at: state.now,
+            actorId: by.id,
+            comment: report,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Nobody came: recorded as an absence, not as a finished session.
+  void markNoShow(String bookingId, {required Person by}) {
+    final b = _find(bookingId);
+    if (!canOperate(by) || !canMarkNoShow(b, state.now)) {
+      throw StateError('${by.id} cannot mark ${b.id} as no-show');
+    }
+    _replace(
+      b.copyWith(
+        status: BookingStatus.noShow,
+        history: [
+          ...b.history,
+          BookingEvent(
+            type: BookingEventType.noShow,
+            at: state.now,
+            actorId: by.id,
           ),
         ],
       ),

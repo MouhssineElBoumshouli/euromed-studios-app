@@ -95,4 +95,5 @@ BookingStatus nextAfterApproval(BookingStatus s) => switch (s) {
 bool canCancel(Person person, Booking booking, DateTime now) =>
     (person.id == booking.requesterId || person.has(Role.admin)) &&
     (booking.status.isPending || booking.status == BookingStatus.approved) &&
-    booking.start.isAfter(now);
+    booking.start.isAfter(now) &&
+    !booking.history.any((e) => e.type == BookingEventType.checkedIn);

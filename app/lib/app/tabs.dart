@@ -100,3 +100,31 @@ List<TabSpec> tabsFor(Person p) {
   }
   return const [_home, _studios, _bookings, _projects, _profile];
 }
+
+/// People who run or approve things: they get the "Espace Studios"
+/// workspace on a computer.
+bool isStaff(Person p) =>
+    p.has(Role.admin) ||
+    p.has(Role.studioManager) ||
+    p.has(Role.regisseur) ||
+    p.has(Role.entityApprover);
+
+/// Sections of the computer workspace (no 5-tab limit there).
+List<TabSpec> consoleTabsFor(Person p) {
+  if (p.has(Role.admin)) {
+    return const [_dashboard, _validations, _planning, _regie, _studios, _admin, _profile];
+  }
+  if (p.has(Role.studioManager)) {
+    return const [_home, _validations, _planning, _regie, _studios, _projects, _profile];
+  }
+  if (p.has(Role.regisseur)) {
+    return const [_regie, _scanner, _planning, _maintenance, _studios, _profile];
+  }
+  final requester = p.roles.any((r) => r.isRequester);
+  return [
+    _validations,
+    if (requester) ...const [_home, _bookings],
+    _studios,
+    _profile,
+  ];
+}

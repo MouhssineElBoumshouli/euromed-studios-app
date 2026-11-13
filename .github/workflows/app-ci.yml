@@ -6,9 +6,9 @@ name: App CI
 
 on:
   push:
-    paths: ["app/**", ".github/workflows/app-ci.yml"]
+    paths: ["app/**", "e2e/**", "supabase/**", ".github/workflows/app-ci.yml"]
   pull_request:
-    paths: ["app/**", ".github/workflows/app-ci.yml"]
+    paths: ["app/**", "e2e/**", "supabase/**", ".github/workflows/app-ci.yml"]
   workflow_dispatch:
 
 permissions:
@@ -68,6 +68,8 @@ jobs:
         run: |
           set -e
           SLUG=$(echo "${{ github.ref_name }}" | tr '/' '-')
+          # The main version is the permanent demo link: .../euromed-studios-app/demo/
+          if [ "$SLUG" = "main" ]; then SLUG=demo; fi
           rm -rf /tmp/pv && mkdir -p /tmp/pv
           cp -r app/build/web /tmp/pv/site
           find /tmp/pv/site -name '*.symbols' -delete

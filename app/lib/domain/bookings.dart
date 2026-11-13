@@ -21,7 +21,8 @@ enum BookingStatus {
   approved('Validée'),
   refused('Refusée'),
   cancelled('Annulée'),
-  completed('Terminée');
+  completed('Terminée'),
+  noShow('Absence');
 
   const BookingStatus(this.label);
   final String label;
@@ -40,7 +41,8 @@ enum BookingEventType {
   refused('Refusée'),
   cancelled('Annulée'),
   checkedIn('Entrée au studio'),
-  completed('Séance terminée');
+  completed('Séance terminée'),
+  noShow('Absence constatée');
 
   const BookingEventType(this.label);
   final String label;

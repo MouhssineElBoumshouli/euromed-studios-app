@@ -9,7 +9,7 @@ import '../theme/es_text.dart';
       BookingStatus.pendingEntity => (c.pendingBg, c.pendingText),
       BookingStatus.pendingStudio => (c.reviewBg, c.reviewText),
       BookingStatus.approved => (c.successBg, c.successText),
-      BookingStatus.refused => (c.dangerBg, c.dangerText),
+      BookingStatus.refused || BookingStatus.noShow => (c.dangerBg, c.dangerText),
       BookingStatus.cancelled ||
       BookingStatus.completed =>
         (c.neutralBg, c.neutralText),
@@ -22,6 +22,7 @@ IconData statusIcon(BookingStatus s) => switch (s) {
       BookingStatus.refused => Icons.close_rounded,
       BookingStatus.cancelled => Icons.block_rounded,
       BookingStatus.completed => Icons.done_all_rounded,
+      BookingStatus.noShow => Icons.person_off_outlined,
     };
 
 /// Booking status label.

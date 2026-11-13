@@ -99,3 +99,11 @@ L'application doit-elle être en français seulement, ou aussi en arabe et en an
 **Q18 ⏳ — Demande d’un validateur pour lui-même**
 Un directeur ou une directrice d’établissement est aussi enseignant·e. Sa propre demande ne peut pas être validée par lui-même ou elle-même. Qui la valide au niveau 1 ?
 *Proposition :* l’administrateur des Studios, ou un supérieur hiérarchique désigné. Réglable dans l’application.
+
+**Q19 ⏳ — Arrivée en avance**
+Combien de temps avant le début de son créneau une personne peut-elle entrer au studio ?
+*Proposition :* 15 minutes, pour s’installer. Réglable par l’administrateur.
+
+**Q20 ⏳ — Absence sans prévenir**
+Si une personne réserve et ne vient pas, faut-il le noter ? Faut-il appliquer une règle, par exemple bloquer de nouvelles réservations après plusieurs absences ?
+*Proposition :* le régisseur note l’absence. L’application compte les absences, mais n’applique aucune sanction sans votre accord.
