@@ -12,6 +12,7 @@ import '../../data/app_state.dart';
 import '../../data/demo_world.dart';
 import '../../domain/bookings.dart';
 import '../../domain/rules/approval.dart';
+import '../notifications/notifications_screen.dart';
 import 'decision_screen.dart';
 
 /// G1 · Validation inbox for Level 1 approvers, the Studio Manager and the
@@ -67,6 +68,7 @@ class _ValidationsState extends ConsumerState<ValidationsScreen> {
                 : '${inbox.length} demande${inbox.length > 1 ? 's' : ''} '
                     'à traiter',
             bottomPadding: EsSpace.s4,
+            trailing: wide ? null : const NoticeBell(),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: EsSpace.page),

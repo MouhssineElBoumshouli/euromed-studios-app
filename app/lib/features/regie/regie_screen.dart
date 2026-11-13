@@ -13,6 +13,7 @@ import '../../data/app_state.dart';
 import '../../data/booking_service.dart';
 import '../../domain/bookings.dart';
 import '../../domain/rules/sessions.dart';
+import '../notifications/notifications_screen.dart';
 
 /// H1 · Régie: today's validated sessions, in order, with what to do next
 /// for each (let in, close with a report).
@@ -50,12 +51,21 @@ class RegieScreen extends ConsumerWidget {
           title: 'Régie',
           subtitle: 'Aujourd’hui · ${Fmt.longDay(w.now)}',
           bottomPadding: EsSpace.s4,
-          trailing: EsButton(
-            'Scanner un QR',
-            icon: Icons.qr_code_scanner_rounded,
-            expand: false,
-            size: EsButtonSize.medium,
-            onPressed: () => context.push('/scanner'),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (!isWide(context)) ...[
+                const NoticeBell(),
+                const SizedBox(width: 8),
+              ],
+              EsButton(
+                'Scanner',
+                icon: Icons.qr_code_scanner_rounded,
+                expand: false,
+                size: EsButtonSize.medium,
+                onPressed: () => context.push('/scanner'),
+              ),
+            ],
           ),
         ),
         Padding(

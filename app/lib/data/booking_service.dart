@@ -208,6 +208,15 @@ class BookingService {
     _world.markNoShow(bookingId, by: by);
   }
 
+  /// Marks every notification so far as read.
+  Future<void> markNoticesSeen(String personId) async {
+    if (isLive) {
+      await _call(() => _db.rpc('mark_notifications_seen'));
+      return;
+    }
+    _world.markNoticesSeen(personId);
+  }
+
   Future<void> signCharter(String personId) async {
     if (isLive) {
       await _call(() => _db.rpc('sign_charter'));

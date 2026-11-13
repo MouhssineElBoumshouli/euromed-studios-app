@@ -121,6 +121,13 @@ class LiveSync {
       )),
       Future<dynamic>.value(db.from('maintenance').select()),
       Future<dynamic>.value(db.from('charter_signatures').select()),
+      Future<dynamic>.value(
+        db
+            .from('profiles')
+            .select('slug, notifications_seen_at')
+            .eq('id', db.auth.currentUser!.id)
+            .single(),
+      ),
     ]);
     final settings = results[0] as Map<String, dynamic>;
     final known = {for (final s in DemoWorld.studios) s.id};
@@ -170,6 +177,11 @@ class LiveSync {
             ],
             signedCharterVersion: signed,
             charterSignedAt: signedAt,
+            noticesSeenAt: {
+              if (results[5]['notifications_seen_at'] != null)
+                results[5]['slug'] as String:
+                    _time(results[5]['notifications_seen_at']),
+            },
           ),
         );
   }
