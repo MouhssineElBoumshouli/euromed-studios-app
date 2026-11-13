@@ -23,7 +23,8 @@ void main() {
     expect(find.text('Bonjour Yasmine,'), findsOneWidget);
     // Next session: Plateau TV tomorrow 14:00–15:00 (booking b1).
     expect(find.text('Plateau TV'), findsWidgets);
-    expect(find.textContaining('Demain · 14:00–15:00'), findsOneWidget);
+    expect(find.text('Demain'), findsOneWidget);
+    expect(find.textContaining('14:00–15:00 · Area 2'), findsOneWidget);
     // Quota: 1 h used out of 2 h.
     expect(find.textContaining('1 h utilisées sur 2 h'), findsOneWidget);
     // Bottom tabs for a student.

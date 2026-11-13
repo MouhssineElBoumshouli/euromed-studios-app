@@ -289,7 +289,9 @@ class _NextSessionHero extends StatelessWidget {
     final countdown = ongoing
         ? 'En cours · jusqu’à ${Fmt.time(booking.end)}'
         : until.inHours < 24
-            ? 'Dans ${until.inHours > 0 ? '${until.inHours} h ' : ''}${until.inMinutes % 60} min'
+            ? '${Fmt.relativeDay(booking.start, now)} · dans '
+                '${until.inHours > 0 ? '${until.inHours} h ' : ''}'
+                '${until.inMinutes % 60} min'
             : Fmt.relativeDay(booking.start, now);
 
     return Semantics(
@@ -367,7 +369,6 @@ class _NextSessionHero extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            '${Fmt.relativeDay(booking.start, now)} · '
                             '${Fmt.range(booking.start, booking.end)} · '
                             '${room.name}',
                             maxLines: 1,
