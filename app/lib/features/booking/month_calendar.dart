@@ -52,7 +52,7 @@ class MonthCalendar extends StatelessWidget {
     final rows = ((lead + count) / 7).ceil();
 
     return EsCard(
-      padding: const EdgeInsets.fromLTRB(10, 10, 10, 16),
+      padding: const EdgeInsets.fromLTRB(6, 10, 6, 16),
       child: GestureDetector(
         // Swipe left or right to change month.
         onHorizontalDragEnd: (d) {
@@ -114,11 +114,11 @@ class MonthCalendar extends StatelessWidget {
                 children: [
                   for (var r = 0; r < rows; r++)
                     Padding(
-                      padding: EdgeInsets.only(top: r == 0 ? 0 : 4),
+                      padding: EdgeInsets.only(top: r == 0 ? 0 : 3),
                       child: Row(
                         children: [
                           for (var col = 0; col < 7; col++) ...[
-                            if (col > 0) const SizedBox(width: 4),
+                            if (col > 0) const SizedBox(width: 3),
                             Expanded(child: _cell(r * 7 + col - lead + 1, count)),
                           ],
                         ],
@@ -243,7 +243,9 @@ class _DayCell extends StatelessWidget {
                       ]
                     : null,
               ),
-              child: Column(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
@@ -267,6 +269,7 @@ class _DayCell extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
               ),
             ),
           ),

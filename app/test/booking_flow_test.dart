@@ -86,6 +86,7 @@ void main() {
     await t.binding.setSurfaceSize(const Size(400, 1400));
     await t.pumpWidget(const ProviderScope(child: EuromedStudiosApp()));
     await t.pumpAndSettle();
+    addTearDown(() => appRouter.go('/home'));
     appRouter.push('/book/podcast');
     await t.pumpAndSettle();
 
@@ -105,7 +106,5 @@ void main() {
     await t.tap(find.text('Changer'));
     await t.pumpAndSettle();
     expect(find.text('Choisissez une date'), findsOneWidget);
-    appRouter.go('/home');
-    await t.pumpAndSettle();
   });
 }

@@ -60,12 +60,15 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
     super.initState();
     final w = ref.read(worldProvider);
     final days = _bookableDays(w);
-    day = widget.initialDay != null
-        ? dateOnly(widget.initialDay!)
+    final asked =
+        widget.initialDay == null ? null : dateOnly(widget.initialDay!);
+    // Use the requested day only if it can really be booked.
+    final usable = asked != null && _canPick(w, asked);
+    day = usable
+        ? asked
         : days.firstWhere((d) => _freeOn(w, d) > 0, orElse: () => days.first);
     month = DateTime(day.year, day.month);
-    if (widget.initialDay != null &&
-        widget.initialDay!.hour >= w.policy.openingHour) {
+    if (usable && widget.initialDay!.hour >= w.policy.openingHour) {
       // Came from a suggested slot: skip the calendar, slot already picked.
       rangeStart = widget.initialDay;
       rangeEnd = widget.initialDay!.add(Duration(minutes: w.policy.slotMinutes));
@@ -104,6 +107,10 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
   /// Free hours on [d] (0 = full or closed).
   int _freeOn(WorldState w, DateTime d) =>
       _slotsOn(w, d).where((s) => s.state.isSelectable).length;
+
+  /// Inside the booking window, open, and not full.
+  bool _canPick(WorldState w, DateTime d) =>
+      _bookableDays(w).contains(d) && _freeOn(w, d) > 0;
 
   int get _minutes =>
       rangeStart == null ? 0 : rangeEnd!.difference(rangeStart!).inMinutes;
@@ -279,7 +286,7 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
     ];
 
     final canContinue = switch (step) {
-      0 => _freeOn(w, day) > 0,
+      0 => _canPick(w, day),
       1 => rangeStart != null,
       2 => activity != null,
       _ => !sending,
@@ -384,7 +391,7 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
                   ? formatMinutes(_minutes)
                   : null,
               label: switch (step) {
-                0 when !canContinue => 'Jour complet',
+                0 when !canContinue => 'Choisissez un autre jour',
                 0 => 'Voir les créneaux du ${Fmt.dayMonth(day)}',
                 1 when rangeStart == null => 'Choisissez un créneau',
                 2 when activity == null => 'Choisissez une activité',
@@ -410,10 +417,11 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
     final free = {for (final d in days) d: _freeOn(w, d)};
     final n = free[day] ?? 0;
     return ListView(
+      // A little narrower gutter so day cells stay ≥ 44 px on small phones.
       padding: const EdgeInsets.fromLTRB(
-        EsSpace.page,
+        EsSpace.page - 8,
         EsSpace.s3,
-        EsSpace.page,
+        EsSpace.page - 8,
         EsSpace.s6,
       ),
       children: [
@@ -833,7 +841,8 @@ class _ChosenDate extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     free == 0
-                        ? 'Ce jour est complet. Choisissez un autre jour.'
+                        ? 'Pas de créneau libre ce jour-là. Choisissez un '
+                            'autre jour.'
                         : '$free créneau${free > 1 ? 'x' : ''} '
                             'libre${free > 1 ? 's' : ''} · Touchez '
                             '« Voir les créneaux » pour continuer.',
