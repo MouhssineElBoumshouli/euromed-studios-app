@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -11,11 +12,14 @@ import '../../core/widgets/status_chip.dart';
 import '../../data/app_state.dart';
 import '../../data/booking_service.dart';
 import '../../data/demo_world.dart';
+import '../../data/projects_state.dart';
 import '../../data/selectors.dart';
 import '../../domain/bookings.dart';
 import '../../domain/people.dart';
+import '../../domain/projects.dart';
 import '../../domain/rules/approval.dart';
 import '../../domain/rules/availability.dart';
+import '../../domain/rules/projects.dart';
 import '../../domain/rules/quota.dart';
 import '../../domain/studios.dart';
 import 'month_calendar.dart';
@@ -24,9 +28,17 @@ import 'month_calendar.dart';
 /// 1. choose the date on a month calendar, 2. choose the time,
 /// 3. details, 4. review and send.
 class BookingFlowScreen extends ConsumerStatefulWidget {
-  const BookingFlowScreen({super.key, required this.studioId, this.initialDay});
+  const BookingFlowScreen({
+    super.key,
+    required this.studioId,
+    this.initialDay,
+    this.projectId,
+  });
   final String studioId;
   final DateTime? initialDay;
+
+  /// Booking started from a project: linked to it automatically (R-23).
+  final String? projectId;
 
   @override
   ConsumerState<BookingFlowScreen> createState() => _BookingFlowState();
@@ -49,6 +61,7 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
   DateTime? rangeEnd;
   Activity? activity;
   bool forClub = false;
+  String? projectId;
   final note = TextEditingController();
   final equip = [for (final e in DemoWorld.equipment) _Equip(e)];
   bool sending = false;
@@ -58,6 +71,11 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
   @override
   void initState() {
     super.initState();
+    // Keep a project from the link only if this person works on it.
+    final me = ref.read(currentPersonProvider);
+    projectId = _myProjects(me).any((p) => p.id == widget.projectId)
+        ? widget.projectId
+        : null;
     final w = ref.read(worldProvider);
     final days = _bookableDays(w);
     final asked =
@@ -112,6 +130,12 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
   bool _canPick(WorldState w, DateTime d) =>
       _bookableDays(w).contains(d) && _freeOn(w, d) > 0;
 
+  /// Projects this person can book for (owner or collaborator).
+  List<Project> _myProjects(Person me) => [
+        for (final p in ref.read(projectsProvider).projects)
+          if (canWorkOn(me, p)) p,
+      ];
+
   int get _minutes =>
       rangeStart == null ? 0 : rangeEnd!.difference(rangeStart!).inMinutes;
 
@@ -159,6 +183,7 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
             requesterType: _type(me),
             establishmentId: me.establishmentId,
             clubId: forClub ? me.clubIds.first : null,
+            projectId: projectId,
             studioId: studio.id,
             start: rangeStart!,
             end: rangeEnd!,
@@ -624,6 +649,33 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
             onTap: () => setState(() => forClub = true),
           ),
         ],
+        if (_myProjects(me).isNotEmpty) ...[
+          const SizedBox(height: EsSpace.s5),
+          const SectionTitle('Pour un projet ?'),
+          Text(
+            'Facultatif. La séance apparaîtra dans le suivi du projet.',
+            style: EsText.bodyS.copyWith(color: c.textSecondary),
+          ),
+          const SizedBox(height: EsSpace.s2),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ChoiceChip(
+                label: const Text('Aucun'),
+                selected: projectId == null,
+                onSelected: (_) => setState(() => projectId = null),
+              ),
+              for (final p in _myProjects(me))
+                ChoiceChip(
+                  avatar: const Icon(Icons.layers_outlined, size: 16),
+                  label: Text(p.title),
+                  selected: projectId == p.id,
+                  onSelected: (_) => setState(() => projectId = p.id),
+                ),
+            ],
+          ),
+        ],
         const SizedBox(height: EsSpace.s5),
         const SectionTitle('Matériel en plus'),
         Text(
@@ -753,6 +805,16 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
                               .name
                           : me.fullName,
                     ),
+                    if (projectId != null)
+                      _Row(
+                        Icons.layers_outlined,
+                        'Projet',
+                        _myProjects(me)
+                                .where((p) => p.id == projectId)
+                                .firstOrNull
+                                ?.title ??
+                            '—',
+                      ),
                     if (items.isNotEmpty)
                       _Row(Icons.inventory_2_outlined, 'Matériel',
                           items.join('\n')),

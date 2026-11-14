@@ -14,9 +14,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../domain/bookings.dart';
 import '../domain/people.dart';
 import '../domain/policy.dart';
+import '../domain/projects.dart';
 import 'app_state.dart';
 import 'backend.dart';
 import 'demo_world.dart';
+import 'projects_state.dart';
 
 /// Set by main() when the app runs against the server.
 LiveSync? liveSync;
@@ -80,6 +82,9 @@ class LiveSync {
             signedCharterVersion: const {},
           ),
         );
+    container
+        .read(projectsProvider.notifier)
+        .load(const ProjectsState(loaded: false));
   }
 
   Future<void> _enter(int gen, String uid) async {
@@ -162,6 +167,21 @@ class LiveSync {
             .maybeSingle()
             .catchError((_) => null),
       ),
+      // Projects arrived later; a missing table must not block sign-in.
+      Future<dynamic>.value(
+        db
+            .from('projects')
+            .select()
+            .then<dynamic>((v) => v)
+            .catchError((_) => <dynamic>[]),
+      ),
+      Future<dynamic>.value(
+        db
+            .from('project_files')
+            .select()
+            .then<dynamic>((v) => v)
+            .catchError((_) => <dynamic>[]),
+      ),
     ]);
     final settings = results[0] as Map<String, dynamic>;
     final known = {for (final s in DemoWorld.studios) s.id};
@@ -219,7 +239,67 @@ class LiveSync {
             },
           ),
         );
+    container.read(projectsProvider.notifier).load(
+          ProjectsState(
+            projects: [
+              for (final r in results[6] as List)
+                if (projectFromRow(r as Map<String, dynamic>) case final p?) p,
+            ],
+            files: [
+              for (final r in results[7] as List)
+                if (fileFromRow(r as Map<String, dynamic>) case final f?) f,
+            ],
+          ),
+        );
   }
+}
+
+T? _enum<T extends Enum>(List<T> values, Object? name) =>
+    values.where((v) => v.name == name).firstOrNull;
+
+/// A project row, or null if it holds a value this app doesn't know
+/// (one odd row must not break the whole load).
+Project? projectFromRow(Map<String, dynamic> r) {
+  final type = _enum(ProjectType.values, r['type']);
+  final stage = _enum(ProjectStage.values, r['stage']);
+  if (type == null || stage == null) return null;
+  return Project(
+    id: r['id'] as String,
+    title: r['title'] as String,
+    description: r['description'] as String?,
+    type: type,
+    stage: stage,
+    ownerId: r['owner_slug'] as String,
+    memberIds: [
+      for (final m in (r['member_slugs'] as List? ?? const [])) m as String,
+    ],
+    createdAt: _time(r['created_at']),
+    history: [
+      for (final e in (r['history'] as List? ?? const []))
+        if (_enum(ProjectEventType.values, e['type']) case final t?)
+          ProjectEvent(
+            type: t,
+            at: _time(e['at']),
+            actorId: e['actor'] as String? ?? '',
+            detail: e['detail'] as String?,
+          ),
+    ],
+  );
+}
+
+ProjectFile? fileFromRow(Map<String, dynamic> r) {
+  final kind = _enum(FileKind.values, r['kind']);
+  if (kind == null) return null;
+  return ProjectFile(
+    id: r['id'] as String,
+    projectId: r['project_id'] as String,
+    kind: kind,
+    name: r['name'] as String,
+    path: r['path'] as String,
+    sizeBytes: r['size_bytes'] as int,
+    uploadedBy: r['uploaded_by'] as String,
+    uploadedAt: _time(r['uploaded_at']),
+  );
 }
 
 DateTime _time(Object? v) => DateTime.parse(v as String).toLocal();

@@ -111,3 +111,6 @@ Si une personne réserve et ne vient pas, faut-il le noter ? Faut-il appliquer u
 **Q21 ⏳ — Rappels et canaux de notification**
 Les personnes doivent-elles recevoir les notifications par e-mail ou sur le téléphone, en plus de l'application ? Combien de temps avant la séance faut-il envoyer le rappel ?
 *Proposition :* dans l'application, rappel 1 heure avant. E-mail et notifications sur le téléphone dans la version officielle, avec le service de messagerie de l'université.
+
+## Q22 · Quand un projet peut-il passer en post-production ?
+Proposition actuelle : au moins une séance validée ou réalisée liée au projet. Faut-il plutôt attendre que toutes les séances prévues soient faites ?

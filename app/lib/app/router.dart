@@ -1,3 +1,4 @@
+
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,6 +14,9 @@ import '../features/notifications/notifications_screen.dart';
 import '../features/placeholder/coming_soon_screen.dart';
 import '../features/planning/planning_screen.dart';
 import '../features/profile/profile_screen.dart';
+import '../features/projects/new_project_screen.dart';
+import '../features/projects/project_detail_screen.dart';
+import '../features/projects/projects_screen.dart';
 import '../features/regie/regie_screen.dart';
 import '../features/regie/scanner_screen.dart';
 import '../features/studios/studio_detail_screen.dart';
@@ -84,11 +88,23 @@ final appRouter = GoRouter(
         // F1 (milestone 4)
         GoRoute(
           path: '/projects',
-          builder: (_, __) => const ComingSoonScreen(
-            title: 'Projets',
-            milestone: 'Étape 4',
-            what: 'Le suivi de vos projets, du script à la livraison.',
-          ),
+          builder: (_, __) => const ProjectsScreen(),
+          routes: [
+            // F2
+            GoRoute(
+              path: 'new',
+              parentNavigatorKey: _rootKey,
+              builder: (_, __) => const WideFrame(child: NewProjectScreen()),
+            ),
+            // F3–F5
+            GoRoute(
+              path: ':id',
+              parentNavigatorKey: _rootKey,
+              builder: (_, st) => WideFrame(
+                child: ProjectDetailScreen(projectId: st.pathParameters['id']!),
+              ),
+            ),
+          ],
         ),
         // G1 (milestone 3)
         GoRoute(
@@ -150,6 +166,7 @@ final appRouter = GoRouter(
       builder: (_, st) => WideFrame(child: BookingFlowScreen(
         studioId: st.pathParameters['studioId']!,
         initialDay: DateTime.tryParse(st.uri.queryParameters['day'] ?? ''),
+        projectId: st.uri.queryParameters['project'],
       )),
     ),
     // D4

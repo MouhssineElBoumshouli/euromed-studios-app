@@ -56,7 +56,8 @@ class BookingService {
     }
     if (m.startsWith('not_a_requester') ||
         m.startsWith('not_club_representative') ||
-        m.startsWith('studio_not_bookable')) {
+        m.startsWith('studio_not_bookable') ||
+        m.startsWith('project_not_allowed')) {
       return const SubmitRejected(SubmitProblem.notAllowed);
     }
     return StateError(m);
