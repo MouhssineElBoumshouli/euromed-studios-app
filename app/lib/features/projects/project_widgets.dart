@@ -11,6 +11,7 @@ import '../../data/app_state.dart';
 import '../../data/projects_state.dart';
 import '../../domain/bookings.dart';
 import '../../domain/projects.dart';
+import 'project_sections.dart';
 
 /// Colour and icon for each project type.
 (Color, Color, IconData) typeStyle(EsColors c, ProjectType t) => switch (t) {
@@ -170,6 +171,10 @@ class ProjectCard extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           StageBar(project.stage),
+          if (project.stage == ProjectStage.postProduction) ...[
+            const SizedBox(height: 8),
+            PostStatusTag(project.postStatus),
+          ],
           const SizedBox(height: 10),
           Wrap(
             spacing: 12,

@@ -509,7 +509,7 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
                 padding: const EdgeInsets.fromLTRB(12, 10, 6, 10),
                 child: Row(
                   children: [
-                    IconTile(Icons.calendar_month_rounded, size: 40),
+                    const IconTile(Icons.calendar_month_rounded, size: 40),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -1033,7 +1033,7 @@ class _BottomBar extends StatelessWidget {
                     padding: const EdgeInsets.only(bottom: 12),
                     child: Row(
                       children: [
-                        IconTile(Icons.event_available_rounded, size: 40),
+                        const IconTile(Icons.event_available_rounded, size: 40),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(

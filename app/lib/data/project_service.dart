@@ -65,6 +65,42 @@ class ProjectService {
     if (m.contains('mime') || m.contains('invalid_mime_type')) {
       return 'Format non accepté. Utilisez PDF, Word, texte ou image.';
     }
+    if (m.contains('bad_transition') || m.contains('not_ready')) {
+      return 'Le statut a changé entre-temps. Actualisez la page.';
+    }
+    if (m.contains('no_correction_now')) {
+      return 'Une correction se demande pendant le montage.';
+    }
+    if (m.contains('bad_link')) {
+      return 'Indiquez un lien sécurisé qui commence par https://';
+    }
+    if (m.contains('reason_required')) {
+      return 'Expliquez ce qu’il faut corriger.';
+    }
+    if (m.contains('not_invitable')) {
+      return 'Cette personne ne peut pas être invitée sur un projet.';
+    }
+    if (m.contains('too_long')) {
+      return 'Message trop long (1000 caractères au plus).';
+    }
+    if (m.contains('empty')) {
+      return 'Écrivez un message avant d’envoyer.';
+    }
+    if (m.contains('already_member')) {
+      return 'Cette personne fait déjà partie du projet.';
+    }
+    if (m.contains('already_invited')) {
+      return 'Cette personne a déjà une invitation en attente.';
+    }
+    if (m.contains('too_many_members')) {
+      return 'Un projet compte au plus 10 collaborateurs.';
+    }
+    if (m.contains('already_answered')) {
+      return 'Cette invitation a déjà reçu une réponse.';
+    }
+    if (m.contains('archived')) {
+      return 'Le projet est archivé.';
+    }
     if (m.contains('file_missing')) {
       return 'L’envoi du fichier n’a pas abouti. Réessayez.';
     }
@@ -178,7 +214,7 @@ class ProjectService {
     );
   }
 
-  Future<void> removeFile(ProjectFile f) async {
+  Future<void> removeFile(ProjectFile f, {required Person by}) async {
     if (isLive) {
       await _call(() async {
         await _db.rpc('remove_project_file', params: {'p_id': f.id});
@@ -187,7 +223,170 @@ class ProjectService {
       return;
     }
     await Future<void>.delayed(_latency);
-    _local.removeFile(f.id);
+    _local.removeFile(f.id, by: by.id, now: _now);
+  }
+
+  DateTime get _now => _ref.read(worldProvider).now;
+
+  /// Runs an offline action and turns its refusal into a sentence.
+  Future<void> _offline(void Function() run) async {
+    await Future<void>.delayed(_latency);
+    try {
+      run();
+    } on StateError catch (e) {
+      throw ProjectProblem(
+        e.message.contains(' ') ? e.message : _translate(e.message),
+      );
+    }
+  }
+
+  Future<void> setPostStatus(
+    String projectId,
+    PostStatus to, {
+    required Person by,
+  }) async {
+    if (isLive) {
+      await _call(
+        () => _db.rpc(
+          'set_post_status',
+          params: {'p_id': projectId, 'p_status': to.name},
+        ),
+      );
+      return;
+    }
+    await _offline(
+      () => _local.setPostStatus(projectId, to, by: by, now: _now),
+    );
+  }
+
+  Future<void> postMessage(
+    String projectId,
+    String body, {
+    required Person by,
+    bool correction = false,
+  }) async {
+    if (isLive) {
+      await _call(
+        () => _db.rpc(
+          'post_project_message',
+          params: {
+            'p_id': projectId,
+            'p_body': body,
+            'p_correction': correction,
+          },
+        ),
+      );
+      return;
+    }
+    await _offline(
+      () => _local.postMessage(
+        projectId,
+        body,
+        by: by,
+        now: _now,
+        correction: correction,
+      ),
+    );
+  }
+
+  Future<void> qualityCheck(
+    String projectId, {
+    required Person by,
+    required bool passed,
+    String? note,
+    String? deliveryUrl,
+  }) async {
+    if (isLive) {
+      await _call(
+        () => _db.rpc(
+          'quality_check',
+          params: {
+            'p_id': projectId,
+            'p_passed': passed,
+            'p_note': note,
+            'p_delivery_url': deliveryUrl,
+          },
+        ),
+      );
+      return;
+    }
+    await _offline(
+      () => _local.qualityCheck(
+        projectId,
+        by: by,
+        passed: passed,
+        now: _now,
+        note: note,
+        deliveryUrl: deliveryUrl,
+      ),
+    );
+  }
+
+  Future<void> invite(
+    String projectId,
+    String personId, {
+    required Person by,
+  }) async {
+    if (isLive) {
+      await _call(
+        () => _db.rpc(
+          'invite_member',
+          params: {'p_id': projectId, 'p_slug': personId},
+        ),
+      );
+      return;
+    }
+    await _offline(
+      () => _local.invite(projectId, personId, by: by, now: _now),
+    );
+  }
+
+  Future<void> answerInvite(
+    String inviteId, {
+    required Person by,
+    required bool accept,
+  }) async {
+    if (isLive) {
+      await _call(
+        () => _db.rpc(
+          'answer_invite',
+          params: {'p_invite': inviteId, 'p_accept': accept},
+        ),
+      );
+      return;
+    }
+    await _offline(
+      () => _local.answerInvite(inviteId, by: by, accept: accept, now: _now),
+    );
+  }
+
+  Future<void> cancelInvite(String inviteId, {required Person by}) async {
+    if (isLive) {
+      await _call(
+        () => _db.rpc('cancel_invite', params: {'p_invite': inviteId}),
+      );
+      return;
+    }
+    await _offline(() => _local.cancelInvite(inviteId, by: by));
+  }
+
+  Future<void> removeMember(
+    String projectId,
+    String personId, {
+    required Person by,
+  }) async {
+    if (isLive) {
+      await _call(
+        () => _db.rpc(
+          'remove_member',
+          params: {'p_id': projectId, 'p_slug': personId},
+        ),
+      );
+      return;
+    }
+    await _offline(
+      () => _local.removeMember(projectId, personId, by: by, now: _now),
+    );
   }
 
   /// A short-lived private link to open the file (1 minute).

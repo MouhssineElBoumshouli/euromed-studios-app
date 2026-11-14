@@ -17,6 +17,7 @@ import '../../data/projects_state.dart';
 import '../../domain/bookings.dart';
 import '../../domain/projects.dart';
 import '../../domain/rules/projects.dart';
+import 'project_sections.dart';
 import 'project_widgets.dart';
 
 /// F3–F5 · One project: where it stands, its documents, its sessions,
@@ -118,7 +119,7 @@ class _ProjectDetailState extends ConsumerState<ProjectDetailScreen> {
 
   Future<void> _remove(ProjectFile f) async {
     try {
-      await _service.removeFile(f);
+      await _service.removeFile(f, by: ref.read(currentPersonProvider));
       _say('Document retiré.');
     } on ProjectProblem catch (e) {
       _say(e.message);
@@ -181,15 +182,7 @@ class _ProjectDetailState extends ConsumerState<ProjectDetailScreen> {
     final problem = advanceProblem(p, files, w.bookings);
     final owner = personById(p.ownerId);
 
-    return Scaffold(
-      body: ListView(
-        padding: EdgeInsets.fromLTRB(
-          EsSpace.page,
-          top + EsSpace.s3,
-          EsSpace.page,
-          EsSpace.s8,
-        ),
-        children: [
+    final back = <Widget>[
           Align(
             alignment: Alignment.centerLeft,
             child: EsBackButton(
@@ -197,6 +190,8 @@ class _ProjectDetailState extends ConsumerState<ProjectDetailScreen> {
                   context.canPop() ? context.pop() : context.go('/projects'),
             ),
           ),
+    ];
+    final main = <Widget>[
           const SizedBox(height: EsSpace.s4),
           Row(children: [TypeTag(p.type)]),
           const SizedBox(height: 10),
@@ -227,14 +222,24 @@ class _ProjectDetailState extends ConsumerState<ProjectDetailScreen> {
           const SizedBox(height: EsSpace.s5),
           _Pipeline(stage: p.stage),
           const SizedBox(height: EsSpace.s4),
-          _NextStep(
-            project: p,
-            problem: problem,
-            mayAdvance: mayAdvance,
-            busy: advancing,
-            onAdvance: () => _advance(p),
-          ),
+          switch (p.stage) {
+            ProjectStage.postProduction => PostProductionPanel(project: p),
+            ProjectStage.archived => DeliveryCard(project: p),
+            _ => _NextStep(
+                project: p,
+                problem: problem,
+                mayAdvance: mayAdvance,
+                busy: advancing,
+                onAdvance: () => _advance(p),
+              ),
+          },
           const SizedBox(height: EsSpace.s5),
+          const SectionTitle('Échanges'),
+          const SizedBox(height: EsSpace.s2),
+          ProjectThread(project: p),
+          const SizedBox(height: EsSpace.s5),
+    ];
+    final aside = <Widget>[
           SectionTitle(
             'Documents',
             actionLabel: work ? 'Ajouter' : null,
@@ -300,10 +305,62 @@ class _ProjectDetailState extends ConsumerState<ProjectDetailScreen> {
               ),
             ),
           const SizedBox(height: EsSpace.s5),
+          const SectionTitle('Équipe du projet'),
+          const SizedBox(height: EsSpace.s2),
+          MembersSection(project: p),
+          const SizedBox(height: EsSpace.s5),
           const SectionTitle('Historique'),
           const SizedBox(height: EsSpace.s2),
           _History(events: p.history.reversed.toList()),
-        ],
+    ];
+
+    // On a large screen (staff console), documents, sessions, team and
+    // history sit in a side column next to the work itself.
+    return Scaffold(
+      body: LayoutBuilder(
+        builder: (context, box) {
+          final twoCols = box.maxWidth >= 1000;
+          return ListView(
+            padding: EdgeInsets.fromLTRB(
+              twoCols ? EsSpace.s6 : EsSpace.page,
+              top + EsSpace.s3,
+              twoCols ? EsSpace.s6 : EsSpace.page,
+              EsSpace.s8,
+            ),
+            children: [
+              ...back,
+              if (twoCols)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: main,
+                      ),
+                    ),
+                    const SizedBox(width: EsSpace.s6),
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SizedBox(height: EsSpace.s4),
+                          ...aside,
+                        ],
+                      ),
+                    ),
+                  ],
+                )
+              else ...[
+                ...main,
+                const SizedBox(height: EsSpace.s5),
+                ...aside,
+              ],
+            ],
+          );
+        },
       ),
     );
   }
@@ -508,7 +565,7 @@ class _FileTile extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(14, 10, 4, 10),
         child: Row(
           children: [
-            IconTile(Icons.description_outlined, size: 38),
+            const IconTile(Icons.description_outlined, size: 38),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -588,13 +645,21 @@ class _SessionTile extends StatelessWidget {
   }
 }
 
-class _History extends StatelessWidget {
+class _History extends StatefulWidget {
   const _History({required this.events});
   final List<ProjectEvent> events;
 
   @override
+  State<_History> createState() => _HistoryState();
+}
+
+class _HistoryState extends State<_History> {
+  bool all = false;
+
+  @override
   Widget build(BuildContext context) {
     final c = context.es;
+    final events = widget.events;
     String line(ProjectEvent e) {
       final who = personById(e.actorId).firstName;
       return switch (e.type) {
@@ -603,6 +668,19 @@ class _History extends StatelessWidget {
           '$who a passé le projet en ${ProjectStage.values.where((s) => s.name == e.detail).firstOrNull?.label.toLowerCase() ?? e.detail}',
         ProjectEventType.fileAdded => '$who a ajouté « ${e.detail} »',
         ProjectEventType.fileRemoved => '$who a retiré « ${e.detail} »',
+        ProjectEventType.postStatus =>
+          '$who : ${PostStatus.values.where((s) => s.name == e.detail).firstOrNull?.label.toLowerCase() ?? e.detail}',
+        ProjectEventType.correction => '$who a demandé une correction',
+        ProjectEventType.qcPassed =>
+          '$who a validé le contrôle qualité et livré le projet',
+        ProjectEventType.qcFailed =>
+          '$who a renvoyé le montage en correction',
+        ProjectEventType.memberInvited =>
+          '$who a invité ${personById(e.detail ?? '').fullName}',
+        ProjectEventType.memberJoined => '$who a rejoint le projet',
+        ProjectEventType.memberLeft => '$who a quitté le projet',
+        ProjectEventType.memberRemoved =>
+          '$who a retiré ${personById(e.detail ?? '').fullName}',
       };
     }
 
@@ -610,7 +688,7 @@ class _History extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       child: Column(
         children: [
-          for (final e in events.take(8))
+          for (final e in all ? events : events.take(6))
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 6),
               child: Row(
@@ -631,12 +709,18 @@ class _History extends StatelessWidget {
                       style: EsText.bodyS.copyWith(color: c.textPrimary),
                     ),
                   ),
+                  const SizedBox(width: 8),
                   Text(
                     Fmt.dateTime(e.at),
                     style: EsText.bodyS.copyWith(color: c.textDisabled),
                   ),
                 ],
               ),
+            ),
+          if (!all && events.length > 6)
+            TextButton(
+              onPressed: () => setState(() => all = true),
+              child: Text('Voir tout l’historique (${events.length})'),
             ),
         ],
       ),

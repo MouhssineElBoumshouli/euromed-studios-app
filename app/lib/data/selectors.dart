@@ -11,6 +11,7 @@ import '../domain/rules/quota.dart';
 import '../domain/studios.dart';
 import 'app_state.dart';
 import 'demo_world.dart';
+import 'projects_state.dart';
 
 /// The requester type a person books as by default.
 RequesterType defaultRequesterType(Person p) {
@@ -88,16 +89,28 @@ List<LiveRoom> liveStatus(WorldState w) {
 final noticesProvider = Provider<List<Notice>>((ref) {
   final w = ref.watch(worldProvider);
   final me = ref.watch(currentPersonProvider);
-  return noticesFor(
-    me,
-    w.bookings,
-    w.now,
-    people: DemoWorld.people,
-    describe: (b) =>
-        '${studioById(b.studioId).name} · ${Fmt.shortDay(b.start)} '
-        '${Fmt.time(b.start)}',
-    nameOf: (id) => personById(id).displayName,
-  );
+  final pr = ref.watch(projectsProvider);
+  String nameOf(String id) => personById(id).displayName;
+  return [
+    ...noticesFor(
+      me,
+      w.bookings,
+      w.now,
+      people: DemoWorld.people,
+      describe: (b) =>
+          '${studioById(b.studioId).name} · ${Fmt.shortDay(b.start)} '
+          '${Fmt.time(b.start)}',
+      nameOf: nameOf,
+    ),
+    ...projectNoticesFor(
+      me,
+      pr.projects,
+      pr.invites,
+      w.now,
+      messages: pr.messages,
+      nameOf: nameOf,
+    ),
+  ]..sort((a, b) => b.at.compareTo(a.at));
 });
 
 final unreadNoticesProvider = Provider<int>((ref) {
