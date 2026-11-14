@@ -102,7 +102,14 @@ final noticesProvider = Provider<List<Notice>>((ref) {
           '${Fmt.time(b.start)}',
       nameOf: nameOf,
     ),
-    ...projectNoticesFor(me, pr.projects, pr.invites, w.now, nameOf: nameOf),
+    ...projectNoticesFor(
+      me,
+      pr.projects,
+      pr.invites,
+      w.now,
+      messages: pr.messages,
+      nameOf: nameOf,
+    ),
   ]..sort((a, b) => b.at.compareTo(a.at));
 });
 

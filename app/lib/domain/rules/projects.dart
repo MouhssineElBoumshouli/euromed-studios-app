@@ -102,10 +102,29 @@ bool canQualityCheck(Person p, Project pr) =>
 const maxMembers = 10;
 
 /// R-27: the owner invites collaborators until the project is archived.
-bool canInvite(Person p, Project pr) =>
+/// [pending] invitations count towards the limit.
+bool canInvite(Person p, Project pr, {int pending = 0}) =>
     pr.ownerId == p.id &&
     pr.stage != ProjectStage.archived &&
-    pr.memberIds.length < maxMembers;
+    pr.memberIds.length + pending < maxMembers;
+
+/// The people of the technical team who have worked on this project's
+/// edit (they posted a status change). They get its corrections and its
+/// quality check; with nobody yet, the studio manager does.
+Set<String> editorsOf(String projectId, List<ProjectMessage> messages) => {
+      for (final m in messages)
+        if (m.projectId == projectId && m.kind == MessageKind.status)
+          m.authorId,
+    };
+
+/// Whether [p] should hear about [pr]'s editing (corrections, checks).
+bool followsEdit(Person p, Project pr, List<ProjectMessage> messages) {
+  if (!isTechTeam(p)) return false;
+  final editors = editorsOf(pr.id, messages);
+  return editors.contains(p.id) || p.has(Role.studioManager);
+}
+
+const maxMessageLength = 1000;
 
 /// People it makes sense to invite: requesters and the technical team.
 bool isInvitable(Person candidate) =>

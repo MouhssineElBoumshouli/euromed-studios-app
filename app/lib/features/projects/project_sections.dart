@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/format.dart';
@@ -113,6 +114,18 @@ class _PostPanelState extends ConsumerState<PostProductionPanel> {
     final p = widget.project;
     final s = p.postStatus;
     final mine = p.involves(me.id);
+    // Who sent it back: the quality check, or someone on the project?
+    final lastLoop = p.history.lastWhere(
+      (e) =>
+          e.type == ProjectEventType.correction ||
+          e.type == ProjectEventType.qcFailed,
+      orElse: () => ProjectEvent(
+        type: ProjectEventType.correction,
+        at: p.createdAt,
+        actorId: '',
+      ),
+    );
+    final fromCheck = lastLoop.type == ProjectEventType.qcFailed;
 
     final explain = switch (s) {
       PostStatus.notStarted => mine
@@ -123,10 +136,19 @@ class _PostPanelState extends ConsumerState<PostProductionPanel> {
           ? 'Le montage est en cours. Écrivez dans les échanges ci-dessous '
               'pour demander une correction.'
           : 'Le montage est en cours.',
-      PostStatus.correctionRequested => mine
-          ? 'Votre demande de correction a été transmise à l’équipe technique.'
-          : 'Une correction est demandée. Lisez les échanges, puis reprenez '
-              'le montage.',
+      PostStatus.correctionRequested => switch ((mine, fromCheck)) {
+          (true, true) => 'Le contrôle qualité demande des retouches. '
+              'L’équipe technique reprend le montage.',
+          (true, false) => lastLoop.actorId == me.id
+              ? 'Votre demande de correction a été transmise à l’équipe '
+                  'technique.'
+              : '${personById(lastLoop.actorId).firstName} a demandé une '
+                  'correction. L’équipe technique va reprendre le montage.',
+          (false, true) => 'Le contrôle qualité n’est pas passé. Reprenez '
+              'le montage avec les retours ci-dessous.',
+          (false, false) => 'Une correction est demandée. Lisez les '
+              'échanges, puis reprenez le montage.',
+        },
       PostStatus.readyForCheck => mine
           ? 'Le montage est terminé. L’équipe technique fait le contrôle '
               'qualité avant la livraison.'
@@ -184,7 +206,9 @@ class _PostPanelState extends ConsumerState<PostProductionPanel> {
           _PostSteps(status: s),
           const SizedBox(height: 12),
           Text(explain, style: EsText.bodyM.copyWith(color: c.textSecondary)),
-          if (p.qcNote != null && s == PostStatus.correctionRequested) ...[
+          if (p.qcNote != null &&
+              s == PostStatus.correctionRequested &&
+              fromCheck) ...[
             const SizedBox(height: 10),
             InfoBanner(
               tone: BannerTone.warning,
@@ -281,30 +305,39 @@ class QualityCheckSheet extends ConsumerStatefulWidget {
 class _QcState extends ConsumerState<QualityCheckSheet> {
   bool? passed;
   final link = TextEditingController();
-  final note = TextEditingController();
+
+  /// One box per verdict, so a failure reason never leaks into a delivery.
+  final passNote = TextEditingController();
+  final failNote = TextEditingController();
   bool busy = false;
+
+  TextEditingController get note => passed == true ? passNote : failNote;
 
   @override
   void initState() {
     super.initState();
-    link.addListener(() => setState(() {}));
-    note.addListener(() => setState(() {}));
+    for (final t in [link, passNote, failNote]) {
+      t.addListener(() => setState(() {}));
+    }
   }
 
   @override
   void dispose() {
     link.dispose();
-    note.dispose();
+    passNote.dispose();
+    failNote.dispose();
     super.dispose();
   }
 
   bool get _ready => switch (passed) {
         true => isValidDeliveryLink(link.text),
-        false => note.text.trim().isNotEmpty,
+        false => failNote.text.trim().isNotEmpty,
         null => false,
       };
 
   Future<void> _send() async {
+    if (passed! && !await _confirmArchive()) return;
+    if (!mounted) return;
     setState(() => busy = true);
     final ok = await runProjectAction(
       context,
@@ -325,6 +358,32 @@ class _QcState extends ConsumerState<QualityCheckSheet> {
     } else {
       setState(() => busy = false);
     }
+  }
+
+  /// Archiving can't be undone: say so before doing it.
+  Future<bool> _confirmArchive() async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Valider et archiver ?'),
+        content: const Text(
+          'Le projet sera archivé et le lien du fichier final envoyé à '
+          'l’équipe du projet. Les échanges passeront en lecture seule. '
+          'Cette action est définitive.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Valider et livrer'),
+          ),
+        ],
+      ),
+    );
+    return ok == true;
   }
 
   @override
@@ -385,8 +444,8 @@ class _QcState extends ConsumerState<QualityCheckSheet> {
                 decoration: InputDecoration(
                   labelText: 'Lien sécurisé du fichier final',
                   hintText: 'https://…',
-                  helperText: 'Lien de partage réservé au porteur du projet '
-                      '(voir Q12).',
+                  helperText: 'Visible par l’équipe du projet et les '
+                      'studios (voir Q12).',
                   errorText: link.text.isNotEmpty &&
                           !isValidDeliveryLink(link.text)
                       ? 'Le lien doit commencer par https://'
@@ -395,7 +454,7 @@ class _QcState extends ConsumerState<QualityCheckSheet> {
               ),
               const SizedBox(height: EsSpace.s3),
               TextField(
-                controller: note,
+                controller: passNote,
                 maxLines: 2,
                 maxLength: 600,
                 decoration: const InputDecoration(
@@ -406,7 +465,7 @@ class _QcState extends ConsumerState<QualityCheckSheet> {
             if (passed == false) ...[
               const SizedBox(height: EsSpace.s4),
               TextField(
-                controller: note,
+                controller: failNote,
                 maxLines: 4,
                 maxLength: 600,
                 decoration: const InputDecoration(
@@ -600,7 +659,10 @@ class _ThreadState extends ConsumerState<ProjectThread> {
             widget.project.id,
             body,
             by: ref.read(currentPersonProvider),
-            correction: correction,
+            correction: correction && canRequestCorrection(
+              ref.read(currentPersonProvider),
+              widget.project,
+            ),
           ),
       done: correction ? 'Demande de correction envoyée.' : null,
     );
@@ -623,7 +685,7 @@ class _ThreadState extends ConsumerState<ProjectThread> {
     final shown = showAll || all.length <= 6 ? all : all.sublist(all.length - 6);
     final canWrite = canMessage(me, p);
     final canCorrect = canRequestCorrection(me, p);
-    if (!canCorrect && correction) correction = false;
+    final asCorrection = correction && canCorrect;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -655,6 +717,14 @@ class _ThreadState extends ConsumerState<ProjectThread> {
               ],
             ),
           ),
+        if (!canWrite && p.stage == ProjectStage.archived && all.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              'Projet archivé : les échanges sont en lecture seule.',
+              style: EsText.bodyS.copyWith(color: c.textSecondary),
+            ),
+          ),
         if (canWrite) ...[
           const SizedBox(height: 10),
           EsCard(
@@ -673,19 +743,20 @@ class _ThreadState extends ConsumerState<ProjectThread> {
                         maxLength: 1000,
                         textCapitalization: TextCapitalization.sentences,
                         decoration: InputDecoration(
-                          hintText: correction
+                          hintText: asCorrection
                               ? 'Décrivez la correction à faire…'
                               : 'Écrire un message…',
                           border: InputBorder.none,
                           enabledBorder: InputBorder.none,
                           focusedBorder: InputBorder.none,
                           filled: false,
-                          counterText: '',
+                          // The limit shows only when it gets close.
+                          counterText: text.text.length > 850 ? null : '',
                         ),
                       ),
                     ),
                     IconButton.filled(
-                      tooltip: correction
+                      tooltip: asCorrection
                           ? 'Envoyer la demande de correction'
                           : 'Envoyer',
                       onPressed: text.text.trim().isEmpty || sending
@@ -693,7 +764,7 @@ class _ThreadState extends ConsumerState<ProjectThread> {
                           : _send,
                       style: IconButton.styleFrom(
                         backgroundColor:
-                            correction ? c.pendingText : c.actionPrimary,
+                            asCorrection ? c.pendingText : c.actionPrimary,
                         minimumSize: const Size(44, 44),
                       ),
                       icon: sending
@@ -716,14 +787,14 @@ class _ThreadState extends ConsumerState<ProjectThread> {
                       avatar: Icon(
                         Icons.edit_note_rounded,
                         size: 18,
-                        color: correction ? Colors.white : c.pendingText,
+                        color: asCorrection ? Colors.white : c.pendingText,
                       ),
                       label: const Text('Demande de correction'),
-                      selected: correction,
+                      selected: asCorrection,
                       showCheckmark: false,
                       selectedColor: c.pendingText,
                       labelStyle: EsText.labelS.copyWith(
-                        color: correction ? Colors.white : c.textPrimary,
+                        color: asCorrection ? Colors.white : c.textPrimary,
                       ),
                       onSelected: (v) => setState(() => correction = v),
                     ),
@@ -757,11 +828,15 @@ class _MessageTile extends StatelessWidget {
         child: Row(
           children: [
             Expanded(child: Divider(color: c.border)),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Text(
-                '${author.firstName} · ${s?.label ?? m.body} · $when',
-                style: EsText.bodyS.copyWith(color: c.textSecondary),
+            Flexible(
+              flex: 4,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  '${author.firstName} · ${s?.label ?? m.body} · $when',
+                  textAlign: TextAlign.center,
+                  style: EsText.bodyS.copyWith(color: c.textSecondary),
+                ),
               ),
             ),
             Expanded(child: Divider(color: c.border)),
@@ -1012,11 +1087,15 @@ class MembersSection extends ConsumerWidget {
                                   return;
                                 }
                                 if (!context.mounted) return;
-                                await runProjectAction(
+                                final left = await runProjectAction(
                                   context,
                                   () => service.removeMember(p.id, m, by: me),
                                   done: 'Vous avez quitté le projet.',
                                 );
+                                // The project is no longer visible to me.
+                                if (left && context.mounted) {
+                                  context.go('/projects');
+                                }
                               },
                               child: Text(
                                 'Quitter',
@@ -1029,7 +1108,7 @@ class MembersSection extends ConsumerWidget {
             for (final i in pending)
               row(
                 personId: i.inviteeId,
-                role: 'Invitation envoyée · ${Fmt.ago(i.at, DateTime.now())}',
+                role: 'Invitation envoyée · ${Fmt.ago(i.at, ref.watch(worldProvider).now)}',
                 pendingInvite: true,
                 trailing: TextButton(
                   onPressed: () => runProjectAction(
@@ -1040,7 +1119,7 @@ class MembersSection extends ConsumerWidget {
                   child: const Text('Annuler'),
                 ),
               ),
-          if (canInvite(me, p)) ...[
+          if (canInvite(me, p, pending: pending.length)) ...[
             const SizedBox(height: 4),
             Align(
               alignment: Alignment.centerLeft,
@@ -1298,7 +1377,7 @@ class _InvitationCardState extends ConsumerState<InvitationCard> {
                     ),
                     Text(
                       '${from.fullName} vous invite à collaborer · '
-                      '${Fmt.ago(i.at, DateTime.now())}',
+                      '${Fmt.ago(i.at, ref.watch(worldProvider).now)}',
                       style: EsText.bodyS.copyWith(color: c.textSecondary),
                     ),
                   ],

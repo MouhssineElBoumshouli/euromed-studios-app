@@ -77,6 +77,15 @@ class ProjectService {
     if (m.contains('reason_required')) {
       return 'Expliquez ce qu’il faut corriger.';
     }
+    if (m.contains('not_invitable')) {
+      return 'Cette personne ne peut pas être invitée sur un projet.';
+    }
+    if (m.contains('too_long')) {
+      return 'Message trop long (1000 caractères au plus).';
+    }
+    if (m.contains('empty')) {
+      return 'Écrivez un message avant d’envoyer.';
+    }
     if (m.contains('already_member')) {
       return 'Cette personne fait déjà partie du projet.';
     }

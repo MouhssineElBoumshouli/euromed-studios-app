@@ -229,7 +229,15 @@ void main() {
         .firstWhere((p) => p.id == 'p3')
         .copyWith(postStatus: PostStatus.readyForCheck);
     final forHaddad = projectNoticesFor(people['haddad']!, [ready],
-        const [], DateTime(2026, 11, 11, 10), nameOf: (id) => id);
+        const [], DateTime(2026, 11, 11, 10),
+        messages: DemoProjects.messages, nameOf: (id) => id);
+    expect(forHaddad.any((n) => n.title == 'Correction demandée'), isTrue);
+    // Another régisseur who never worked on this edit is not disturbed.
+    final forTazi = projectNoticesFor(people['tazi']!, [ready], const [],
+        DateTime(2026, 11, 11, 10),
+        messages: DemoProjects.messages, nameOf: (id) => id);
+    expect(forTazi.any((n) => n.title == 'Contrôle qualité à faire'),
+        isTrue, reason: 'the studio manager always follows edits');
     expect(forHaddad.any((n) => n.title == 'Contrôle qualité à faire'),
         isTrue);
   });

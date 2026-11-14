@@ -214,6 +214,7 @@ class Project {
     String? deliveryUrl,
     DateTime? deliveredAt,
     String? qcNote,
+    bool clearQcNote = false,
   }) =>
       Project(
         id: id,
@@ -228,7 +229,7 @@ class Project {
         postStatus: postStatus ?? this.postStatus,
         deliveryUrl: deliveryUrl ?? this.deliveryUrl,
         deliveredAt: deliveredAt ?? this.deliveredAt,
-        qcNote: qcNote ?? this.qcNote,
+        qcNote: clearQcNote ? qcNote : (qcNote ?? this.qcNote),
       );
 
   /// Adds one line to the history.

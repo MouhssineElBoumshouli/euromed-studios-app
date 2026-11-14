@@ -213,11 +213,11 @@ List<Notice> projectNoticesFor(
   List<Project> projects,
   List<ProjectInvite> invites,
   DateTime now, {
+  List<ProjectMessage> messages = const [],
   required String Function(String personId) nameOf,
 }) {
   final out = <Notice>[];
   final since = now.subtract(const Duration(days: 30));
-  final tech = isTechTeam(person);
 
   for (final i in invites) {
     if (i.inviteeId == person.id && i.status == InviteStatus.pending) {
@@ -237,10 +237,11 @@ List<Notice> projectNoticesFor(
 
   for (final p in projects) {
     final mine = p.involves(person.id);
-    if (!mine && !tech) continue;
+    final follows = followsEdit(person, p, messages);
+    if (!mine && !follows) continue;
 
-    // Waiting for the technical team's quality check.
-    if (tech && canQualityCheck(person, p)) {
+    // Waiting for the quality check: the editors, or the studio manager.
+    if (follows && canQualityCheck(person, p)) {
       final ready = p.history.lastWhere(
         (e) => e.type == ProjectEventType.postStatus,
         orElse: () => ProjectEvent(
@@ -266,11 +267,6 @@ List<Notice> projectNoticesFor(
       if (e.actorId == person.id || e.at.isBefore(since)) continue;
       final id = '${p.id}-${e.type.name}-${e.at.millisecondsSinceEpoch}';
       final n = switch (e.type) {
-        ProjectEventType.correction when tech && !mine => (
-            NoticeKind.project,
-            'Correction demandée',
-            '${nameOf(e.actorId)} · « ${p.title} » : ${e.detail ?? ''}',
-          ),
         ProjectEventType.postStatus when mine => (
             NoticeKind.progress,
             e.detail == PostStatus.readyForCheck.name
@@ -295,11 +291,6 @@ List<Notice> projectNoticesFor(
             'Nouveau collaborateur',
             '${nameOf(e.actorId)} a rejoint « ${p.title} ».',
           ),
-        ProjectEventType.memberRemoved when e.detail == person.id => (
-            NoticeKind.cancelled,
-            'Retiré d’un projet',
-            'Vous ne faites plus partie de « ${p.title} ».',
-          ),
         ProjectEventType.stageChanged when mine && p.ownerId != person.id => (
             NoticeKind.progress,
             'Le projet avance',
@@ -315,15 +306,37 @@ List<Notice> projectNoticesFor(
             at: e.at,
             title: n.$2,
             body: n.$3,
-            // A removed person can no longer open the project.
-            route: e.type == ProjectEventType.memberRemoved
-                ? '/projects'
-                : '/projects/${p.id}',
+            route: '/projects/${p.id}',
           ),
         );
       }
     }
   }
+  // The project thread: messages and correction requests from others.
+  final byId = {for (final p in projects) p.id: p};
+  for (final m in messages) {
+    final p = byId[m.projectId];
+    if (p == null || m.authorId == person.id || m.at.isBefore(since)) continue;
+    if (m.kind != MessageKind.message && m.kind != MessageKind.correction) {
+      continue; // status changes and verdicts come from the history
+    }
+    final mine = p.involves(person.id);
+    if (!mine && !followsEdit(person, p, messages)) continue;
+    final text = m.body.length > 90 ? '${m.body.substring(0, 90)}…' : m.body;
+    out.add(
+      Notice(
+        id: 'msg-${m.id}',
+        kind: NoticeKind.project,
+        at: m.at,
+        title: m.kind == MessageKind.correction
+            ? 'Correction demandée'
+            : 'Nouveau message',
+        body: '${nameOf(m.authorId)} · « ${p.title} » : $text',
+        route: '/projects/${p.id}',
+      ),
+    );
+  }
+
   out.sort((a, b) => b.at.compareTo(a.at));
   return out;
 }

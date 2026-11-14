@@ -240,7 +240,15 @@ class ProjectsNotifier extends Notifier<ProjectsState> {
 
   void load(ProjectsState fresh) => state = fresh;
 
-  Project _find(String id) => state.projects.firstWhere((p) => p.id == id);
+  Project _find(String id) => state.projects.firstWhere(
+        (p) => p.id == id,
+        orElse: () => throw StateError('not_found'),
+      );
+
+  ProjectInvite _invite(String id) => state.invites.firstWhere(
+        (i) => i.id == id,
+        orElse: () => throw StateError('not_found'),
+      );
 
   void _replace(Project updated) => state = state.copyWith(
         projects: [
@@ -312,7 +320,10 @@ class ProjectsNotifier extends Notifier<ProjectsState> {
   }
 
   void removeFile(String fileId, {required String by, required DateTime now}) {
-    final f = state.files.firstWhere((x) => x.id == fileId);
+    final f = state.files.firstWhere(
+      (x) => x.id == fileId,
+      orElse: () => throw StateError('not_found'),
+    );
     _replace(
       _find(f.projectId).log(ProjectEventType.fileRemoved, by, now, f.name),
     );
@@ -332,7 +343,12 @@ class ProjectsNotifier extends Notifier<ProjectsState> {
     if (!canSetPostStatus(by, p, to)) throw StateError('bad_transition');
     _replace(
       p
-          .copyWith(postStatus: to)
+          .copyWith(
+            postStatus: to,
+            // Resuming the edit clears the previous check comment.
+            clearQcNote: to == PostStatus.inProgress,
+            qcNote: to == PostStatus.inProgress ? null : p.qcNote,
+          )
           .log(ProjectEventType.postStatus, by.id, now, to.name),
     );
     _say(id, by.id, MessageKind.status, to.name, now);
@@ -348,9 +364,12 @@ class ProjectsNotifier extends Notifier<ProjectsState> {
   }) {
     final p = _find(id);
     if (!canMessage(by, p)) throw StateError('not_allowed');
+    final text = body.trim();
+    if (text.isEmpty) throw StateError('empty');
+    if (text.length > maxMessageLength) throw StateError('too_long');
     if (correction) {
       if (!canRequestCorrection(by, p)) throw StateError('no_correction_now');
-      final short = body.length > 140 ? body.substring(0, 140) : body;
+      final short = text.length > 140 ? text.substring(0, 140) : text;
       _replace(
         p
             .copyWith(postStatus: PostStatus.correctionRequested)
@@ -361,7 +380,7 @@ class ProjectsNotifier extends Notifier<ProjectsState> {
       id,
       by.id,
       correction ? MessageKind.correction : MessageKind.message,
-      body,
+      text,
       now,
     );
   }
@@ -388,6 +407,7 @@ class ProjectsNotifier extends Notifier<ProjectsState> {
               deliveryUrl: deliveryUrl.trim(),
               deliveredAt: now,
               qcNote: note,
+              clearQcNote: true,
             )
             .log(ProjectEventType.qcPassed, by.id, now),
       );
@@ -414,7 +434,11 @@ class ProjectsNotifier extends Notifier<ProjectsState> {
     required DateTime now,
   }) {
     final p = _find(id);
-    if (!canInvite(by, p)) throw StateError('not_allowed');
+    if (p.ownerId != by.id) throw StateError('not_allowed');
+    if (p.stage == ProjectStage.archived) throw StateError('archived');
+    if (!canInvite(by, p, pending: state.pendingInvitesOf(id).length)) {
+      throw StateError('too_many_members');
+    }
     if (p.involves(personId)) throw StateError('already_member');
     if (state.pendingInvitesOf(id).any((i) => i.inviteeId == personId)) {
       throw StateError('already_invited');
@@ -443,10 +467,17 @@ class ProjectsNotifier extends Notifier<ProjectsState> {
     required bool accept,
     required DateTime now,
   }) {
-    final inv = state.invites.firstWhere((i) => i.id == inviteId);
+    final inv = _invite(inviteId);
     if (inv.inviteeId != by.id) throw StateError('not_found');
     if (inv.status != InviteStatus.pending) {
       throw StateError('already_answered');
+    }
+    final target = _find(inv.projectId);
+    if (accept && target.stage == ProjectStage.archived) {
+      throw StateError('archived');
+    }
+    if (accept && target.memberIds.length >= maxMembers) {
+      throw StateError('too_many_members');
     }
     state = state.copyWith(
       invites: [
@@ -469,7 +500,8 @@ class ProjectsNotifier extends Notifier<ProjectsState> {
   }
 
   void cancelInvite(String inviteId, {required Person by}) {
-    final inv = state.invites.firstWhere((i) => i.id == inviteId);
+    final inv = _invite(inviteId);
+    if (inv.status != InviteStatus.pending) throw StateError('not_found');
     if (_find(inv.projectId).ownerId != by.id) throw StateError('not_allowed');
     state = state.copyWith(
       invites: [
