@@ -843,7 +843,8 @@ class _MessageTile extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Text(
-                  '${author.firstName} · ${s?.label ?? m.body} · $when',
+                  '${author.firstName} · ${s?.label ?? m.body} · '
+                  '${Fmt.ago(m.at, now)}',
                   textAlign: TextAlign.center,
                   style: EsText.bodyS.copyWith(color: c.textSecondary),
                 ),

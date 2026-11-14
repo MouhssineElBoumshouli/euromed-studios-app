@@ -114,3 +114,9 @@ Les personnes doivent-elles recevoir les notifications par e-mail ou sur le tél
 
 ## Q22 · Quand un projet peut-il passer en post-production ?
 Proposition actuelle : au moins une séance validée ou réalisée liée au projet. Faut-il plutôt attendre que toutes les séances prévues soient faites ?
+
+## Q23 · Qui fait le montage ?
+Proposition actuelle : l’équipe technique des studios fait le montage et le contrôle qualité ; le porteur du projet suit l’avancement et demande des corrections. Est-ce bien le cas, ou certains porteurs montent-ils eux-mêmes ?
+
+## Q24 · Nombre de collaborateurs par projet
+Proposition actuelle : 10 collaborateurs au plus par projet (le porteur en plus). Cette limite vous convient-elle ?

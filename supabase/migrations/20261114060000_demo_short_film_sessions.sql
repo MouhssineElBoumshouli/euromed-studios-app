@@ -1,5 +1,5 @@
 -- Demo: the short film (p3, in post-production) shows the two shooting
--- sessions it was made from, already held.
+-- sessions it was made from, already held (on open weekdays).
 create or replace function public.reset_demo_short_film_sessions() returns void
 language plpgsql security definer set search_path = public as $$
 declare
@@ -16,8 +16,8 @@ begin
       jsonb_build_object('type','checkedIn','at',v.s,'actor','haddad'),
       jsonb_build_object('type','completed','at',v.s + interval '2 hours','actor','haddad'))
   from (values
-    ('ES-2026-0101', 'plateau_tv', date_trunc('day', now()) - interval '13 days' + interval '9 hours'),
-    ('ES-2026-0104', 'chroma', date_trunc('day', now()) - interval '12 days' + interval '14 hours')
+    ('ES-2026-0101', 'plateau_tv', public.demo_at(-10, 9)),
+    ('ES-2026-0104', 'chroma', public.demo_at(-9, 14))
   ) as v(ref, studio, s);
 end $$;
 revoke execute on function public.reset_demo_short_film_sessions() from public, anon, authenticated;
