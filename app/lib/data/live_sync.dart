@@ -14,9 +14,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../domain/bookings.dart';
 import '../domain/people.dart';
 import '../domain/policy.dart';
+import '../domain/projects.dart';
 import 'app_state.dart';
 import 'backend.dart';
 import 'demo_world.dart';
+import 'projects_state.dart';
 
 /// Set by main() when the app runs against the server.
 LiveSync? liveSync;
@@ -80,6 +82,7 @@ class LiveSync {
             signedCharterVersion: const {},
           ),
         );
+    container.read(projectsProvider.notifier).load(const ProjectsState());
   }
 
   Future<void> _enter(int gen, String uid) async {
@@ -162,6 +165,21 @@ class LiveSync {
             .maybeSingle()
             .catchError((_) => null),
       ),
+      // Projects arrived later; a missing table must not block sign-in.
+      Future<dynamic>.value(
+        db
+            .from('projects')
+            .select()
+            .then<dynamic>((v) => v)
+            .catchError((_) => <dynamic>[]),
+      ),
+      Future<dynamic>.value(
+        db
+            .from('project_files')
+            .select()
+            .then<dynamic>((v) => v)
+            .catchError((_) => <dynamic>[]),
+      ),
     ]);
     final settings = results[0] as Map<String, dynamic>;
     final known = {for (final s in DemoWorld.studios) s.id};
@@ -219,8 +237,51 @@ class LiveSync {
             },
           ),
         );
+    container.read(projectsProvider.notifier).load(
+          ProjectsState(
+            projects: [
+              for (final r in results[6] as List)
+                projectFromRow(r as Map<String, dynamic>),
+            ],
+            files: [
+              for (final r in results[7] as List)
+                ProjectFile(
+                  id: r['id'] as String,
+                  projectId: r['project_id'] as String,
+                  kind: FileKind.values.byName(r['kind'] as String),
+                  name: r['name'] as String,
+                  path: r['path'] as String,
+                  sizeBytes: r['size_bytes'] as int,
+                  uploadedBy: r['uploaded_by'] as String,
+                  uploadedAt: _time(r['uploaded_at']),
+                ),
+            ],
+          ),
+        );
   }
 }
+
+Project projectFromRow(Map<String, dynamic> r) => Project(
+      id: r['id'] as String,
+      title: r['title'] as String,
+      description: r['description'] as String?,
+      type: ProjectType.values.byName(r['type'] as String),
+      stage: ProjectStage.values.byName(r['stage'] as String),
+      ownerId: r['owner_slug'] as String,
+      memberIds: [
+        for (final m in (r['member_slugs'] as List? ?? const [])) m as String,
+      ],
+      createdAt: _time(r['created_at']),
+      history: [
+        for (final e in (r['history'] as List? ?? const []))
+          ProjectEvent(
+            type: ProjectEventType.values.byName(e['type'] as String),
+            at: _time(e['at']),
+            actorId: e['actor'] as String,
+            detail: e['detail'] as String?,
+          ),
+      ],
+    );
 
 DateTime _time(Object? v) => DateTime.parse(v as String).toLocal();
 
