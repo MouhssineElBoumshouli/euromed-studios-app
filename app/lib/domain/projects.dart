@@ -67,7 +67,87 @@ class ProjectFile {
   final DateTime uploadedAt;
 }
 
-enum ProjectEventType { created, stageChanged, fileAdded, fileRemoved }
+/// P-07: where editing stands during post-production.
+enum PostStatus {
+  notStarted('Pas commencé'),
+  inProgress('Montage en cours'),
+  correctionRequested('Correction demandée'),
+  readyForCheck('Prêt pour le contrôle');
+
+  const PostStatus(this.label);
+  final String label;
+}
+
+enum ProjectEventType {
+  created,
+  stageChanged,
+  fileAdded,
+  fileRemoved,
+  postStatus,
+  correction,
+  qcPassed,
+  qcFailed,
+  memberInvited,
+  memberJoined,
+  memberLeft,
+  memberRemoved,
+}
+
+/// What a message in the project thread is.
+enum MessageKind { message, correction, status, qcFailed, qcPassed }
+
+class ProjectMessage {
+  const ProjectMessage({
+    required this.id,
+    required this.projectId,
+    required this.authorId,
+    required this.kind,
+    required this.body,
+    required this.at,
+  });
+  final String id;
+  final String projectId;
+  final String authorId;
+  final MessageKind kind;
+
+  /// Free text, or the new [PostStatus] name for a status message.
+  final String body;
+  final DateTime at;
+}
+
+enum InviteStatus { pending, accepted, declined, cancelled }
+
+/// R-27: the owner invites a collaborator, who accepts or declines.
+class ProjectInvite {
+  const ProjectInvite({
+    required this.id,
+    required this.projectId,
+    required this.projectTitle,
+    required this.inviteeId,
+    required this.invitedBy,
+    required this.status,
+    required this.at,
+  });
+  final String id;
+  final String projectId;
+
+  /// Copied so the invited person can read it before joining.
+  final String projectTitle;
+  final String inviteeId;
+  final String invitedBy;
+  final InviteStatus status;
+  final DateTime at;
+
+  ProjectInvite withStatus(InviteStatus s) => ProjectInvite(
+        id: id,
+        projectId: projectId,
+        projectTitle: projectTitle,
+        inviteeId: inviteeId,
+        invitedBy: invitedBy,
+        status: s,
+        at: at,
+      );
+}
 
 class ProjectEvent {
   const ProjectEvent({
@@ -95,6 +175,10 @@ class Project {
     this.description,
     this.memberIds = const [],
     this.history = const [],
+    this.postStatus = PostStatus.notStarted,
+    this.deliveryUrl,
+    this.deliveredAt,
+    this.qcNote,
   });
 
   final String id;
@@ -109,10 +193,28 @@ class Project {
   final DateTime createdAt;
   final List<ProjectEvent> history;
 
+  /// Editing status, meaningful during post-production (P-07).
+  final PostStatus postStatus;
+
+  /// Secure link to the final file, set when the quality check passes.
+  final String? deliveryUrl;
+  final DateTime? deliveredAt;
+
+  /// The technical team's last quality-check comment.
+  final String? qcNote;
+
   bool involves(String personId) =>
       ownerId == personId || memberIds.contains(personId);
 
-  Project copyWith({ProjectStage? stage, List<ProjectEvent>? history}) =>
+  Project copyWith({
+    ProjectStage? stage,
+    List<ProjectEvent>? history,
+    List<String>? memberIds,
+    PostStatus? postStatus,
+    String? deliveryUrl,
+    DateTime? deliveredAt,
+    String? qcNote,
+  }) =>
       Project(
         id: id,
         title: title,
@@ -120,8 +222,26 @@ class Project {
         type: type,
         stage: stage ?? this.stage,
         ownerId: ownerId,
-        memberIds: memberIds,
+        memberIds: memberIds ?? this.memberIds,
         createdAt: createdAt,
         history: history ?? this.history,
+        postStatus: postStatus ?? this.postStatus,
+        deliveryUrl: deliveryUrl ?? this.deliveryUrl,
+        deliveredAt: deliveredAt ?? this.deliveredAt,
+        qcNote: qcNote ?? this.qcNote,
+      );
+
+  /// Adds one line to the history.
+  Project log(
+    ProjectEventType type,
+    String actorId,
+    DateTime at, [
+    String? detail,
+  ]) =>
+      copyWith(
+        history: [
+          ...history,
+          ProjectEvent(type: type, at: at, actorId: actorId, detail: detail),
+        ],
       );
 }

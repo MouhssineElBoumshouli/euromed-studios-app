@@ -137,6 +137,8 @@ class _NotificationsState extends ConsumerState<NotificationsScreen> {
       NoticeKind.reminder => (Icons.alarm_rounded, c.lilac, c.onLilac),
       NoticeKind.assigned => (Icons.engineering_outlined, c.reviewBg, c.reviewText),
       NoticeKind.closed => (Icons.done_all_rounded, c.neutralBg, c.neutralText),
+      NoticeKind.invite => (Icons.group_add_outlined, c.lilac, c.onLilac),
+      NoticeKind.project => (Icons.layers_outlined, c.reviewBg, c.reviewText),
     };
 
 class _NoticeTile extends StatelessWidget {

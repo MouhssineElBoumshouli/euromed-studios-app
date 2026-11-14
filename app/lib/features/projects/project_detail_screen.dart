@@ -17,6 +17,7 @@ import '../../data/projects_state.dart';
 import '../../domain/bookings.dart';
 import '../../domain/projects.dart';
 import '../../domain/rules/projects.dart';
+import 'project_sections.dart';
 import 'project_widgets.dart';
 
 /// F3–F5 · One project: where it stands, its documents, its sessions,
@@ -118,7 +119,7 @@ class _ProjectDetailState extends ConsumerState<ProjectDetailScreen> {
 
   Future<void> _remove(ProjectFile f) async {
     try {
-      await _service.removeFile(f);
+      await _service.removeFile(f, by: ref.read(currentPersonProvider));
       _say('Document retiré.');
     } on ProjectProblem catch (e) {
       _say(e.message);
@@ -227,13 +228,21 @@ class _ProjectDetailState extends ConsumerState<ProjectDetailScreen> {
           const SizedBox(height: EsSpace.s5),
           _Pipeline(stage: p.stage),
           const SizedBox(height: EsSpace.s4),
-          _NextStep(
-            project: p,
-            problem: problem,
-            mayAdvance: mayAdvance,
-            busy: advancing,
-            onAdvance: () => _advance(p),
-          ),
+          switch (p.stage) {
+            ProjectStage.postProduction => PostProductionPanel(project: p),
+            ProjectStage.archived => DeliveryCard(project: p),
+            _ => _NextStep(
+                project: p,
+                problem: problem,
+                mayAdvance: mayAdvance,
+                busy: advancing,
+                onAdvance: () => _advance(p),
+              ),
+          },
+          const SizedBox(height: EsSpace.s5),
+          const SectionTitle('Échanges'),
+          const SizedBox(height: EsSpace.s2),
+          ProjectThread(project: p),
           const SizedBox(height: EsSpace.s5),
           SectionTitle(
             'Documents',
@@ -299,6 +308,10 @@ class _ProjectDetailState extends ConsumerState<ProjectDetailScreen> {
                 ],
               ),
             ),
+          const SizedBox(height: EsSpace.s5),
+          const SectionTitle('Équipe du projet'),
+          const SizedBox(height: EsSpace.s2),
+          MembersSection(project: p),
           const SizedBox(height: EsSpace.s5),
           const SectionTitle('Historique'),
           const SizedBox(height: EsSpace.s2),
@@ -588,13 +601,21 @@ class _SessionTile extends StatelessWidget {
   }
 }
 
-class _History extends StatelessWidget {
+class _History extends StatefulWidget {
   const _History({required this.events});
   final List<ProjectEvent> events;
 
   @override
+  State<_History> createState() => _HistoryState();
+}
+
+class _HistoryState extends State<_History> {
+  bool all = false;
+
+  @override
   Widget build(BuildContext context) {
     final c = context.es;
+    final events = widget.events;
     String line(ProjectEvent e) {
       final who = personById(e.actorId).firstName;
       return switch (e.type) {
@@ -603,6 +624,19 @@ class _History extends StatelessWidget {
           '$who a passé le projet en ${ProjectStage.values.where((s) => s.name == e.detail).firstOrNull?.label.toLowerCase() ?? e.detail}',
         ProjectEventType.fileAdded => '$who a ajouté « ${e.detail} »',
         ProjectEventType.fileRemoved => '$who a retiré « ${e.detail} »',
+        ProjectEventType.postStatus =>
+          '$who : ${PostStatus.values.where((s) => s.name == e.detail).firstOrNull?.label.toLowerCase() ?? e.detail}',
+        ProjectEventType.correction => '$who a demandé une correction',
+        ProjectEventType.qcPassed =>
+          '$who a validé le contrôle qualité et livré le projet',
+        ProjectEventType.qcFailed =>
+          '$who a renvoyé le montage en correction',
+        ProjectEventType.memberInvited =>
+          '$who a invité ${personById(e.detail ?? '').fullName}',
+        ProjectEventType.memberJoined => '$who a rejoint le projet',
+        ProjectEventType.memberLeft => '$who a quitté le projet',
+        ProjectEventType.memberRemoved =>
+          '$who a retiré ${personById(e.detail ?? '').fullName}',
       };
     }
 
@@ -610,7 +644,7 @@ class _History extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       child: Column(
         children: [
-          for (final e in events.take(8))
+          for (final e in all ? events : events.take(6))
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 6),
               child: Row(
@@ -631,12 +665,18 @@ class _History extends StatelessWidget {
                       style: EsText.bodyS.copyWith(color: c.textPrimary),
                     ),
                   ),
+                  const SizedBox(width: 8),
                   Text(
                     Fmt.dateTime(e.at),
                     style: EsText.bodyS.copyWith(color: c.textDisabled),
                   ),
                 ],
               ),
+            ),
+          if (!all && events.length > 6)
+            TextButton(
+              onPressed: () => setState(() => all = true),
+              child: Text('Voir tout l’historique (${events.length})'),
             ),
         ],
       ),

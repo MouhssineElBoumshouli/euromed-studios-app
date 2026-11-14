@@ -9,10 +9,23 @@ library;
 
 import '../bookings.dart';
 import '../people.dart';
+import '../projects.dart';
 import 'approval.dart';
+import 'projects.dart';
 import 'sessions.dart';
 
-enum NoticeKind { toDecide, approved, progress, refused, cancelled, reminder, assigned, closed }
+enum NoticeKind {
+  toDecide,
+  approved,
+  progress,
+  refused,
+  cancelled,
+  reminder,
+  assigned,
+  closed,
+  invite,
+  project,
+}
 
 class Notice {
   const Notice({
@@ -187,6 +200,130 @@ List<Notice> noticesFor(
     }
   }
 
+  out.sort((a, b) => b.at.compareTo(a.at));
+  return out;
+}
+
+/// Project news for [person], newest first (R-24, R-25, R-27).
+///
+/// Built from the projects' history and the invitations, like the
+/// bookings feed: nothing extra to store.
+List<Notice> projectNoticesFor(
+  Person person,
+  List<Project> projects,
+  List<ProjectInvite> invites,
+  DateTime now, {
+  required String Function(String personId) nameOf,
+}) {
+  final out = <Notice>[];
+  final since = now.subtract(const Duration(days: 30));
+  final tech = isTechTeam(person);
+
+  for (final i in invites) {
+    if (i.inviteeId == person.id && i.status == InviteStatus.pending) {
+      out.add(
+        Notice(
+          id: 'invite-${i.id}',
+          kind: NoticeKind.invite,
+          at: i.at,
+          title: 'Invitation à un projet',
+          body: '${nameOf(i.invitedBy)} vous invite sur « ${i.projectTitle} ».',
+          route: '/projects',
+          actionable: true,
+        ),
+      );
+    }
+  }
+
+  for (final p in projects) {
+    final mine = p.involves(person.id);
+    if (!mine && !tech) continue;
+
+    // Waiting for the technical team's quality check.
+    if (tech && canQualityCheck(person, p)) {
+      final ready = p.history.lastWhere(
+        (e) => e.type == ProjectEventType.postStatus,
+        orElse: () => ProjectEvent(
+          type: ProjectEventType.postStatus,
+          at: p.createdAt,
+          actorId: '',
+        ),
+      );
+      out.add(
+        Notice(
+          id: 'qc-${p.id}-${ready.at.millisecondsSinceEpoch}',
+          kind: NoticeKind.toDecide,
+          at: ready.at,
+          title: 'Contrôle qualité à faire',
+          body: '« ${p.title} » est prêt à être vérifié.',
+          route: '/projects/${p.id}',
+          actionable: true,
+        ),
+      );
+    }
+
+    for (final e in p.history) {
+      if (e.actorId == person.id || e.at.isBefore(since)) continue;
+      final id = '${p.id}-${e.type.name}-${e.at.millisecondsSinceEpoch}';
+      final n = switch (e.type) {
+        ProjectEventType.correction when tech && !mine => (
+            NoticeKind.project,
+            'Correction demandée',
+            '${nameOf(e.actorId)} · « ${p.title} » : ${e.detail ?? ''}',
+          ),
+        ProjectEventType.postStatus when mine => (
+            NoticeKind.progress,
+            e.detail == PostStatus.readyForCheck.name
+                ? 'Montage terminé'
+                : 'Montage en cours',
+            e.detail == PostStatus.readyForCheck.name
+                ? '« ${p.title} » passe au contrôle qualité.'
+                : 'L’équipe technique travaille sur « ${p.title} ».',
+          ),
+        ProjectEventType.qcPassed when mine => (
+            NoticeKind.approved,
+            'Projet validé et livré',
+            'Le fichier final de « ${p.title} » est disponible.',
+          ),
+        ProjectEventType.qcFailed when mine => (
+            NoticeKind.refused,
+            'Contrôle qualité : à reprendre',
+            '« ${p.title} » : ${e.detail ?? ''}',
+          ),
+        ProjectEventType.memberJoined when p.ownerId == person.id => (
+            NoticeKind.project,
+            'Nouveau collaborateur',
+            '${nameOf(e.actorId)} a rejoint « ${p.title} ».',
+          ),
+        ProjectEventType.memberRemoved when e.detail == person.id => (
+            NoticeKind.cancelled,
+            'Retiré d’un projet',
+            'Vous ne faites plus partie de « ${p.title} ».',
+          ),
+        ProjectEventType.stageChanged when mine && p.ownerId != person.id => (
+            NoticeKind.progress,
+            'Le projet avance',
+            '« ${p.title} » passe en ${ProjectStage.values.where((s) => s.name == e.detail).firstOrNull?.label.toLowerCase() ?? e.detail}.',
+          ),
+        _ => null,
+      };
+      if (n != null) {
+        out.add(
+          Notice(
+            id: id,
+            kind: n.$1,
+            at: e.at,
+            title: n.$2,
+            body: n.$3,
+            // A removed person can no longer open the project.
+            route: e.type == ProjectEventType.memberRemoved
+                ? '/projects'
+                : '/projects/${p.id}',
+          ),
+        );
+      }
+    }
+  }
   out.sort((a, b) => b.at.compareTo(a.at));
   return out;
 }

@@ -66,6 +66,56 @@ bool canAdvance(Person p, Project pr) =>
     pr.stage != ProjectStage.postProduction &&
     (pr.ownerId == p.id || p.has(Role.studioManager) || p.has(Role.admin));
 
+/// The technical team runs editing and the quality check (R-24, R-25).
+bool isTechTeam(Person p) =>
+    p.has(Role.regisseur) || p.has(Role.studioManager) || p.has(Role.admin);
+
+/// P-07 transitions the technical team may make.
+bool canSetPostStatus(Person p, Project pr, PostStatus to) =>
+    isTechTeam(p) &&
+    pr.stage == ProjectStage.postProduction &&
+    switch (to) {
+      PostStatus.inProgress => pr.postStatus == PostStatus.notStarted ||
+          pr.postStatus == PostStatus.correctionRequested,
+      PostStatus.readyForCheck => pr.postStatus == PostStatus.inProgress,
+      _ => false,
+    };
+
+/// Anyone on the project, and studio staff, can write in its thread.
+bool canMessage(Person p, Project pr) =>
+    pr.stage != ProjectStage.archived &&
+    (pr.involves(p.id) || supervisesProjects(p));
+
+/// R-24: the project's people ask for changes while editing is under way.
+bool canRequestCorrection(Person p, Project pr) =>
+    pr.involves(p.id) &&
+    pr.stage == ProjectStage.postProduction &&
+    (pr.postStatus == PostStatus.inProgress ||
+        pr.postStatus == PostStatus.readyForCheck);
+
+/// R-25: the technical team checks the edit once it is ready.
+bool canQualityCheck(Person p, Project pr) =>
+    isTechTeam(p) &&
+    pr.stage == ProjectStage.postProduction &&
+    pr.postStatus == PostStatus.readyForCheck;
+
+const maxMembers = 10;
+
+/// R-27: the owner invites collaborators until the project is archived.
+bool canInvite(Person p, Project pr) =>
+    pr.ownerId == p.id &&
+    pr.stage != ProjectStage.archived &&
+    pr.memberIds.length < maxMembers;
+
+/// People it makes sense to invite: requesters and the technical team.
+bool isInvitable(Person candidate) =>
+    candidate.roles.any((r) => r.isRequester) ||
+    candidate.has(Role.regisseur);
+
+/// A delivery link must be a secure web address.
+bool isValidDeliveryLink(String s) =>
+    RegExp(r'^https://[^\s/]+\.[^\s]+$').hasMatch(s.trim());
+
 /// Files accepted for upload (Q12 is about where final files go).
 const maxFileBytes = 20 * 1024 * 1024;
 const allowedFileExtensions = [

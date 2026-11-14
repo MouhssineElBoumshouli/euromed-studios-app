@@ -182,6 +182,20 @@ class LiveSync {
             .then<dynamic>((v) => v)
             .catchError((_) => <dynamic>[]),
       ),
+      Future<dynamic>.value(
+        db
+            .from('project_messages')
+            .select()
+            .then<dynamic>((v) => v)
+            .catchError((_) => <dynamic>[]),
+      ),
+      Future<dynamic>.value(
+        db
+            .from('project_invites')
+            .select()
+            .then<dynamic>((v) => v)
+            .catchError((_) => <dynamic>[]),
+      ),
     ]);
     final settings = results[0] as Map<String, dynamic>;
     final known = {for (final s in DemoWorld.studios) s.id};
@@ -249,6 +263,14 @@ class LiveSync {
               for (final r in results[7] as List)
                 if (fileFromRow(r as Map<String, dynamic>) case final f?) f,
             ],
+            messages: [
+              for (final r in results[8] as List)
+                if (messageFromRow(r as Map<String, dynamic>) case final m?) m,
+            ],
+            invites: [
+              for (final r in results[9] as List)
+                if (inviteFromRow(r as Map<String, dynamic>) case final i?) i,
+            ],
           ),
         );
   }
@@ -274,6 +296,12 @@ Project? projectFromRow(Map<String, dynamic> r) {
       for (final m in (r['member_slugs'] as List? ?? const [])) m as String,
     ],
     createdAt: _time(r['created_at']),
+    postStatus:
+        _enum(PostStatus.values, r['post_status']) ?? PostStatus.notStarted,
+    deliveryUrl: r['delivery_url'] as String?,
+    deliveredAt:
+        r['delivered_at'] == null ? null : _time(r['delivered_at']),
+    qcNote: r['qc_note'] as String?,
     history: [
       for (final e in (r['history'] as List? ?? const []))
         if (_enum(ProjectEventType.values, e['type']) case final t?)
@@ -368,3 +396,30 @@ List<Map<String, dynamic>> equipmentToJson(List<EquipmentRequest> items) => [
           if (e.note != null) 'note': e.note,
         },
     ];
+
+ProjectMessage? messageFromRow(Map<String, dynamic> r) {
+  final kind = _enum(MessageKind.values, r['kind']);
+  if (kind == null) return null;
+  return ProjectMessage(
+    id: r['id'] as String,
+    projectId: r['project_id'] as String,
+    authorId: r['author_slug'] as String,
+    kind: kind,
+    body: r['body'] as String,
+    at: _time(r['created_at']),
+  );
+}
+
+ProjectInvite? inviteFromRow(Map<String, dynamic> r) {
+  final status = _enum(InviteStatus.values, r['status']);
+  if (status == null) return null;
+  return ProjectInvite(
+    id: r['id'] as String,
+    projectId: r['project_id'] as String,
+    projectTitle: r['project_title'] as String,
+    inviteeId: r['invitee_slug'] as String,
+    invitedBy: r['invited_by'] as String,
+    status: status,
+    at: _time(r['created_at']),
+  );
+}

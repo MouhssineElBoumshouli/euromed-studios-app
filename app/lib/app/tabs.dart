@@ -89,7 +89,8 @@ List<TabSpec> tabsFor(Person p) {
     return const [_home, _validations, _planning, _projects, _profile];
   }
   if (p.has(Role.regisseur)) {
-    return const [_regie, _planning, _scanner, _maintenance, _profile];
+    // The scanner stays one tap away from Régie.
+    return const [_regie, _planning, _projects, _maintenance, _profile];
   }
   final requester = p.roles.any((r) => r.isRequester);
   if (p.has(Role.entityApprover) && requester) {
@@ -112,13 +113,13 @@ bool isStaff(Person p) =>
 /// Sections of the computer workspace (no 5-tab limit there).
 List<TabSpec> consoleTabsFor(Person p) {
   if (p.has(Role.admin)) {
-    return const [_dashboard, _validations, _planning, _regie, _studios, _admin, _profile];
+    return const [_dashboard, _validations, _planning, _regie, _studios, _projects, _admin, _profile];
   }
   if (p.has(Role.studioManager)) {
     return const [_home, _validations, _planning, _regie, _studios, _projects, _profile];
   }
   if (p.has(Role.regisseur)) {
-    return const [_regie, _scanner, _planning, _maintenance, _studios, _profile];
+    return const [_regie, _scanner, _planning, _projects, _maintenance, _studios, _profile];
   }
   final requester = p.roles.any((r) => r.isRequester);
   return [

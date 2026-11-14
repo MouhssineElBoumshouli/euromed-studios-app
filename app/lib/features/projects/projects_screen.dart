@@ -13,6 +13,7 @@ import '../../data/projects_state.dart';
 import '../../domain/projects.dart';
 import '../../domain/rules/projects.dart';
 import '../notifications/notifications_screen.dart';
+import 'project_sections.dart';
 import 'project_widgets.dart';
 
 /// F1 · Projects: mine and the ones I'm invited to, by stage.
@@ -58,6 +59,34 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
       ),
     );
 
+    final invites = ref.watch(myInvitesProvider);
+    final inviteBlock = invites.isEmpty
+        ? const SizedBox.shrink()
+        : Padding(
+            padding: const EdgeInsets.fromLTRB(
+              EsSpace.page,
+              0,
+              EsSpace.page,
+              EsSpace.s4,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Overline(
+                  invites.length == 1
+                      ? 'Une invitation'
+                      : '${invites.length} invitations',
+                ),
+                const SizedBox(height: 8),
+                for (final i in invites)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: InvitationCard(invite: i),
+                  ),
+              ],
+            ),
+          );
+
     final empty = EmptyState(
       icon: Icons.layers_outlined,
       title: 'Aucun projet pour l’instant',
@@ -80,6 +109,7 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
         padding: EdgeInsets.only(bottom: tabBarSpace(context)),
         children: [
           header,
+          inviteBlock,
           if (projects.isEmpty)
             empty
           else
@@ -115,6 +145,7 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
       padding: EdgeInsets.only(bottom: tabBarSpace(context)),
       children: [
         header,
+        inviteBlock,
         if (projects.isEmpty)
           empty
         else ...[
