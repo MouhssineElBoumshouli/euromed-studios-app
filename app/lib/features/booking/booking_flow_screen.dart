@@ -18,9 +18,11 @@ import '../../domain/rules/approval.dart';
 import '../../domain/rules/availability.dart';
 import '../../domain/rules/quota.dart';
 import '../../domain/studios.dart';
+import 'month_calendar.dart';
 
-/// D1–D3 · Booking in three steps (R-10 to R-15, R-33):
-/// 1. choose the time, 2. details, 3. review and send.
+/// D0–D3 · Booking in four steps (R-10 to R-15, R-33):
+/// 1. choose the date on a month calendar, 2. choose the time,
+/// 3. details, 4. review and send.
 class BookingFlowScreen extends ConsumerStatefulWidget {
   const BookingFlowScreen({super.key, required this.studioId, this.initialDay});
   final String studioId;
@@ -40,6 +42,9 @@ class _Equip {
 class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
   int step = 0;
   late DateTime day;
+
+  /// First day of the month shown on the calendar.
+  late DateTime month;
   DateTime? rangeStart;
   DateTime? rangeEnd;
   Activity? activity;
@@ -54,13 +59,17 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
   void initState() {
     super.initState();
     final w = ref.read(worldProvider);
+    final days = _bookableDays(w);
     day = widget.initialDay != null
         ? dateOnly(widget.initialDay!)
-        : _bookableDays(w).first;
+        : days.firstWhere((d) => _freeOn(w, d) > 0, orElse: () => days.first);
+    month = DateTime(day.year, day.month);
     if (widget.initialDay != null &&
         widget.initialDay!.hour >= w.policy.openingHour) {
+      // Came from a suggested slot: skip the calendar, slot already picked.
       rangeStart = widget.initialDay;
       rangeEnd = widget.initialDay!.add(Duration(minutes: w.policy.slotMinutes));
+      step = 1;
     }
   }
 
@@ -80,15 +89,21 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
             DateTime(w.now.year, w.now.month, w.now.day + d),
       ];
 
-  List<Slot> _slots(WorldState w) => slotsFor(
+  List<Slot> _slots(WorldState w) => _slotsOn(w, day);
+
+  List<Slot> _slotsOn(WorldState w, DateTime d) => slotsFor(
         studio: studio,
-        day: day,
+        day: d,
         policy: w.policy,
         allStudios: DemoWorld.studios,
         bookings: w.bookings,
         maintenance: w.maintenance,
         now: w.now,
       );
+
+  /// Free hours on [d] (0 = full or closed).
+  int _freeOn(WorldState w, DateTime d) =>
+      _slotsOn(w, d).where((s) => s.state.isSelectable).length;
 
   int get _minutes =>
       rangeStart == null ? 0 : rangeEnd!.difference(rangeStart!).inMinutes;
@@ -238,7 +253,7 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
                   if (p == SubmitProblem.slotUnavailable ||
                       p == SubmitProblem.overQuota) {
                     setState(() {
-                      step = 0;
+                      step = 1;
                       rangeStart = rangeEnd = null;
                     });
                   }
@@ -257,14 +272,16 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
     final w = ref.watch(worldProvider);
     final me = ref.watch(currentPersonProvider);
     final titles = [
+      'Choisissez une date',
       'Choisissez un créneau',
       'Votre demande',
       'Vérifiez et envoyez',
     ];
 
     final canContinue = switch (step) {
-      0 => rangeStart != null,
-      1 => activity != null,
+      0 => _freeOn(w, day) > 0,
+      1 => rangeStart != null,
+      2 => activity != null,
       _ => !sending,
     };
     final top = MediaQuery.paddingOf(context).top;
@@ -293,7 +310,7 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
                         step == 0 ? context.pop() : setState(() => step--),
                   ),
                   const Spacer(),
-                  _StepPill(step: step, total: 3),
+                  _StepPill(step: step, total: 4),
                 ],
               ),
             ),
@@ -351,29 +368,32 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
                 child: KeyedSubtree(
                   key: ValueKey(step),
                   child: switch (step) {
-                    0 => _timeStep(w, me),
-                    1 => _detailsStep(me),
+                    0 => _dateStep(w),
+                    1 => _timeStep(w, me),
+                    2 => _detailsStep(me),
                     _ => _reviewStep(w, me),
                   },
                 ),
               ),
             ),
             _BottomBar(
-              summary: step == 0 && rangeStart != null
+              summary: step == 1 && rangeStart != null
                   ? '${Fmt.shortDay(day)} · ${Fmt.range(rangeStart!, rangeEnd!)}'
                   : null,
-              duration: step == 0 && rangeStart != null
+              duration: step == 1 && rangeStart != null
                   ? formatMinutes(_minutes)
                   : null,
               label: switch (step) {
-            0 when rangeStart == null => 'Choisissez un créneau',
-            1 when activity == null => 'Choisissez une activité',
-            0 || 1 => 'Continuer',
-            _ => 'Envoyer la demande',
-          },
+                0 when !canContinue => 'Jour complet',
+                0 => 'Voir les créneaux du ${Fmt.dayMonth(day)}',
+                1 when rangeStart == null => 'Choisissez un créneau',
+                2 when activity == null => 'Choisissez une activité',
+                1 || 2 => 'Continuer',
+                _ => 'Envoyer la demande',
+              },
               loading: sending,
               onPressed: canContinue
-                  ? () => step < 2 ? setState(() => step++) : _send()
+                  ? () => step < 3 ? setState(() => step++) : _send()
                   : null,
             ),
           ],
@@ -382,10 +402,53 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
     );
   }
 
-  // ------------------------------------------------------------ step 1 (D1)
+  // ------------------------------------------------------------ step 1 (D0)
+  Widget _dateStep(WorldState w) {
+    final days = _bookableDays(w);
+    final first = DateTime(w.now.year, w.now.month);
+    final last = DateTime(days.last.year, days.last.month);
+    final free = {for (final d in days) d: _freeOn(w, d)};
+    final n = free[day] ?? 0;
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(
+        EsSpace.page,
+        EsSpace.s3,
+        EsSpace.page,
+        EsSpace.s6,
+      ),
+      children: [
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                MonthCalendar(
+                  month: month,
+                  today: dateOnly(w.now),
+                  selected: day,
+                  freeByDay: free,
+                  canGoBack: month.isAfter(first),
+                  canGoForward: month.isBefore(last),
+                  onMonth: (m) => setState(() => month = m),
+                  onDay: (d) => setState(() {
+                    if (d != day) rangeStart = rangeEnd = null;
+                    day = d;
+                  }),
+                ),
+                const SizedBox(height: EsSpace.s4),
+                _ChosenDate(day: day, free: n),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ------------------------------------------------------------ step 2 (D1)
   Widget _timeStep(WorldState w, Person me) {
     final c = context.es;
-    final days = _bookableDays(w);
     final slots = _slots(w);
     final q = quotaFor(
       requesterId: me.id,
@@ -404,50 +467,54 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(0, EsSpace.s3, 0, EsSpace.s6),
       children: [
-        SizedBox(
-          height: 82,
-          child: ListView.separated(
-            clipBehavior: Clip.none,
-            padding: const EdgeInsets.symmetric(horizontal: EsSpace.page),
-            scrollDirection: Axis.horizontal,
-            itemCount: days.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemBuilder: (_, i) => _DayChip(
-              day: days[i],
-              selected: days[i] == day,
-              showMonth: i == 0 || days[i].day == 1,
-              onTap: () => setState(() {
-                day = days[i];
-                rangeStart = rangeEnd = null;
-              }),
-            ),
-          ),
-        ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: EsSpace.page),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: EsSpace.s4),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      Fmt.longDay(day),
-                      style: EsText.titleL.copyWith(color: c.textPrimary),
+              EsCard(
+                padding: const EdgeInsets.fromLTRB(12, 10, 6, 10),
+                child: Row(
+                  children: [
+                    IconTile(Icons.calendar_month_rounded, size: 40),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            Fmt.longDay(day),
+                            style:
+                                EsText.titleM.copyWith(color: c.textPrimary),
+                          ),
+                          Text(
+                            freeCount == 0
+                                ? 'Complet'
+                                : '$freeCount créneau${freeCount > 1 ? 'x' : ''} '
+                                    'libre${freeCount > 1 ? 's' : ''}',
+                            style: EsText.bodyS.copyWith(
+                              color: freeCount == 0
+                                  ? c.dangerText
+                                  : c.successText,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  Text(
-                    freeCount == 0
-                        ? 'Complet'
-                        : '$freeCount libre${freeCount > 1 ? 's' : ''}',
-                    style: EsText.labelS.copyWith(
-                      color: freeCount == 0 ? c.dangerText : c.successText,
+                    TextButton(
+                      onPressed: () => setState(() {
+                        step = 0;
+                        month = DateTime(day.year, day.month);
+                      }),
+                      style: TextButton.styleFrom(
+                        minimumSize: const Size(44, 44),
+                      ),
+                      child: const Text('Changer'),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              const SizedBox(height: EsSpace.s3),
+              const SizedBox(height: EsSpace.s4),
               if (slots.isEmpty)
                 Text(
                   'Aucun créneau ce jour-là.',
@@ -733,6 +800,55 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
   }
 }
 
+/// "Date choisie : 14 nov. 2026", under the calendar.
+class _ChosenDate extends StatelessWidget {
+  const _ChosenDate({required this.day, required this.free});
+  final DateTime day;
+  final int free;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.es;
+    return Semantics(
+      liveRegion: true,
+      child: EsCard(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            IconTile(
+              free == 0 ? Icons.event_busy_outlined : Icons.event_available_rounded,
+              size: 44,
+              bg: free == 0 ? c.dangerBg : c.lilac,
+              fg: free == 0 ? c.dangerText : c.onLilac,
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Date choisie : ${Fmt.dayMonthYear(day)}',
+                    style: EsText.titleM.copyWith(color: c.textPrimary),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    free == 0
+                        ? 'Ce jour est complet. Choisissez un autre jour.'
+                        : '$free créneau${free > 1 ? 'x' : ''} '
+                            'libre${free > 1 ? 's' : ''} · Touchez '
+                            '« Voir les créneaux » pour continuer.',
+                    style: EsText.bodyS.copyWith(color: c.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _StepPill extends StatelessWidget {
   const _StepPill({required this.step, required this.total});
   final int step;
@@ -762,12 +878,12 @@ class _Progress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.es;
-    const labels = ['Créneau', 'Détails', 'Envoi'];
+    const labels = ['Date', 'Créneau', 'Détails', 'Envoi'];
     return Padding(
       padding: const EdgeInsets.fromLTRB(EsSpace.page, 8, EsSpace.page, 4),
       child: Row(
         children: [
-          for (var i = 0; i < 3; i++) ...[
+          for (var i = 0; i < labels.length; i++) ...[
             if (i > 0) const SizedBox(width: 6),
             Expanded(
               child: Column(
@@ -871,87 +987,6 @@ class _BottomBar extends StatelessWidget {
             onPressed: onPressed,
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _DayChip extends StatelessWidget {
-  const _DayChip({
-    required this.day,
-    required this.selected,
-    required this.showMonth,
-    required this.onTap,
-  });
-  final DateTime day;
-  final bool selected;
-  final bool showMonth;
-  final VoidCallback onTap;
-
-  static const _wd = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
-  static const _mo = [
-    'janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin',
-    'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.',
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.es;
-    return Semantics(
-      selected: selected,
-      button: true,
-      label: Fmt.longDay(day),
-      excludeSemantics: true,
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: EsMotion.medium,
-          curve: EsMotion.curve,
-          width: 58,
-          decoration: BoxDecoration(
-            color: selected ? c.actionPrimary : c.bgSurface,
-            borderRadius: BorderRadius.circular(EsRadius.lg),
-            boxShadow: selected
-                ? [
-                    BoxShadow(
-                      color: c.shadow.withValues(alpha: 0.25),
-                      blurRadius: 14,
-                      offset: const Offset(0, 6),
-                    ),
-                  ]
-                : esShadow(c),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                _wd[day.weekday - 1],
-                style: EsText.labelS.copyWith(
-                  color: selected
-                      ? c.onActionPrimary.withValues(alpha: 0.75)
-                      : c.textSecondary,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                '${day.day}',
-                style: EsText.displayM.copyWith(
-                  color: selected ? c.onActionPrimary : c.textPrimary,
-                  fontSize: 20,
-                ),
-              ),
-              Text(
-                showMonth ? _mo[day.month - 1] : ' ',
-                style: EsText.bodyS.copyWith(
-                  fontSize: 10.5,
-                  color: selected
-                      ? c.onActionPrimary.withValues(alpha: 0.75)
-                      : c.textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

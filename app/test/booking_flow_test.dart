@@ -1,4 +1,5 @@
 import 'package:euromed_studios/app/app.dart';
+import 'package:euromed_studios/app/router.dart';
 import 'package:euromed_studios/data/app_state.dart';
 import 'package:euromed_studios/data/demo_world.dart';
 import 'package:euromed_studios/domain/bookings.dart';
@@ -75,5 +76,35 @@ void main() {
     expect(find.text('Studios'), findsNWidgets(2)); // title + tab
     expect(find.text('PRODUCTION'), findsOneWidget);
     expect(find.text('Studio Podcast'), findsOneWidget);
+  });
+
+  testWidgets('Booking starts on a month calendar, then shows the slots',
+      (t) async {
+    t.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(disableAnimations: true);
+    addTearDown(t.platformDispatcher.clearAccessibilityFeaturesTestValue);
+    await t.binding.setSurfaceSize(const Size(400, 1400));
+    await t.pumpWidget(const ProviderScope(child: EuromedStudiosApp()));
+    await t.pumpAndSettle();
+    appRouter.push('/book/podcast');
+    await t.pumpAndSettle();
+
+    expect(find.text('Choisissez une date'), findsOneWidget);
+    expect(find.text('ÉTAPE 1/4'), findsOneWidget);
+    expect(find.textContaining('Date choisie : '), findsOneWidget);
+    final go = find.textContaining('Voir les créneaux du ');
+    expect(go, findsOneWidget);
+
+    await t.tap(go);
+    await t.pumpAndSettle();
+    expect(find.text('Choisissez un créneau'), findsOneWidget);
+    expect(find.text('ÉTAPE 2/4'), findsOneWidget);
+    expect(find.text('Changer'), findsOneWidget);
+
+    await t.tap(find.text('Changer'));
+    await t.pumpAndSettle();
+    expect(find.text('Choisissez une date'), findsOneWidget);
+    appRouter.go('/home');
+    await t.pumpAndSettle();
   });
 }

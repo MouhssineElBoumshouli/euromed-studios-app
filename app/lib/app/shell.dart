@@ -6,6 +6,7 @@ import '../core/theme/es_colors.dart';
 import '../core/theme/es_text.dart';
 import '../core/widgets/es_button.dart';
 import '../core/widgets/layout.dart';
+import '../core/widgets/logo.dart';
 import '../data/app_state.dart';
 import '../data/backend.dart';
 import '../data/selectors.dart' show noticesProvider;
@@ -347,27 +348,24 @@ class SideMenu extends ConsumerWidget {
             padding: const EdgeInsets.only(left: 8),
             child: Row(
               children: [
-                Expanded(child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'UEMF',
-                  style: EsText.displayM.copyWith(
-                    color: console ? Colors.white : c.actionPrimary,
-                    fontSize: 26,
-                    height: 1,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      EuromedStudiosLogo(height: 44, onDark: console),
+                      if (console) ...[
+                        const SizedBox(height: 10),
+                        Text(
+                          'ESPACE STUDIOS',
+                          style: EsText.overline.copyWith(
+                            color: Colors.white.withValues(alpha: 0.6),
+                            letterSpacing: 1.6,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  console ? 'ESPACE STUDIOS' : 'EUROMED STUDIOS',
-                  style: EsText.overline.copyWith(
-                    color: console ? c.brandAccent : c.textSecondary,
-                    letterSpacing: 1.6,
-                  ),
-                ),
-              ],
-            )),
                 NoticeBell(onDark: console),
               ],
             ),

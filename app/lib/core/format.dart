@@ -8,6 +8,9 @@ abstract final class Fmt {
   static final _dayShort = DateFormat('EEE d MMM', 'fr_FR');
   static final _dayLong = DateFormat('EEEE d MMMM', 'fr_FR');
   static final _dateTime = DateFormat('EEE d MMM · HH:mm', 'fr_FR');
+  static final _dayMonth = DateFormat('d MMM', 'fr_FR');
+  static final _dayMonthYear = DateFormat('d MMM y', 'fr_FR');
+  static final _month = DateFormat('MMMM y', 'fr_FR');
 
   static String time(DateTime d) => _time.format(d);
 
@@ -25,6 +28,15 @@ abstract final class Fmt {
   static String longDay(DateTime d) => _cap(_dayLong.format(d));
   static String shortDay(DateTime d) => _cap(_dayShort.format(d));
   static String dateTime(DateTime d) => _cap(_dateTime.format(d));
+
+  /// "14 nov."
+  static String dayMonth(DateTime d) => _dayMonth.format(d);
+
+  /// "14 nov. 2026"
+  static String dayMonthYear(DateTime d) => _dayMonthYear.format(d);
+
+  /// "Novembre 2026"
+  static String month(DateTime d) => _cap(_month.format(d));
 
   /// "il y a 26 h", "il y a 15 min".
   static String ago(DateTime then, DateTime now) {

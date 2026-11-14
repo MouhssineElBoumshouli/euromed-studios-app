@@ -8,6 +8,7 @@ import '../../core/theme/es_colors.dart';
 import '../../core/theme/es_text.dart';
 import '../../core/widgets/layout.dart';
 import '../../core/widgets/status_chip.dart';
+import '../../core/widgets/logo.dart';
 import '../../data/app_state.dart';
 import '../../data/demo_world.dart';
 import '../../data/selectors.dart';
@@ -47,43 +48,16 @@ class HomeScreen extends ConsumerWidget {
 }
 
 
-/// UEMF wordmark on the left, notifications and profile on the right.
+/// Euromed Studios logo on the left, notifications and profile on the right.
 class _TopRow extends ConsumerWidget {
   const _TopRow();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final c = context.es;
     final me = ref.watch(currentPersonProvider);
     return Row(
       children: [
-        Semantics(
-          label: 'UEMF Euromed Studios',
-          excludeSemantics: true,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'UEMF',
-                style: EsText.displayM.copyWith(
-                  color: c.actionPrimary,
-                  fontSize: 24,
-                  letterSpacing: -0.5,
-                  height: 1,
-                ),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                'EUROMED STUDIOS',
-                style: EsText.overline.copyWith(
-                  color: c.textSecondary,
-                  fontSize: 9.5,
-                  letterSpacing: 1.4,
-                ),
-              ),
-            ],
-          ),
-        ),
+        const EuromedStudiosLogo(height: 40, onDark: false),
         const Spacer(),
         DecoratedBox(
           decoration: BoxDecoration(

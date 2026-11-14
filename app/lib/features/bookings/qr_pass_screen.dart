@@ -10,6 +10,7 @@ import '../../core/theme/es_text.dart';
 import '../../core/widgets/es_button.dart';
 import '../../core/widgets/layout.dart';
 import '../../core/widgets/status_chip.dart';
+import '../../core/widgets/logo.dart';
 import '../../data/app_state.dart';
 import '../../data/demo_world.dart';
 import '../../domain/bookings.dart';
@@ -135,10 +136,7 @@ class _QrPassState extends ConsumerState<QrPassScreen> {
                           ],
                         ),
                       ),
-                      Text(
-                        'UEMF',
-                        style: EsText.titleM.copyWith(color: Colors.white),
-                      ),
+                      const EuromedStudiosLogo(height: 40, wordmark: false),
                     ],
                   ),
                 ),
