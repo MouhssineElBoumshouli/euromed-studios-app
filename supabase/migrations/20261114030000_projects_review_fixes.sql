@@ -56,3 +56,7 @@ end $$;
 --    owner can see a collaborator's session and move the project forward.
 create policy "sessions of my projects" on public.bookings for select to authenticated
   using (project_id is not null and public.can_see_project(project_id));
+
+-- 4. Security advisor: fixed search path; the trigger function is not an API.
+alter function public.involved_in(public.profiles, public.projects) set search_path = public;
+revoke execute on function public.check_booking_project() from public, anon, authenticated;
