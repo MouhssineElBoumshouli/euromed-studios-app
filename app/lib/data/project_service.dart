@@ -65,6 +65,9 @@ class ProjectService {
     if (m.contains('mime') || m.contains('invalid_mime_type')) {
       return 'Format non accepté. Utilisez PDF, Word, texte ou image.';
     }
+    if (m.contains('file_missing')) {
+      return 'L’envoi du fichier n’a pas abouti. Réessayez.';
+    }
     if (m.contains('not_allowed') || m.contains('row-level security')) {
       return 'Vous ne pouvez pas faire cette action sur ce projet.';
     }
@@ -188,6 +191,7 @@ class ProjectService {
   }
 
   /// A short-lived private link to open the file (1 minute).
+  /// Null offline (no real files there).
   Future<String?> linkFor(ProjectFile f) async {
     if (!isLive) return null;
     try {
@@ -195,7 +199,9 @@ class ProjectService {
           .from(projectBucket)
           .createSignedUrl(f.path, 60);
     } on StorageException {
-      return null;
+      throw const ProjectProblem(
+        'Le document est introuvable. Ajoutez-le à nouveau.',
+      );
     }
   }
 

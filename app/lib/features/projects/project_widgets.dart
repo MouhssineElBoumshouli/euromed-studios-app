@@ -85,7 +85,7 @@ class StageBar extends StatelessWidget {
 
 /// Owner and collaborators as overlapping initials.
 class PeopleStack extends StatelessWidget {
-  const PeopleStack(this.ids, {super.key, this.size = 28});
+  const PeopleStack(this.ids, {super.key, this.size = 34});
   final List<String> ids;
   final double size;
 

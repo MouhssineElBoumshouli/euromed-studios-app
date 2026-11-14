@@ -71,7 +71,11 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
   @override
   void initState() {
     super.initState();
-    projectId = widget.projectId;
+    // Keep a project from the link only if this person works on it.
+    final me = ref.read(currentPersonProvider);
+    projectId = _myProjects(me).any((p) => p.id == widget.projectId)
+        ? widget.projectId
+        : null;
     final w = ref.read(worldProvider);
     final days = _bookableDays(w);
     final asked =

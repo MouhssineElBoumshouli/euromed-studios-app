@@ -104,12 +104,16 @@ class _ProjectDetailState extends ConsumerState<ProjectDetailScreen> {
   }
 
   Future<void> _open(ProjectFile f) async {
-    final url = await _service.linkFor(f);
-    if (url == null) {
-      _say('Le document n’est pas disponible en mode hors ligne.');
-      return;
+    try {
+      final url = await _service.linkFor(f);
+      if (url == null) {
+        _say('Aperçu indisponible en mode démo hors ligne.');
+        return;
+      }
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    } on ProjectProblem catch (e) {
+      _say(e.message);
     }
-    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
   }
 
   Future<void> _remove(ProjectFile f) async {
@@ -144,6 +148,9 @@ class _ProjectDetailState extends ConsumerState<ProjectDetailScreen> {
     final p = store.projects.where((x) => x.id == widget.projectId).firstOrNull;
     final top = MediaQuery.paddingOf(context).top;
 
+    if (p == null && !store.loaded) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
     if (p == null || !canSeeProject(me, p)) {
       return Scaffold(
         body: Padding(

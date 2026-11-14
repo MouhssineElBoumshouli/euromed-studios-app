@@ -10,11 +10,20 @@ import '../domain/people.dart';
 import '../domain/projects.dart';
 import '../domain/rules/projects.dart';
 import 'app_state.dart';
+import 'backend.dart';
 
 class ProjectsState {
-  const ProjectsState({this.projects = const [], this.files = const []});
+  const ProjectsState({
+    this.projects = const [],
+    this.files = const [],
+    this.loaded = true,
+  });
   final List<Project> projects;
   final List<ProjectFile> files;
+
+  /// False until the first live load (so a deep link waits instead of
+  /// saying "not found").
+  final bool loaded;
 
   List<ProjectFile> filesOf(String projectId) =>
       [for (final f in files) if (f.projectId == projectId) f];
@@ -115,10 +124,12 @@ abstract final class DemoProjects {
 
 class ProjectsNotifier extends Notifier<ProjectsState> {
   @override
-  ProjectsState build() => ProjectsState(
-        projects: List.of(DemoProjects.projects),
-        files: List.of(DemoProjects.files),
-      );
+  ProjectsState build() => isLive
+      ? const ProjectsState(loaded: false)
+      : ProjectsState(
+          projects: List.of(DemoProjects.projects),
+          files: List.of(DemoProjects.files),
+        );
 
   int _counter = 10;
 
