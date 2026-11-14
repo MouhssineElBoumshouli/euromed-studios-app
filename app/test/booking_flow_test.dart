@@ -97,7 +97,8 @@ void main() {
 
     await t.tap(go);
     await t.pumpAndSettle();
-    expect(find.text('Choisissez un créneau'), findsOneWidget);
+    // Title + the (disabled) button until a slot is picked.
+    expect(find.text('Choisissez un créneau'), findsNWidgets(2));
     expect(find.text('ÉTAPE 2/4'), findsOneWidget);
     expect(find.text('Changer'), findsOneWidget);
 
