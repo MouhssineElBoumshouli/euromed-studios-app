@@ -101,6 +101,7 @@ final appRouter = GoRouter(
               path: ':id',
               parentNavigatorKey: _rootKey,
               builder: (_, st) => WideFrame(
+                maxWidth: 1280,
                 child: ProjectDetailScreen(projectId: st.pathParameters['id']!),
               ),
             ),

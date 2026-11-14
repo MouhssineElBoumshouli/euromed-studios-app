@@ -182,15 +182,7 @@ class _ProjectDetailState extends ConsumerState<ProjectDetailScreen> {
     final problem = advanceProblem(p, files, w.bookings);
     final owner = personById(p.ownerId);
 
-    return Scaffold(
-      body: ListView(
-        padding: EdgeInsets.fromLTRB(
-          EsSpace.page,
-          top + EsSpace.s3,
-          EsSpace.page,
-          EsSpace.s8,
-        ),
-        children: [
+    final back = <Widget>[
           Align(
             alignment: Alignment.centerLeft,
             child: EsBackButton(
@@ -198,6 +190,8 @@ class _ProjectDetailState extends ConsumerState<ProjectDetailScreen> {
                   context.canPop() ? context.pop() : context.go('/projects'),
             ),
           ),
+    ];
+    final main = <Widget>[
           const SizedBox(height: EsSpace.s4),
           Row(children: [TypeTag(p.type)]),
           const SizedBox(height: 10),
@@ -244,6 +238,8 @@ class _ProjectDetailState extends ConsumerState<ProjectDetailScreen> {
           const SizedBox(height: EsSpace.s2),
           ProjectThread(project: p),
           const SizedBox(height: EsSpace.s5),
+    ];
+    final aside = <Widget>[
           SectionTitle(
             'Documents',
             actionLabel: work ? 'Ajouter' : null,
@@ -316,7 +312,55 @@ class _ProjectDetailState extends ConsumerState<ProjectDetailScreen> {
           const SectionTitle('Historique'),
           const SizedBox(height: EsSpace.s2),
           _History(events: p.history.reversed.toList()),
-        ],
+    ];
+
+    // On a large screen (staff console), documents, sessions, team and
+    // history sit in a side column next to the work itself.
+    return Scaffold(
+      body: LayoutBuilder(
+        builder: (context, box) {
+          final twoCols = box.maxWidth >= 1000;
+          return ListView(
+            padding: EdgeInsets.fromLTRB(
+              twoCols ? EsSpace.s6 : EsSpace.page,
+              top + EsSpace.s3,
+              twoCols ? EsSpace.s6 : EsSpace.page,
+              EsSpace.s8,
+            ),
+            children: [
+              ...back,
+              if (twoCols)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: main,
+                      ),
+                    ),
+                    const SizedBox(width: EsSpace.s6),
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SizedBox(height: EsSpace.s4),
+                          ...aside,
+                        ],
+                      ),
+                    ),
+                  ],
+                )
+              else ...[
+                ...main,
+                const SizedBox(height: EsSpace.s5),
+                ...aside,
+              ],
+            ],
+          );
+        },
       ),
     );
   }

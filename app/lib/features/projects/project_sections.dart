@@ -198,7 +198,7 @@ class _PostPanelState extends ConsumerState<PostProductionPanel> {
         children: [
           Row(
             children: [
-              const Expanded(child: Overline('Étape actuelle · Montage')),
+              const Expanded(child: Overline('Montage')),
               PostStatusTag(s),
             ],
           ),
@@ -713,7 +713,12 @@ class _ThreadState extends ConsumerState<ProjectThread> {
                       'précédents',
                     ),
                   ),
-                for (final m in shown) _MessageTile(message: m, me: me),
+                for (final m in shown)
+                  _MessageTile(
+                    message: m,
+                    me: me,
+                    now: ref.watch(worldProvider).now,
+                  ),
               ],
             ),
           ),
@@ -809,9 +814,14 @@ class _ThreadState extends ConsumerState<ProjectThread> {
 }
 
 class _MessageTile extends StatelessWidget {
-  const _MessageTile({required this.message, required this.me});
+  const _MessageTile({
+    required this.message,
+    required this.me,
+    required this.now,
+  });
   final ProjectMessage message;
   final Person me;
+  final DateTime now;
 
   @override
   Widget build(BuildContext context) {
@@ -880,19 +890,37 @@ class _MessageTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: mine ? 'Vous' : author.fullName,
-                        style: EsText.titleS.copyWith(color: c.textPrimary),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: mine ? 'Vous' : author.fullName,
+                              style:
+                                  EsText.titleS.copyWith(color: c.textPrimary),
+                            ),
+                            TextSpan(
+                              text: staffRole,
+                              style: EsText.bodyS
+                                  .copyWith(color: c.textSecondary),
+                            ),
+                          ],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      TextSpan(
-                        text: '$staffRole · $when',
+                    ),
+                    const SizedBox(width: 8),
+                    Tooltip(
+                      message: when,
+                      child: Text(
+                        Fmt.ago(m.at, now),
                         style: EsText.bodyS.copyWith(color: c.textDisabled),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 4),
                 Container(
