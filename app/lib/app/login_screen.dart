@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/theme/es_colors.dart';
 import '../core/theme/es_text.dart';
 import '../core/widgets/layout.dart';
+import '../core/widgets/logo.dart';
 import '../data/backend.dart';
 import '../data/demo_world.dart';
 import '../data/live_sync.dart';
@@ -57,21 +58,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   EsSpace.s8,
                 ),
                 children: [
-                  Text(
-                    'UEMF',
-                    style: EsText.displayM.copyWith(
-                      color: c.actionPrimary,
-                      fontSize: 28,
-                      height: 1,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'EUROMED STUDIOS',
-                    style: EsText.overline.copyWith(
-                      color: c.textSecondary,
-                      letterSpacing: 1.6,
-                    ),
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: EuromedStudiosLogo(height: 64, onDark: false),
                   ),
                   const SizedBox(height: EsSpace.s8),
                   Text.rich(

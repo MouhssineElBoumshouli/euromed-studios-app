@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Réservation des studios Euromed · UEMF">
+  <meta name="theme-color" content="#141D52">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Euromed Studios">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="manifest" href="manifest.json">
+  <title>Euromed Studios</title>
+  <style>
+    /* Shown while the app loads: the logo on navy, with a soft pulse. */
+    html, body { margin: 0; height: 100%; background: #141D52; }
+    #splash { position: fixed; inset: 0; display: grid; place-items: center; background: #141D52; transition: opacity .35s ease; z-index: 10; }
+    #splash svg { width: 84px; height: auto; animation: pulse 1.6s ease-in-out infinite; }
+    #splash.gone { opacity: 0; pointer-events: none; }
+    @keyframes pulse { 50% { opacity: .55; } }
+    @media (prefers-reduced-motion: reduce) { #splash svg { animation: none; } }
+  </style>
+</head>
+<body>
+  <div id="splash" aria-label="Euromed Studios, chargement" role="img">
+    <svg viewBox="0 0 64 100" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#fff">
+        <rect x="0" y="17.5" width="10" height="3.6"/><rect x="0" y="11.5" width="10" height="3.6"/>
+        <rect x="13" y="17.5" width="10" height="3.6"/><rect x="13" y="11.5" width="10" height="3.6"/><rect x="13" y="5.5" width="10" height="3.6"/><rect x="13" y="-0.5" width="10" height="3.6"/>
+        <rect x="27" y="17.5" width="10" height="3.6"/><rect x="27" y="11.5" width="10" height="3.6"/><rect x="27" y="5.5" width="10" height="3.6"/>
+        <rect x="41" y="17.5" width="10" height="3.6"/><rect x="41" y="11.5" width="10" height="3.6"/>
+        <rect x="54" y="17.5" width="10" height="3.6"/><rect x="54" y="11.5" width="10" height="3.6"/><rect x="54" y="5.5" width="10" height="3.6"/>
+        <path d="M0 30 L35.5 30 Q26.5 38 25.8 52 L25.8 98 Q7 97.5 0 73 Z"/>
+      </g>
+      <g fill="#CCAB7C">
+        <path d="M63.5 30.5 Q40 33 39 64.5 Q47 61 63.5 52 Z"/>
+        <path d="M63.5 67 Q41 72 39 98 Q63.5 94 63.5 73 Z"/>
+      </g>
+    </svg>
+  </div>
+  <script>
+    window.addEventListener('flutter-first-frame', function () {
+      var s = document.getElementById('splash');
+      s.classList.add('gone');
+      setTimeout(function () { s.remove(); }, 400);
+    });
+  </script>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>

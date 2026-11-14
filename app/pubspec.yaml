@@ -46,3 +46,7 @@ flutter:
           weight: 600
         - asset: assets/fonts/DMSans-Bold.ttf
           weight: 700
+    - family: BarlowSemiCondensed
+      fonts:
+        - asset: assets/fonts/BarlowSemiCondensed-Bold.ttf
+          weight: 700
