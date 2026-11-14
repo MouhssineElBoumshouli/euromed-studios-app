@@ -289,15 +289,18 @@ class _PillTab extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 3),
-            Text(
-              spec.label,
-              maxLines: 1,
-              overflow: TextOverflow.fade,
-              softWrap: false,
-              style: EsText.labelS.copyWith(
-                color: fg,
-                fontSize: 11.5,
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+            // Long labels ("Maintenance") shrink a little instead of cutting.
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                spec.label,
+                maxLines: 1,
+                softWrap: false,
+                style: EsText.labelS.copyWith(
+                  color: fg,
+                  fontSize: 11.5,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                ),
               ),
             ),
           ],
