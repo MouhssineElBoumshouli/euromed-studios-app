@@ -521,7 +521,7 @@ class _FileTile extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(14, 10, 4, 10),
         child: Row(
           children: [
-            IconTile(Icons.description_outlined, size: 38),
+            const IconTile(Icons.description_outlined, size: 38),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

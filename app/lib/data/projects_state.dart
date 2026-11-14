@@ -445,7 +445,9 @@ class ProjectsNotifier extends Notifier<ProjectsState> {
   }) {
     final inv = state.invites.firstWhere((i) => i.id == inviteId);
     if (inv.inviteeId != by.id) throw StateError('not_found');
-    if (inv.status != InviteStatus.pending) throw StateError('already_answered');
+    if (inv.status != InviteStatus.pending) {
+      throw StateError('already_answered');
+    }
     state = state.copyWith(
       invites: [
         for (final i in state.invites)
