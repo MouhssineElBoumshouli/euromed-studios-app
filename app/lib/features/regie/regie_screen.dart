@@ -177,7 +177,15 @@ class _Count extends StatelessWidget {
               '$value',
               style: EsText.displayM.copyWith(color: color, fontSize: 24),
             ),
-            Text(label, style: EsText.bodyS.copyWith(color: c.textSecondary)),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                maxLines: 1,
+                softWrap: false,
+                style: EsText.bodyS.copyWith(color: c.textSecondary),
+              ),
+            ),
           ],
         ),
       ),
