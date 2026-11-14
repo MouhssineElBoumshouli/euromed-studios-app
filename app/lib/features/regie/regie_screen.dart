@@ -24,17 +24,27 @@ class RegieScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.es;
     final w = ref.watch(worldProvider);
-    final today = [
-      for (final b in w.bookings)
-        if (!b.isPrivate &&
-            (b.status == BookingStatus.approved ||
-                b.status == BookingStatus.completed ||
-                b.status == BookingStatus.noShow) &&
-            b.start.year == w.now.year &&
-            b.start.month == w.now.month &&
-            b.start.day == w.now.day)
-          b,
-    ]..sort((a, b) => a.start.compareTo(b.start));
+    List<Booking> sessionsOn(DateTime d) => [
+          for (final b in w.bookings)
+            if (!b.isPrivate &&
+                (b.status == BookingStatus.approved ||
+                    b.status == BookingStatus.completed ||
+                    b.status == BookingStatus.noShow) &&
+                b.start.year == d.year &&
+                b.start.month == d.month &&
+                b.start.day == d.day)
+              b,
+        ]..sort((a, b) => a.start.compareTo(b.start));
+    final today = sessionsOn(w.now);
+    // Closed today (weekend): show the next open day instead of nothing.
+    final closed = !w.policy.openWeekdays.contains(w.now.weekday);
+    var next = DateTime(w.now.year, w.now.month, w.now.day + 1);
+    for (var i = 0;
+        i < 7 && !w.policy.openWeekdays.contains(next.weekday);
+        i++) {
+      next = DateTime(next.year, next.month, next.day + 1);
+    }
+    final upcoming = closed ? sessionsOn(next) : const <Booking>[];
     int count(Set<SessionPhase> p) =>
         today
             .where(
@@ -87,7 +97,44 @@ class RegieScreen extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: EsSpace.s4),
-        if (today.isEmpty)
+        if (closed) ...[
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: EsSpace.page),
+            child: InfoBanner(
+              icon: Icons.door_front_door_outlined,
+              title: 'Studios fermés aujourd’hui',
+              text: 'Voici les séances validées de la prochaine journée.',
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              EsSpace.page,
+              EsSpace.s4,
+              EsSpace.page,
+              EsSpace.s2,
+            ),
+            child: SectionTitle(Fmt.longDay(next)),
+          ),
+          if (upcoming.isEmpty)
+            const EmptyState(
+              icon: Icons.weekend_outlined,
+              title: 'Aucune séance validée',
+              message: 'Les séances validées apparaîtront ici.',
+            ),
+          for (var i = 0; i < upcoming.length; i++)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                EsSpace.page,
+                0,
+                EsSpace.page,
+                EsSpace.s3,
+              ),
+              child: FadeInUp(
+                index: i,
+                child: SessionCard(booking: upcoming[i], now: w.now),
+              ),
+            ),
+        ] else if (today.isEmpty)
           const EmptyState(
             icon: Icons.weekend_outlined,
             title: 'Aucune séance aujourd’hui',
