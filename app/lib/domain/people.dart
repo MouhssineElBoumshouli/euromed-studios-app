@@ -69,6 +69,7 @@ class Person {
     this.title,
     this.approverScopes = const [],
     this.clubIds = const [],
+    this.active = true,
   });
 
   final String id;
@@ -83,6 +84,45 @@ class Person {
 
   /// Clubs this person may book for (as representative).
   final List<String> clubIds;
+
+  /// False when an admin turned the account off (it can't sign in).
+  final bool active;
+
+  /// Same person with the same access (for skipping identical reloads).
+  bool sameAs(Person o) =>
+      id == o.id &&
+      firstName == o.firstName &&
+      lastName == o.lastName &&
+      title == o.title &&
+      establishmentId == o.establishmentId &&
+      active == o.active &&
+      roles.length == o.roles.length &&
+      roles.containsAll(o.roles) &&
+      clubIds.join(',') == o.clubIds.join(',') &&
+      approverScopes
+              .map((s) => '${s.requesterType.name}/${s.establishmentId}')
+              .join(',') ==
+          o.approverScopes
+              .map((s) => '${s.requesterType.name}/${s.establishmentId}')
+              .join(',');
+
+  Person copyWith({
+    Set<Role>? roles,
+    List<ApproverScope>? approverScopes,
+    List<String>? clubIds,
+    bool? active,
+  }) =>
+      Person(
+        id: id,
+        firstName: firstName,
+        lastName: lastName,
+        roles: roles ?? this.roles,
+        establishmentId: establishmentId,
+        title: title,
+        approverScopes: approverScopes ?? this.approverScopes,
+        clubIds: clubIds ?? this.clubIds,
+        active: active ?? this.active,
+      );
 
   String get displayName =>
       '$firstName ${lastName.isEmpty ? '' : '${lastName[0]}.'}'.trim();

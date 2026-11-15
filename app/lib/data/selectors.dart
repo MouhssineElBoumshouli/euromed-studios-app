@@ -12,6 +12,7 @@ import '../domain/studios.dart';
 import 'app_state.dart';
 import 'demo_world.dart';
 import 'projects_state.dart';
+import 'directory.dart';
 
 /// The requester type a person books as by default.
 RequesterType defaultRequesterType(Person p) {
@@ -96,7 +97,7 @@ final noticesProvider = Provider<List<Notice>>((ref) {
       me,
       w.bookings,
       w.now,
-      people: DemoWorld.people,
+      people: Directory.people,
       describe: (b) =>
           '${studioById(b.studioId).name} · ${Fmt.shortDay(b.start)} '
           '${Fmt.time(b.start)}',

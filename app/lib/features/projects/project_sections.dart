@@ -11,12 +11,12 @@ import '../../core/widgets/es_button.dart';
 import '../../core/widgets/layout.dart';
 import '../../core/widgets/status_chip.dart';
 import '../../data/app_state.dart';
-import '../../data/demo_world.dart';
 import '../../data/project_service.dart';
 import '../../data/projects_state.dart';
 import '../../domain/people.dart';
 import '../../domain/projects.dart';
 import '../../domain/rules/projects.dart';
+import '../../data/directory.dart';
 
 /// Runs a project action with a snackbar for the result.
 Future<bool> runProjectAction(
@@ -1216,7 +1216,7 @@ class _InviteState extends ConsumerState<InvitePeopleSheet> {
     final invited = {for (final i in store.pendingInvitesOf(p.id)) i.inviteeId};
     final q = _fold(search.text.trim());
     final people = [
-      for (final person in DemoWorld.people)
+      for (final person in Directory.people)
         if (isInvitable(person) &&
             !p.involves(person.id) &&
             (q.isEmpty ||

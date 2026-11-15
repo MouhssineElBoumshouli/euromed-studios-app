@@ -16,6 +16,7 @@ import '../domain/rules/quota.dart';
 import '../domain/rules/sessions.dart';
 import '../domain/studios.dart';
 import 'demo_world.dart';
+import 'directory.dart';
 
 /// Why a request cannot be sent. Each one has its own screen or message.
 enum SubmitProblem {
@@ -226,7 +227,7 @@ class WorldNotifier extends Notifier<WorldState> {
     String? technicianId,
   }) {
     final b = _find(bookingId);
-    if (!canDecide(by, b, people: DemoWorld.people)) {
+    if (!canDecide(by, b, people: Directory.people)) {
       throw StateError('${by.id} cannot decide on ${b.id}');
     }
     final level1 = b.status == BookingStatus.pendingEntity;
@@ -257,7 +258,7 @@ class WorldNotifier extends Notifier<WorldState> {
   /// A refusal always needs a reason (R-19).
   void refuse(String bookingId, {required Person by, required String reason}) {
     final b = _find(bookingId);
-    if (!canDecide(by, b, people: DemoWorld.people)) {
+    if (!canDecide(by, b, people: Directory.people)) {
       throw StateError('${by.id} cannot decide on ${b.id}');
     }
     if (reason.trim().isEmpty) {
@@ -428,13 +429,18 @@ final currentPersonIdProvider = StateProvider<String>((ref) => 'yasmine');
 
 final currentPersonProvider = Provider<Person>((ref) {
   final id = ref.watch(currentPersonIdProvider);
-  return DemoWorld.people.firstWhere((p) => p.id == id);
+  // Follows the directory, so a role change applies at once.
+  final people = ref.watch(directoryProvider);
+  return people.firstWhere(
+    (p) => p.id == id,
+    orElse: () => Person(id: id, firstName: '', lastName: '', roles: const {}),
+  );
 });
 
 /// Stands for "another person" on bookings you may not see in detail.
 const otherPersonId = '_other';
 
-Person personById(String id) => DemoWorld.people.firstWhere(
+Person personById(String id) => Directory.people.firstWhere(
       (p) => p.id == id,
       orElse: () => id == otherPersonId
           ? const Person(

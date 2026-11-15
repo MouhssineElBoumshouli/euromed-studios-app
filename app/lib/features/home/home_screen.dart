@@ -16,6 +16,7 @@ import '../../domain/bookings.dart';
 import '../../domain/rules/approval.dart';
 import '../../domain/rules/quota.dart';
 import '../notifications/notifications_screen.dart';
+import '../../data/directory.dart';
 
 /// B1 · Home. Requesters see their next session, quota and requests.
 /// The studio manager sees what is waiting for them.
@@ -729,7 +730,7 @@ class _ManagerHome extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final me = ref.watch(currentPersonProvider);
     final c = context.es;
-    final inbox = inboxFor(me, w.bookings, people: DemoWorld.people);
+    final inbox = inboxFor(me, w.bookings, people: Directory.people);
     final today = [
       for (final b in w.bookings)
         if (b.status == BookingStatus.approved &&

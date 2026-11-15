@@ -30,3 +30,6 @@ final liveStatus = ValueNotifier<LiveStatus>(LiveStatus.off);
 
 /// True once main() has connected to the server.
 bool get isLive => liveStatus.value != LiveStatus.off;
+
+/// A message to show on the sign-in screen (e.g. account turned off).
+final loginNotice = ValueNotifier<String?>(null);

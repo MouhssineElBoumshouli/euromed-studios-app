@@ -6,6 +6,8 @@ import '../data/backend.dart';
 import '../features/admin/activity_screen.dart';
 import '../features/admin/admin_hub_screen.dart';
 import '../features/admin/dashboard_screen.dart';
+import '../features/admin/user_detail_screen.dart';
+import '../features/admin/users_screen.dart';
 import '../features/booking/booking_flow_screen.dart';
 import '../features/booking/sent_screen.dart';
 import '../features/bookings/booking_detail_screen.dart';
@@ -156,6 +158,22 @@ final appRouter = GoRouter(
               parentNavigatorKey: _rootKey,
               builder: (_, __) =>
                   const WideFrame(maxWidth: 960, child: ActivityScreen()),
+            ),
+            GoRoute(
+              path: 'users',
+              parentNavigatorKey: _rootKey,
+              builder: (_, __) =>
+                  const WideFrame(maxWidth: 960, child: UsersScreen()),
+              routes: [
+                GoRoute(
+                  path: ':id',
+                  parentNavigatorKey: _rootKey,
+                  builder: (_, st) => WideFrame(
+                    maxWidth: 760,
+                    child: UserDetailScreen(personId: st.pathParameters['id']!),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

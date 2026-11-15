@@ -36,6 +36,7 @@ class AdminHubScreen extends ConsumerWidget {
         title: 'Utilisateurs et rôles',
         text: 'Rôles, périmètres de validation, clubs.',
         route: '/admin/users',
+        ready: true,
       ),
       const _Section(
         icon: Icons.rule_rounded,

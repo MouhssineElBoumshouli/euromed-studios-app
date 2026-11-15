@@ -170,11 +170,15 @@ class InfoBanner extends StatelessWidget {
     this.tone = BannerTone.info,
     this.icon,
     this.title,
+    this.action,
   });
   final String text;
   final String? title;
   final BannerTone tone;
   final IconData? icon;
+
+  /// Optional button on the right (e.g. "Recharger").
+  final Widget? action;
 
   @override
   Widget build(BuildContext context) {
@@ -216,6 +220,7 @@ class InfoBanner extends StatelessWidget {
               ],
             ),
           ),
+          if (action != null) action!,
         ],
       ),
     );
