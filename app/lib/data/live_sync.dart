@@ -20,6 +20,7 @@ import 'app_state.dart';
 import 'backend.dart';
 import 'admin_state.dart';
 import 'demo_world.dart';
+import 'directory.dart';
 import 'projects_state.dart';
 
 /// Set by main() when the app runs against the server.
@@ -59,7 +60,12 @@ class LiveSync {
     });
   }
 
-  Future<void> signIn(String slug) => db.auth.signInWithPassword(
+  Future<void> signIn(String slug) {
+    loginNotice.value = null;
+    return _signIn(slug);
+  }
+
+  Future<void> _signIn(String slug) => db.auth.signInWithPassword(
         email: demoEmail(slug),
         password: kDemoPassword,
       );
@@ -96,9 +102,18 @@ class LiveSync {
     _clearWorld();
     liveStatus.value = LiveStatus.loading;
     try {
-      final me =
-          await db.from('profiles').select('slug').eq('id', uid).single();
+      final me = await db
+          .from('profiles')
+          .select('slug, active')
+          .eq('id', uid)
+          .single();
       if (gen != _generation) return;
+      if (me['active'] == false) {
+        loginNotice.value = 'Ce compte a été désactivé par '
+            'l’administration. Contactez la Direction des Studios.';
+        await db.auth.signOut();
+        return;
+      }
       container.read(currentPersonIdProvider.notifier).state =
           me['slug'] as String;
       await refresh(gen);
@@ -145,12 +160,24 @@ class LiveSync {
   Future<void> refresh([int? gen]) async {
     gen ??= _generation;
     final now = DateTime.now();
-    if (_slugById.isEmpty) {
-      final people = await db.from('profiles').select('id, slug');
-      _slugById = {
-        for (final p in people) p['id'] as String: p['slug'] as String,
-      };
+    // The directory: everyone's name, roles and scopes (small table).
+    final people = await db.from('profiles').select();
+    if (gen != _generation) return;
+    _slugById = {
+      for (final p in people) p['id'] as String: p['slug'] as String,
+    };
+    final directory = [for (final p in people) personFromRow(p)];
+    final mine = directory
+        .where((p) => p.id == container.read(currentPersonIdProvider))
+        .firstOrNull;
+    if (mine != null && !mine.active) {
+      // An admin turned this account off: sign out with an explanation.
+      loginNotice.value = 'Ce compte a été désactivé par l’administration. '
+          'Contactez la Direction des Studios.';
+      await db.auth.signOut();
+      return;
     }
+    container.read(directoryProvider.notifier).replace(directory);
     final results = await Future.wait<dynamic>([
       Future<dynamic>.value(db.from('settings').select().single()),
       Future<dynamic>.value(db.from('bookings').select()),
@@ -453,3 +480,28 @@ ProjectInvite? inviteFromRow(Map<String, dynamic> r) {
     at: _time(r['created_at']),
   );
 }
+
+T? _byName<T extends Enum>(List<T> values, Object? name) =>
+    values.where((v) => v.name == name).firstOrNull;
+
+/// A profile row as a [Person]. Unknown roles or scope types are skipped.
+Person personFromRow(Map<String, dynamic> r) => Person(
+      id: r['slug'] as String,
+      firstName: r['first_name'] as String? ?? '',
+      lastName: r['last_name'] as String? ?? '',
+      title: r['title'] as String?,
+      establishmentId: r['establishment_id'] as String?,
+      roles: {
+        for (final x in (r['roles'] as List? ?? const []))
+          if (_byName(Role.values, x) case final role?) role,
+      },
+      approverScopes: [
+        for (final s in (r['approver_scopes'] as List? ?? const []))
+          if (_byName(RequesterType.values, (s as Map)['type']) case final t?)
+            ApproverScope(t, establishmentId: s['establishment_id'] as String?),
+      ],
+      clubIds: [
+        for (final c in (r['club_ids'] as List? ?? const [])) c as String,
+      ],
+      active: r['active'] as bool? ?? true,
+    );

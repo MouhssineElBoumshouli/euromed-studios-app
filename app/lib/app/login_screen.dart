@@ -62,6 +62,20 @@ class _LoginScreenState extends State<LoginScreen> {
                     alignment: Alignment.centerLeft,
                     child: EuromedStudiosLogo(height: 64, onDark: false),
                   ),
+                  ValueListenableBuilder<String?>(
+                    valueListenable: loginNotice,
+                    builder: (_, notice, __) => notice == null
+                        ? const SizedBox.shrink()
+                        : Padding(
+                            padding: const EdgeInsets.only(top: EsSpace.s5),
+                            child: InfoBanner(
+                              tone: BannerTone.warning,
+                              icon: Icons.block_rounded,
+                              title: 'Accès refusé',
+                              text: notice,
+                            ),
+                          ),
+                  ),
                   const SizedBox(height: EsSpace.s8),
                   Text.rich(
                     TextSpan(
