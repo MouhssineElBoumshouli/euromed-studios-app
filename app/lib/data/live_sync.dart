@@ -244,28 +244,21 @@ class LiveSync {
             .from('studios')
             .select('id, bookable')
             .then<dynamic>((v) => v)
-            .catchError((_) => <dynamic>[]),
+            .catchError((_) => null),
       ),
       Future<dynamic>.value(
         db
             .from('equipment')
             .select('id, stock')
             .then<dynamic>((v) => v)
-            .catchError((_) => <dynamic>[]),
+            .catchError((_) => null),
       ),
     ]);
     final settings = results[0] as Map<String, dynamic>;
     final n = results.length;
-    Catalog.apply(
-      bookable: {
-        for (final r in results[n - 2] as List)
-          r['id'] as String: r['bookable'] as bool,
-      },
-      stock: {
-        for (final r in results[n - 1] as List)
-          r['id'] as String: r['stock'] as int,
-      },
-    );
+    // A failed read keeps the last known values (never "everything open").
+    final studioRows = results[n - 2] as List?;
+    final stockRows = results[n - 1] as List?;
     final known = {for (final s in Catalog.studios) s.id};
     final visible = [
       for (final r in results[1] as List)
@@ -298,6 +291,16 @@ class LiveSync {
       }
     }
     if (gen != _generation) return;
+    if (studioRows != null && stockRows != null) {
+      Catalog.apply(
+        bookable: {
+          for (final r in studioRows) r['id'] as String: r['bookable'] as bool,
+        },
+        stock: {
+          for (final r in stockRows) r['id'] as String: r['stock'] as int,
+        },
+      );
+    }
     container.read(worldProvider.notifier).load(
           WorldState(
             now: now,

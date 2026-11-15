@@ -41,6 +41,11 @@ class AdminService {
     } on PostgrestException catch (e) {
       final code = RegExp('[a-z_]+').stringMatch(e.message) ?? '';
       throw AdminProblem(adminProblemText(code));
+    } on AdminProblem {
+      rethrow;
+    } catch (_) {
+      // No network, a timeout, an expired session…
+      throw AdminProblem(adminProblemText('network'));
     }
   }
 
@@ -81,7 +86,7 @@ class AdminService {
             'p_closing': d.closingHour,
             'p_slot': d.slotMinutes,
             'p_advance': d.maxAdvanceDays,
-            'p_quota': d.studentQuotaMinutes,
+            'p_quota': d.studentQuota,
             'p_grace': d.qrGraceMinutes,
           },
         ),
@@ -100,8 +105,10 @@ class AdminService {
             openWeekdays: p.openWeekdays,
             maxAdvanceDays: d.maxAdvanceDays,
             weeklyQuotaMinutes: {
-              ...p.weeklyQuotaMinutes,
-              RequesterType.student: d.studentQuotaMinutes,
+              for (final e in p.weeklyQuotaMinutes.entries)
+                if (e.key != RequesterType.student) e.key: e.value,
+              if (d.studentQuota != null)
+                RequesterType.student: d.studentQuota!,
             },
             qrGraceMinutes: d.qrGraceMinutes,
             charterVersion: p.charterVersion,

@@ -15,6 +15,7 @@ class RulesDraft {
     required this.maxAdvanceDays,
     required this.studentQuotaMinutes,
     required this.qrGraceMinutes,
+    this.limitQuota = true,
   });
 
   factory RulesDraft.of(Policy p) => RulesDraft(
@@ -22,7 +23,9 @@ class RulesDraft {
         closingHour: p.closingHour,
         slotMinutes: p.slotMinutes,
         maxAdvanceDays: p.maxAdvanceDays,
+        // With no limit, the stepper starts from 2 h if it is turned on.
         studentQuotaMinutes: p.quotaFor(RequesterType.student) ?? 120,
+        limitQuota: p.quotaFor(RequesterType.student) != null,
         qrGraceMinutes: p.qrGraceMinutes,
       );
 
@@ -33,6 +36,12 @@ class RulesDraft {
   final int studentQuotaMinutes;
   final int qrGraceMinutes;
 
+  /// False = students have no weekly limit.
+  final bool limitQuota;
+
+  /// The weekly student limit to save, or null for no limit.
+  int? get studentQuota => limitQuota ? studentQuotaMinutes : null;
+
   RulesDraft copyWith({
     int? openingHour,
     int? closingHour,
@@ -40,6 +49,7 @@ class RulesDraft {
     int? maxAdvanceDays,
     int? studentQuotaMinutes,
     int? qrGraceMinutes,
+    bool? limitQuota,
   }) =>
       RulesDraft(
         openingHour: openingHour ?? this.openingHour,
@@ -48,6 +58,7 @@ class RulesDraft {
         maxAdvanceDays: maxAdvanceDays ?? this.maxAdvanceDays,
         studentQuotaMinutes: studentQuotaMinutes ?? this.studentQuotaMinutes,
         qrGraceMinutes: qrGraceMinutes ?? this.qrGraceMinutes,
+        limitQuota: limitQuota ?? this.limitQuota,
       );
 }
 
@@ -62,9 +73,10 @@ String? rulesProblem(RulesDraft d) {
     return 'slot_misfit';
   }
   if (d.maxAdvanceDays < 1 || d.maxAdvanceDays > 180) return 'bad_advance';
-  if (d.studentQuotaMinutes < 30 ||
-      d.studentQuotaMinutes > 2400 ||
-      d.studentQuotaMinutes % 30 != 0) {
+  if (d.limitQuota &&
+      (d.studentQuotaMinutes < 30 ||
+          d.studentQuotaMinutes > 2400 ||
+          d.studentQuotaMinutes % 30 != 0)) {
     return 'bad_quota';
   }
   if (d.qrGraceMinutes < 0 || d.qrGraceMinutes > 60) return 'bad_grace';
@@ -78,6 +90,9 @@ String _h(int minutes) {
       : h.toStringAsFixed(1).replaceAll('.', ',');
 }
 
+String _quota(int? minutes) =>
+    minutes == null ? 'sans limite' : '${_h(minutes)} h/semaine';
+
 /// What changes, in the same words as the activity log.
 List<String> rulesChanges(RulesDraft a, RulesDraft b) => [
       if (a.openingHour != b.openingHour || a.closingHour != b.closingHour)
@@ -87,13 +102,40 @@ List<String> rulesChanges(RulesDraft a, RulesDraft b) => [
         'Créneaux : ${a.slotMinutes} → ${b.slotMinutes} min',
       if (a.maxAdvanceDays != b.maxAdvanceDays)
         'Réservation jusqu’à ${a.maxAdvanceDays} → ${b.maxAdvanceDays} jours',
-      if (a.studentQuotaMinutes != b.studentQuotaMinutes)
-        'Quota étudiant : ${_h(a.studentQuotaMinutes)} → '
-            '${_h(b.studentQuotaMinutes)} h/semaine',
+      if (a.studentQuota != b.studentQuota)
+        'Quota étudiant : ${_quota(a.studentQuota)} → '
+            '${_quota(b.studentQuota)}',
       if (a.qrGraceMinutes != b.qrGraceMinutes)
         'Accès avant la séance : ${a.qrGraceMinutes} → '
             '${b.qrGraceMinutes} min',
     ];
+
+/// Upcoming sessions (approved or waiting) that would no longer fit the
+/// new opening hours or slot grid. They are kept, but staff should know.
+List<Booking> sessionsOutside(
+  List<Booking> bookings,
+  DateTime now,
+  RulesDraft d,
+) =>
+    [
+      for (final b in bookings)
+        if (b.end.isAfter(now) &&
+            (b.status == BookingStatus.approved || b.status.isPending) &&
+            !_fits(b, d))
+          b,
+    ];
+
+bool _fits(Booking b, RulesDraft d) {
+  final from = b.start.hour * 60 + b.start.minute;
+  final to = b.end.hour * 60 + b.end.minute;
+  return dateOnlyEq(b.start, b.end) &&
+      from >= d.openingHour * 60 &&
+      to <= d.closingHour * 60 &&
+      (from - d.openingHour * 60) % d.slotMinutes == 0;
+}
+
+bool dateOnlyEq(DateTime a, DateTime b) =>
+    a.year == b.year && a.month == b.month && a.day == b.day;
 
 String? maintenanceProblem({
   required Person by,
@@ -117,10 +159,62 @@ String? maintenanceProblem({
   return null;
 }
 
+/// The largest quantity of [itemId] promised at the same moment by
+/// upcoming sessions (approved or waiting), across every room.
+int equipmentPeak(List<Booking> bookings, String itemId, DateTime now) {
+  final events = <(DateTime, int)>[];
+  for (final b in bookings) {
+    if (!b.end.isAfter(now) ||
+        !(b.status == BookingStatus.approved || b.status.isPending)) {
+      continue;
+    }
+    var q = 0;
+    for (final e in b.equipment) {
+      if (e.itemId == itemId) q += e.quantity;
+    }
+    if (q == 0) continue;
+    events
+      ..add((b.start, q))
+      ..add((b.end, -q));
+  }
+  // At the same instant, an end comes before a start.
+  events.sort((a, b) {
+    final t = a.$1.compareTo(b.$1);
+    return t != 0 ? t : a.$2.compareTo(b.$2);
+  });
+  var running = 0, top = 0;
+  for (final (_, d) in events) {
+    running += d;
+    if (running > top) top = running;
+  }
+  return top;
+}
+
+/// "2.1" → [2, 1, 0], so versions compare as numbers (2.10 > 2.9).
+List<int> versionKey(String v) {
+  final parts = [for (final p in v.trim().split('.')) int.tryParse(p) ?? 0];
+  while (parts.length < 3) {
+    parts.add(0);
+  }
+  return parts.take(3).toList();
+}
+
+int compareVersions(String a, String b) {
+  final x = versionKey(a), y = versionKey(b);
+  for (var i = 0; i < 3; i++) {
+    if (x[i] != y[i]) return x[i].compareTo(y[i]);
+  }
+  return 0;
+}
+
 String? charterVersionProblem(String version, String current) {
   final v = version.trim();
-  if (!RegExp(r'^[0-9]+(\.[0-9]+){0,2}$').hasMatch(v)) return 'bad_version';
-  if (v == current) return 'same_version';
+  if (!RegExp(r'^[0-9]{1,4}(\.[0-9]{1,4}){0,2}$').hasMatch(v)) {
+    return 'bad_version';
+  }
+  final c = compareVersions(v, current);
+  if (c == 0) return 'same_version';
+  if (c < 0) return 'older_version';
   return null;
 }
 
@@ -142,5 +236,8 @@ String adminProblemText(String code) => switch (code) {
       'bad_stock' => 'Le stock doit être entre 0 et 999.',
       'bad_version' => 'Numéro de version : par exemple 2.0 ou 2.1.',
       'same_version' => 'C’est déjà la version en vigueur.',
+      'older_version' => 'La nouvelle version doit être plus récente que '
+          'celle en vigueur.',
+      'network' => 'Pas de connexion. Vérifiez le réseau et réessayez.',
       _ => 'Le changement n’a pas pu être enregistré. Réessayez.',
     };

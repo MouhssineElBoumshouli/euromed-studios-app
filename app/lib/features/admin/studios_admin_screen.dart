@@ -271,7 +271,8 @@ class _ClosureRow extends ConsumerWidget {
   }
 }
 
-/// Plan a closure: room, day, from–to, reason.
+/// Plan a closure: room, from (day, hour) to (day, hour), reason.
+/// A closure can span several days (up to 60).
 class _MaintenanceSheet extends ConsumerStatefulWidget {
   const _MaintenanceSheet();
 
@@ -282,6 +283,7 @@ class _MaintenanceSheet extends ConsumerStatefulWidget {
 class _MaintenanceSheetState extends ConsumerState<_MaintenanceSheet> {
   String? roomId;
   late DateTime day;
+  late DateTime endDay;
   late int fromHour;
   late int toHour;
   final reason = TextEditingController();
@@ -296,6 +298,7 @@ class _MaintenanceSheetState extends ConsumerState<_MaintenanceSheet> {
       d = DateTime(d.year, d.month, d.day + 1);
     }
     day = d;
+    endDay = d;
     fromHour = w.policy.openingHour;
     toHour = w.policy.closingHour;
     reason.addListener(() => setState(() {}));
@@ -307,6 +310,17 @@ class _MaintenanceSheetState extends ConsumerState<_MaintenanceSheet> {
     super.dispose();
   }
 
+  DateTime get start => DateTime(day.year, day.month, day.day, fromHour);
+  DateTime get end => DateTime(endDay.year, endDay.month, endDay.day, toHour);
+
+  Future<DateTime?> _pick(DateTime initial, DateTime first, DateTime now) =>
+      showDatePicker(
+        context: context,
+        initialDate: initial,
+        firstDate: first,
+        lastDate: now.add(const Duration(days: 240)),
+      );
+
   Future<void> _save() async {
     setState(() => busy = true);
     final m = ScaffoldMessenger.of(context);
@@ -314,8 +328,8 @@ class _MaintenanceSheetState extends ConsumerState<_MaintenanceSheet> {
       final clashes = await ref.read(adminServiceProvider).addMaintenance(
             ref.read(currentPersonProvider),
             roomId: roomId!,
-            start: DateTime(day.year, day.month, day.day, fromHour),
-            end: DateTime(day.year, day.month, day.day, toHour),
+            start: start,
+            end: end,
             reason: reason.text,
           );
       if (!mounted) return;
@@ -334,6 +348,7 @@ class _MaintenanceSheetState extends ConsumerState<_MaintenanceSheet> {
       );
     } on AdminProblem catch (e) {
       m.showSnackBar(SnackBar(content: Text(e.message)));
+    } finally {
       if (mounted) setState(() => busy = false);
     }
   }
@@ -351,16 +366,17 @@ class _MaintenanceSheetState extends ConsumerState<_MaintenanceSheet> {
               (b) =>
                   rooms[b.studioId] == roomId &&
                   (b.status == BookingStatus.approved || b.status.isPending) &&
-                  b.start.isBefore(
-                    DateTime(day.year, day.month, day.day, toHour),
-                  ) &&
-                  DateTime(day.year, day.month, day.day, fromHour)
-                      .isBefore(b.end),
+                  b.end.isAfter(w.now) &&
+                  b.start.isBefore(end) &&
+                  start.isBefore(b.end),
             )
             .length;
+    final tooLong = end.difference(start) > const Duration(days: 60);
     final ready = roomId != null &&
-        fromHour < toHour &&
+        end.isAfter(start) &&
+        !tooLong &&
         reason.text.trim().length >= 3;
+    final today = DateTime(w.now.year, w.now.month, w.now.day);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -389,47 +405,43 @@ class _MaintenanceSheetState extends ConsumerState<_MaintenanceSheet> {
               onChanged: (v) => setState(() => roomId = v),
             ),
             const SizedBox(height: EsSpace.s3),
-            OutlinedButton.icon(
-              onPressed: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: day,
-                  firstDate: DateTime(w.now.year, w.now.month, w.now.day),
-                  lastDate: w.now.add(const Duration(days: 180)),
-                );
-                if (picked != null) setState(() => day = picked);
+            _When(
+              label: 'Du',
+              day: day,
+              hour: _clampHour(fromHour, 6, 22),
+              hours: const (6, 22),
+              onDay: () async {
+                final p = await _pick(day, today, w.now);
+                if (p == null) return;
+                setState(() {
+                  day = p;
+                  if (endDay.isBefore(p)) endDay = p;
+                });
               },
-              icon: const Icon(Icons.event_rounded),
-              label: Text(Fmt.longDay(day)),
+              onHour: (v) => setState(() => fromHour = v),
             ),
             const SizedBox(height: EsSpace.s3),
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<int>(
-                    initialValue: fromHour,
-                    decoration: const InputDecoration(labelText: 'De'),
-                    items: [
-                      for (var h = 6; h <= 22; h++)
-                        DropdownMenuItem(value: h, child: Text('$h h')),
-                    ],
-                    onChanged: (v) => setState(() => fromHour = v!),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: DropdownButtonFormField<int>(
-                    initialValue: toHour,
-                    decoration: const InputDecoration(labelText: 'À'),
-                    items: [
-                      for (var h = 7; h <= 23; h++)
-                        DropdownMenuItem(value: h, child: Text('$h h')),
-                    ],
-                    onChanged: (v) => setState(() => toHour = v!),
-                  ),
-                ),
-              ],
+            _When(
+              label: 'Au',
+              day: endDay,
+              hour: _clampHour(toHour, 7, 23),
+              hours: const (7, 23),
+              onDay: () async {
+                final p = await _pick(endDay, day, w.now);
+                if (p != null) setState(() => endDay = p);
+              },
+              onHour: (v) => setState(() => toHour = v),
             ),
+            if (!end.isAfter(start) || tooLong)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Text(
+                  tooLong
+                      ? 'Une fermeture dure au plus 60 jours.'
+                      : 'La fin doit être après le début.',
+                  style: EsText.bodyS.copyWith(color: c.dangerText),
+                ),
+              ),
             const SizedBox(height: EsSpace.s3),
             TextField(
               controller: reason,
@@ -461,4 +473,55 @@ class _MaintenanceSheetState extends ConsumerState<_MaintenanceSheet> {
       ),
     );
   }
+}
+
+int _clampHour(int h, int min, int max) => h.clamp(min, max);
+
+/// One end of a closure: a day button and an hour menu.
+class _When extends StatelessWidget {
+  const _When({
+    required this.label,
+    required this.day,
+    required this.hour,
+    required this.hours,
+    required this.onDay,
+    required this.onHour,
+  });
+  final String label;
+  final DateTime day;
+  final int hour;
+  final (int, int) hours;
+  final VoidCallback onDay;
+  final ValueChanged<int> onHour;
+
+  @override
+  Widget build(BuildContext context) => Row(
+        children: [
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: onDay,
+              icon: const Icon(Icons.event_rounded),
+              label: Text(
+                '$label ${Fmt.longDay(day).toLowerCase()}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          SizedBox(
+            width: 96,
+            child: DropdownButtonFormField<int>(
+              key: ValueKey('$label-$hour'),
+              initialValue: hour,
+              decoration: const InputDecoration(labelText: 'Heure'),
+              items: [
+                for (var h = hours.$1; h <= hours.$2; h++)
+                  DropdownMenuItem(value: h, child: Text('$h h')),
+              ],
+              onChanged: (v) => v == null ? null : onHour(v),
+            ),
+          ),
+        ],
+      );
 }

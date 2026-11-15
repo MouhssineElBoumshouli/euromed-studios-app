@@ -8,10 +8,12 @@ import '../../data/admin_service.dart';
 import '../../data/app_state.dart';
 import '../../data/catalog.dart';
 import '../../domain/bookings.dart';
+import '../../domain/rules/settings_rules.dart';
 import 'admin_page.dart';
 
-/// I5 · Equipment catalogue and stock. Requests can't ask for more than
-/// what is in stock.
+/// I5 · Equipment catalogue and stock. New requests can't ask for more
+/// than the stock. Lowering it (broken or lost gear) is allowed: the page
+/// warns when upcoming sessions already count on more.
 class EquipmentAdminScreen extends ConsumerWidget {
   const EquipmentAdminScreen({super.key});
 
@@ -19,20 +21,8 @@ class EquipmentAdminScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.es;
     final w = ref.watch(worldProvider);
-    // Busiest future demand per item (one session), to warn before lowering.
-    int peak(String id) {
-      var top = 0;
-      for (final b in w.bookings) {
-        if (b.end.isBefore(w.now) ||
-            !(b.status == BookingStatus.approved || b.status.isPending)) {
-          continue;
-        }
-        for (final e in b.equipment) {
-          if (e.itemId == id && e.quantity > top) top = e.quantity;
-        }
-      }
-      return top;
-    }
+    // Most promised at the same moment, across all rooms.
+    int peak(String id) => equipmentPeak(w.bookings, id, w.now);
 
     return AdminPage(
       title: 'Matériel',
@@ -146,7 +136,9 @@ class _ItemRowState extends ConsumerState<_ItemRow> {
           ),
           if (short)
             Text(
-              'Attention : une séance à venir en demande ${widget.peak}.',
+              'Attention : ${widget.peak} sont déjà demandés pour des séances '
+              'à venir au même moment. Prévenez les demandeurs si le '
+              'matériel manque.',
               style: EsText.bodyS.copyWith(color: c.pendingText),
             ),
           if (changed)

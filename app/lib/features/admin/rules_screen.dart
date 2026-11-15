@@ -28,13 +28,18 @@ class _RulesScreenState extends ConsumerState<RulesScreen> {
   }
 
   Future<void> _save(RulesDraft base, List<String> changes) async {
+    final w = ref.read(worldProvider);
+    final outside = sessionsOutside(w.bookings, w.now, draft!).length;
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Appliquer les nouvelles règles ?'),
         content: Text(
           '${changes.join('\n')}\n\nElles s’appliquent tout de suite aux '
-          'nouvelles demandes. Les demandes déjà faites ne changent pas.',
+          'nouvelles demandes. Les demandes déjà faites ne changent pas.'
+          '${outside == 0 ? '' : '\n\n$outside séance(s) à venir sortent '
+              'des nouveaux horaires ou créneaux. Elles restent prévues : '
+              'prévenez les demandeurs si besoin.'}',
         ),
         actions: [
           TextButton(
@@ -165,16 +170,30 @@ class _RulesScreenState extends ConsumerState<RulesScreen> {
                 onChanged: (v) => set(d.copyWith(maxAdvanceDays: v)),
               ),
               Divider(color: c.border, height: 1),
-              _Stepper(
-                label: 'Quota étudiant',
-                help: 'Heures de studio par semaine et par étudiant (R-05).',
-                value: d.studentQuotaMinutes,
-                display: '${_hours(d.studentQuotaMinutes)} / semaine',
-                step: 30,
-                min: 30,
-                max: 2400,
-                onChanged: (v) => set(d.copyWith(studentQuotaMinutes: v)),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Limiter les heures des étudiants',
+                    style: EsText.titleS),
+                subtitle: Text(
+                  d.limitQuota
+                      ? 'Heures de studio par semaine et par étudiant (R-05).'
+                      : 'Aucune limite hebdomadaire pour les étudiants.',
+                  style: EsText.bodyS.copyWith(color: c.textSecondary),
+                ),
+                value: d.limitQuota,
+                onChanged: (v) => set(d.copyWith(limitQuota: v)),
               ),
+              if (d.limitQuota)
+                _Stepper(
+                  label: 'Quota étudiant',
+                  help: 'Par semaine, demandes en attente comprises.',
+                  value: d.studentQuotaMinutes,
+                  display: '${_hours(d.studentQuotaMinutes)} / sem.',
+                  step: 30,
+                  min: 30,
+                  max: 2400,
+                  onChanged: (v) => set(d.copyWith(studentQuotaMinutes: v)),
+                ),
               Divider(color: c.border, height: 1),
               _Stepper(
                 label: 'Accès avant la séance',
@@ -241,47 +260,59 @@ class _Stepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.es;
+    final text = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: EsText.titleS),
+        Text(help, style: EsText.bodyS.copyWith(color: c.textSecondary)),
+      ],
+    );
+    final controls = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton.outlined(
+          tooltip: 'Moins',
+          onPressed: value <= min
+              ? null
+              : () => onChanged((value - step).clamp(min, max)),
+          icon: const Icon(Icons.remove_rounded),
+        ),
+        SizedBox(
+          width: 104,
+          child: Semantics(
+            label: '$label : $display',
+            liveRegion: true,
+            child: Text(
+              display,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              style: EsText.titleS.copyWith(color: c.textPrimary),
+            ),
+          ),
+        ),
+        IconButton.outlined(
+          tooltip: 'Plus',
+          onPressed: value >= max
+              ? null
+              : () => onChanged((value + step).clamp(min, max)),
+          icon: const Icon(Icons.add_rounded),
+        ),
+      ],
+    );
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label, style: EsText.titleS),
-                Text(help,
-                    style: EsText.bodyS.copyWith(color: c.textSecondary)),
-              ],
-            ),
-          ),
-          IconButton.outlined(
-            tooltip: 'Moins',
-            onPressed: value - step < min
-                ? null
-                : () => onChanged((value - step).clamp(min, max)),
-            icon: const Icon(Icons.remove_rounded),
-          ),
-          SizedBox(
-            width: 104,
-            child: Semantics(
-              label: '$label : $display',
-              liveRegion: true,
-              child: Text(
-                display,
-                textAlign: TextAlign.center,
-                style: EsText.titleS.copyWith(color: c.textPrimary),
-              ),
-            ),
-          ),
-          IconButton.outlined(
-            tooltip: 'Plus',
-            onPressed: value + step > max
-                ? null
-                : () => onChanged((value + step).clamp(min, max)),
-            icon: const Icon(Icons.add_rounded),
-          ),
-        ],
+      // On a phone the label gets the full width, controls go below.
+      child: LayoutBuilder(
+        builder: (context, box) => box.maxWidth < 420
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  text,
+                  const SizedBox(height: 6),
+                  Align(alignment: Alignment.centerRight, child: controls),
+                ],
+              )
+            : Row(children: [Expanded(child: text), controls]),
       ),
     );
   }

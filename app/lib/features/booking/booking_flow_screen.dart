@@ -46,8 +46,11 @@ class BookingFlowScreen extends ConsumerStatefulWidget {
 }
 
 class _Equip {
-  _Equip(this.item);
-  final EquipmentItem item;
+  _Equip(this.id);
+  final String id;
+
+  /// Read live, so a stock change by the admin shows at once.
+  EquipmentItem get item => Catalog.equipment.firstWhere((e) => e.id == id);
   int qty = 0;
   bool required = false;
 }
@@ -64,7 +67,7 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
   bool forClub = false;
   String? projectId;
   final note = TextEditingController();
-  final equip = [for (final e in Catalog.equipment) _Equip(e)];
+  final equip = [for (final e in Catalog.equipment) _Equip(e.id)];
   bool sending = false;
 
   Studio get studio => studioById(widget.studioId);
@@ -191,11 +194,12 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
             activity: activity!,
             note: note.text.trim().isEmpty ? null : note.text.trim(),
             equipment: [
+              // Never more than the stock, even if it was lowered meanwhile.
               for (final e in equip)
-                if (e.qty > 0)
+                if (e.qty.clamp(0, e.item.stock) > 0)
                   EquipmentRequest(
-                    itemId: e.item.id,
-                    quantity: e.qty,
+                    itemId: e.id,
+                    quantity: e.qty.clamp(0, e.item.stock),
                     required: e.required,
                   ),
             ],
@@ -304,6 +308,35 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
     final c = context.es;
     final w = ref.watch(worldProvider);
     final me = ref.watch(currentPersonProvider);
+    // Closed by the admin (or an old link): say so instead of an empty
+    // calendar.
+    if (!studio.bookable && !sending) {
+      return Scaffold(
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(EsSpace.page),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                EsBackButton(
+                  onPressed: () =>
+                      context.canPop() ? context.pop() : context.go('/studios'),
+                ),
+                const Expanded(
+                  child: EmptyState(
+                    icon: Icons.event_busy_outlined,
+                    title: 'Studio fermé à la réservation',
+                    message: 'Ce studio ne prend pas de nouvelles demandes '
+                        'pour le moment. Les séances déjà validées sont '
+                        'maintenues.',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
     final titles = [
       'Choisissez une date',
       'Choisissez un créneau',

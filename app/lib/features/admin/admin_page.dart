@@ -49,8 +49,11 @@ class AdminPage extends ConsumerWidget {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: EsBackButton(
-                    onPressed: () =>
-                        context.canPop() ? context.pop() : context.go('/admin'),
+                    onPressed: () => context.canPop()
+                        ? context.pop()
+                        : context.go(
+                            me.has(Role.admin) ? '/admin' : '/planning',
+                          ),
                   ),
                 ),
                 const SizedBox(height: EsSpace.s4),
@@ -65,7 +68,7 @@ class AdminPage extends ConsumerWidget {
                   const EmptyState(
                     icon: Icons.lock_outline_rounded,
                     title: 'Accès réservé',
-                    message: 'Cette page est réservée à l’administration.',
+                    message: 'Votre rôle ne donne pas accès à cette page.',
                   ),
               ],
             ),

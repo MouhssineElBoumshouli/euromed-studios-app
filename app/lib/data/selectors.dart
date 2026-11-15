@@ -57,7 +57,18 @@ class LiveRoom {
 List<LiveRoom> liveStatus(WorldState w) {
   final now = w.now;
   final result = <LiveRoom>[];
-  for (final s in Catalog.studios.where((s) => s.bookable)) {
+  // Closed studios still show while one of their kept sessions runs.
+  for (final s in Catalog.studios.where(
+    (s) =>
+        s.bookable ||
+        w.bookings.any(
+          (b) =>
+              b.studioId == s.id &&
+              b.status.holdsSlot &&
+              !b.start.isAfter(now) &&
+              b.end.isAfter(now),
+        ),
+  )) {
     final m = w.maintenance.where(
       (m) =>
           m.roomId == s.roomId && !m.start.isAfter(now) && m.end.isAfter(now),

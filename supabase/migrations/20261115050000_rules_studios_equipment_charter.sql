@@ -119,8 +119,8 @@ begin
   perform public.audit('maintenanceRemoved', 'room', m.room_id, names || ' : ' || m.reason);
 end $$;
 
--- Equipment stock (I5). Lowering stock below what is already promised for
--- future sessions is refused.
+-- Equipment stock (I5). Lowering it is allowed (broken or lost gear); the
+-- app warns when upcoming sessions already count on more.
 create or replace function public.set_equipment_stock(p_id text, p_stock int) returns void
 language plpgsql security definer set search_path = public as $$
 declare
