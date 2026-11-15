@@ -127,44 +127,72 @@ class _StudioRowState extends ConsumerState<_StudioRow> {
   Widget build(BuildContext context) {
     final c = context.es;
     final s = widget.studio;
-    return SwitchListTile(
-      secondary: PhotoThumb(s.photo, size: 40, radius: 10),
-      title: Text(s.name, style: EsText.titleS),
-      subtitle: Text(
-        [
-          s.bookable ? 'Ouvert à la réservation' : 'Fermé à la réservation',
-          if (widget.shared) 'salle partagée',
-        ].join(' · '),
-        style: EsText.bodyS.copyWith(
-          color: s.bookable ? c.successText : c.textSecondary,
-        ),
+    final title = Text(s.name, style: EsText.titleS);
+    final status = Text(
+      [
+        s.bookable ? 'Ouvert à la réservation' : 'Fermé à la réservation',
+        if (widget.shared) 'salle partagée',
+      ].join(' · '),
+      style: EsText.bodyS.copyWith(
+        color: s.bookable ? c.successText : c.textSecondary,
       ),
-      value: s.bookable,
-      onChanged: !widget.enabled || busy
-          ? null
-          : (v) async {
-              setState(() => busy = true);
-              final m = ScaffoldMessenger.of(context);
-              try {
-                await ref.read(adminServiceProvider).setStudioBookable(
-                      ref.read(currentPersonProvider),
-                      s.id,
-                      v,
-                    );
-                m.showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      '${s.name} ${v ? 'ouvert' : 'fermé'} à la réservation.',
-                    ),
-                  ),
-                );
-              } on AdminProblem catch (e) {
-                m.showSnackBar(SnackBar(content: Text(e.message)));
-              } finally {
-                if (mounted) setState(() => busy = false);
-              }
-            },
     );
+    final thumb = PhotoThumb(s.photo, size: 40, radius: 10);
+    // The studio manager sees the state, without a switch he can't use.
+    if (!widget.enabled) {
+      return ListTile(leading: thumb, title: title, subtitle: status);
+    }
+    return SwitchListTile(
+      secondary: thumb,
+      title: title,
+      subtitle: status,
+      value: s.bookable,
+      onChanged: busy ? null : (v) => _toggle(s, v),
+    );
+  }
+
+  Future<void> _toggle(Studio s, bool v) async {
+    if (!v) {
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text('Fermer ${s.name} à la réservation ?'),
+          content: const Text(
+            'Plus personne ne pourra le demander. Les séances déjà validées '
+            'ou en attente sont conservées : traitez-les dans Validations.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Annuler'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Fermer'),
+            ),
+          ],
+        ),
+      );
+      if (ok != true || !mounted) return;
+    }
+    setState(() => busy = true);
+    final m = ScaffoldMessenger.of(context);
+    try {
+      await ref.read(adminServiceProvider).setStudioBookable(
+            ref.read(currentPersonProvider),
+            s.id,
+            v,
+          );
+      m.showSnackBar(
+        SnackBar(
+          content: Text('${s.name} ${v ? 'ouvert' : 'fermé'} à la réservation.'),
+        ),
+      );
+    } on AdminProblem catch (e) {
+      m.showSnackBar(SnackBar(content: Text(e.message)));
+    } finally {
+      if (mounted) setState(() => busy = false);
+    }
   }
 }
 
