@@ -40,7 +40,7 @@ void main() {
 
   test('changes are described like in the activity log', () {
     final c = rulesChanges(base, base.copyWith(studentQuotaMinutes: 180));
-    expect(c.single, 'Quota étudiant : 2 → 3 h/semaine');
+    expect(c.single, 'Quota étudiant : 2 h/semaine → 3 h/semaine');
     expect(rulesChanges(base, base), isEmpty);
     expect(
       rulesChanges(base, base.copyWith(limitQuota: false)).single,
