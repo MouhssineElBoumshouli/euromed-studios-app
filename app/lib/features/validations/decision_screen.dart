@@ -17,6 +17,7 @@ import '../../domain/rules/approval.dart';
 import '../../domain/rules/quota.dart';
 import '../bookings/booking_widgets.dart';
 import '../../data/directory.dart';
+import '../../data/catalog.dart';
 
 /// Ready-made refusal reasons, so a refusal takes two taps. The approver
 /// can always edit or write their own (R-19: a reason is mandatory).
@@ -101,7 +102,7 @@ class _DecisionState extends ConsumerState<DecisionScreen> {
     final sameDay = [
       for (final o in w.bookings)
         if (o.id != b.id &&
-            DemoWorld.studios
+            Catalog.studios
                     .firstWhere((x) => x.id == o.studioId)
                     .roomId ==
                 s.roomId &&

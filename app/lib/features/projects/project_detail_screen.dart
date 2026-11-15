@@ -19,6 +19,7 @@ import '../../domain/projects.dart';
 import '../../domain/rules/projects.dart';
 import 'project_sections.dart';
 import 'project_widgets.dart';
+import '../../data/catalog.dart';
 
 /// F3–F5 · One project: where it stands, its documents, its sessions,
 /// and the step that moves it forward.
@@ -817,7 +818,7 @@ class _StudioSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.es;
-    final studios = [for (final s in DemoWorld.studios) if (s.bookable) s];
+    final studios = [for (final s in Catalog.studios) if (s.bookable) s];
     return SafeArea(
       child: ConstrainedBox(
         constraints: BoxConstraints(

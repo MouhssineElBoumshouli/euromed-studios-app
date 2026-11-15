@@ -12,6 +12,7 @@ import '../../data/demo_world.dart';
 import '../../domain/rules/availability.dart';
 import '../../domain/studios.dart';
 import 'studios_screen.dart';
+import '../../data/catalog.dart';
 
 /// The next free slots of [studio], starting now, across the next days.
 List<Slot> nextFreeSlots(WorldState w, Studio studio, {int count = 3}) {
@@ -24,7 +25,7 @@ List<Slot> nextFreeSlots(WorldState w, Studio studio, {int count = 3}) {
         studio: studio,
         day: day,
         policy: w.policy,
-        allStudios: DemoWorld.studios,
+        allStudios: Catalog.studios,
         bookings: w.bookings,
         maintenance: w.maintenance,
         now: w.now,
@@ -45,7 +46,7 @@ class StudioDetailScreen extends ConsumerWidget {
     final w = ref.watch(worldProvider);
     final s = studioById(studioId);
     final room = DemoWorld.rooms.firstWhere((r) => r.id == s.roomId);
-    final shared = DemoWorld.studios
+    final shared = Catalog.studios
         .where((x) => x.roomId == s.roomId && x.id != s.id)
         .map((x) => x.name)
         .toList();

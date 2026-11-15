@@ -77,6 +77,14 @@ class EquipmentItem {
   /// Name of an icon in our icon set (see core/widgets/es_icons.dart).
   final String icon;
   final int stock;
+
+  EquipmentItem withStock(int value) => EquipmentItem(
+        id: id,
+        name: name,
+        detail: detail,
+        icon: icon,
+        stock: value,
+      );
 }
 
 /// What the technical validator decided for an item (P-04, P-05).
@@ -194,7 +202,11 @@ class MaintenanceBlock {
     required this.start,
     required this.end,
     required this.reason,
+    this.id = '',
   });
+
+  /// Server id (empty for the built-in demo closure).
+  final String id;
   final String roomId;
   final DateTime start;
   final DateTime end;

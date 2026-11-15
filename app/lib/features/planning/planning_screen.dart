@@ -15,6 +15,7 @@ import '../../domain/rules/approval.dart';
 import '../../domain/rules/availability.dart';
 import '../../domain/studios.dart';
 import '../../data/directory.dart';
+import '../../data/catalog.dart';
 
 /// F1 · Planning: every studio on one day, hour by hour.
 ///
@@ -41,7 +42,7 @@ class _PlanningState extends ConsumerState<PlanningScreen> {
     final monday = day.subtract(Duration(days: day.weekday - 1));
     final week = [for (var i = 0; i < 5; i++) monday.add(Duration(days: i))];
     final studios = [
-      for (final s in DemoWorld.studios)
+      for (final s in Catalog.studios)
         if (s.bookable) s,
     ];
     final dayBookings = [
@@ -473,7 +474,7 @@ class _Timeline extends StatelessWidget {
   bool _inRow(Booking b, Studio s) {
     if (b.studioId == s.id) return true;
     final other =
-        DemoWorld.studios.where((x) => x.id == b.studioId).firstOrNull;
+        Catalog.studios.where((x) => x.id == b.studioId).firstOrNull;
     return other?.roomId == s.roomId && b.status.holdsSlot;
   }
 }

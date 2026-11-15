@@ -23,6 +23,7 @@ import '../../domain/rules/projects.dart';
 import '../../domain/rules/quota.dart';
 import '../../domain/studios.dart';
 import 'month_calendar.dart';
+import '../../data/catalog.dart';
 
 /// D0–D3 · Booking in four steps (R-10 to R-15, R-33):
 /// 1. choose the date on a month calendar, 2. choose the time,
@@ -63,7 +64,7 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
   bool forClub = false;
   String? projectId;
   final note = TextEditingController();
-  final equip = [for (final e in DemoWorld.equipment) _Equip(e)];
+  final equip = [for (final e in Catalog.equipment) _Equip(e)];
   bool sending = false;
 
   Studio get studio => studioById(widget.studioId);
@@ -116,7 +117,7 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
         studio: studio,
         day: d,
         policy: w.policy,
-        allStudios: DemoWorld.studios,
+        allStudios: Catalog.studios,
         bookings: w.bookings,
         maintenance: w.maintenance,
         now: w.now,
@@ -491,7 +492,7 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
       policy: w.policy,
       clubId: forClub ? me.clubIds.first : null,
     );
-    final shared = DemoWorld.studios
+    final shared = Catalog.studios
         .where((s) => s.roomId == studio.roomId && s.id != studio.id)
         .map((s) => s.name)
         .toList();
