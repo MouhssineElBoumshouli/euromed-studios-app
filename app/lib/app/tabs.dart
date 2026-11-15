@@ -116,7 +116,7 @@ List<TabSpec> consoleTabsFor(Person p) {
     return const [_dashboard, _validations, _planning, _regie, _studios, _projects, _admin, _profile];
   }
   if (p.has(Role.studioManager)) {
-    return const [_home, _validations, _planning, _regie, _studios, _projects, _profile];
+    return const [_home, _dashboard, _validations, _planning, _regie, _studios, _projects, _profile];
   }
   if (p.has(Role.regisseur)) {
     return const [_regie, _scanner, _planning, _projects, _maintenance, _studios, _profile];
