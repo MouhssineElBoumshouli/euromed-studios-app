@@ -3,6 +3,9 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import '../data/backend.dart';
+import '../features/admin/activity_screen.dart';
+import '../features/admin/admin_hub_screen.dart';
+import '../features/admin/dashboard_screen.dart';
 import '../features/booking/booking_flow_screen.dart';
 import '../features/booking/sent_screen.dart';
 import '../features/bookings/booking_detail_screen.dart';
@@ -141,20 +144,20 @@ final appRouter = GoRouter(
         // I1 (milestone 6)
         GoRoute(
           path: '/dashboard',
-          builder: (_, __) => const ComingSoonScreen(
-            title: 'Pilotage',
-            milestone: 'Étape 6',
-            what: 'Occupation, demandes en attente et incidents ouverts.',
-          ),
+          builder: (_, __) => const DashboardScreen(),
         ),
+        // I3–I9
         GoRoute(
           path: '/admin',
-          builder: (_, __) => const ComingSoonScreen(
-            title: 'Gestion',
-            milestone: 'Étape 6',
-            what:
-                'Utilisateurs, salles, matériel et toutes les règles réglables.',
-          ),
+          builder: (_, __) => const AdminHubScreen(),
+          routes: [
+            GoRoute(
+              path: 'activity',
+              parentNavigatorKey: _rootKey,
+              builder: (_, __) =>
+                  const WideFrame(maxWidth: 960, child: ActivityScreen()),
+            ),
+          ],
         ),
         // J1
         GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),

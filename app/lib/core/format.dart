@@ -44,8 +44,15 @@ abstract final class Fmt {
     if (m < 1) return 'à l’instant';
     if (m < 60) return 'il y a $m min';
     final h = m ~/ 60;
-    if (h < 48) return 'il y a $h h';
+    if (h < 24) return 'il y a $h h';
     return 'il y a ${h ~/ 24} j';
+  }
+
+  /// "12 min", "3 h", "2 j": how long something has been waiting.
+  static String duration(Duration d) {
+    if (d.inMinutes < 60) return '${d.inMinutes < 1 ? 1 : d.inMinutes} min';
+    if (d.inHours < 24) return '${d.inHours} h';
+    return '${d.inDays} j';
   }
 
   static String _cap(String s) =>

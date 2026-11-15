@@ -12,11 +12,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../domain/bookings.dart';
+import '../domain/activity.dart';
 import '../domain/people.dart';
 import '../domain/policy.dart';
 import '../domain/projects.dart';
 import 'app_state.dart';
 import 'backend.dart';
+import 'admin_state.dart';
 import 'demo_world.dart';
 import 'projects_state.dart';
 
@@ -85,6 +87,8 @@ class LiveSync {
     container
         .read(projectsProvider.notifier)
         .load(const ProjectsState(loaded: false));
+    // An admin's log must not stay visible to the next person.
+    container.read(adminProvider.notifier).load(const AdminState());
   }
 
   Future<void> _enter(int gen, String uid) async {
@@ -196,6 +200,16 @@ class LiveSync {
             .then<dynamic>((v) => v)
             .catchError((_) => <dynamic>[]),
       ),
+      // Admins only (the server returns nothing to others).
+      Future<dynamic>.value(
+        db
+            .from('audit_log')
+            .select()
+            .order('at', ascending: false)
+            .limit(500)
+            .then<dynamic>((v) => v)
+            .catchError((_) => <dynamic>[]),
+      ),
     ]);
     final settings = results[0] as Map<String, dynamic>;
     final known = {for (final s in DemoWorld.studios) s.id};
@@ -251,6 +265,22 @@ class LiveSync {
                 container.read(currentPersonIdProvider):
                     _time(results[5]['seen_at']),
             },
+          ),
+        );
+    container.read(adminProvider.notifier).load(
+          AdminState(
+            audit: [
+              for (final r in results[10] as List)
+                AuditEntry(
+                  id: '${r['id']}',
+                  at: _time(r['at']),
+                  actorId: r['actor_slug'] as String?,
+                  action: r['action'] as String,
+                  targetType: r['target_type'] as String?,
+                  targetId: r['target_id'] as String?,
+                  summary: r['summary'] as String,
+                ),
+            ],
           ),
         );
     container.read(projectsProvider.notifier).load(
