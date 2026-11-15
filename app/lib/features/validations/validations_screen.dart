@@ -15,6 +15,7 @@ import '../../domain/people.dart';
 import '../../domain/rules/approval.dart';
 import '../notifications/notifications_screen.dart';
 import 'decision_screen.dart';
+import '../../data/directory.dart';
 
 /// G1 · Validation inbox for Level 1 approvers, the Studio Manager and the
 /// Administrator. Oldest request first, so nobody waits too long.
@@ -37,7 +38,7 @@ class _ValidationsState extends ConsumerState<ValidationsScreen> {
     final w = ref.watch(worldProvider);
     final me = ref.watch(currentPersonProvider);
     final notifier = ref.read(worldProvider.notifier);
-    final inbox = inboxFor(me, w.bookings, people: DemoWorld.people);
+    final inbox = inboxFor(me, w.bookings, people: Directory.people);
     final done = [
       for (final b in w.bookings)
         if (b.history.any(
@@ -171,7 +172,7 @@ class _ValidationsState extends ConsumerState<ValidationsScreen> {
                   child: RequestReviewCard(
                     booking: b,
                     now: w.now,
-                    waitingFor: needsLevel1Fallback(b, DemoWorld.people)
+                    waitingFor: needsLevel1Fallback(b, Directory.people)
                         ? 'Administration (repli)'
                         : level1Label(b.requesterType),
                     selected: b.id == current,

@@ -16,6 +16,7 @@ import '../../domain/people.dart';
 import '../../domain/rules/approval.dart';
 import '../../domain/rules/quota.dart';
 import '../bookings/booking_widgets.dart';
+import '../../data/directory.dart';
 
 /// Ready-made refusal reasons, so a refusal takes two taps. The approver
 /// can always edit or write their own (R-19: a reason is mandatory).
@@ -72,11 +73,11 @@ class _DecisionState extends ConsumerState<DecisionScreen> {
     final room = DemoWorld.rooms.firstWhere((r) => r.id == s.roomId);
     final who = personById(b.requesterId);
     final level1 = b.status == BookingStatus.pendingEntity;
-    final decidable = canDecide(me, b, people: DemoWorld.people);
+    final decidable = canDecide(me, b, people: Directory.people);
     final conflict = b.status == BookingStatus.pendingStudio
         ? ref.read(worldProvider.notifier).level2Conflict(b)
         : null;
-    final fallback = level1 && needsLevel1Fallback(b, DemoWorld.people);
+    final fallback = level1 && needsLevel1Fallback(b, Directory.people);
     final q = quotaFor(
       requesterId: b.requesterId,
       type: b.requesterType,
@@ -87,7 +88,7 @@ class _DecisionState extends ConsumerState<DecisionScreen> {
     );
     final signed = w.signedCharterVersion[b.requesterId];
     final technicians = [
-      for (final p in DemoWorld.people)
+      for (final p in Directory.people)
         if (p.has(Role.regisseur)) p,
     ];
     final missingRequired = !level1 &&

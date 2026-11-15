@@ -14,6 +14,7 @@ import '../../domain/bookings.dart';
 import '../../domain/rules/approval.dart';
 import '../../domain/rules/availability.dart';
 import '../../domain/studios.dart';
+import '../../data/directory.dart';
 
 /// F1 · Planning: every studio on one day, hour by hour.
 ///
@@ -53,7 +54,7 @@ class _PlanningState extends ConsumerState<PlanningScreen> {
 
     void open(Booking b) {
       if (b.isPrivate) return;
-      if (b.status.isPending && canDecide(me, b, people: DemoWorld.people)) {
+      if (b.status.isPending && canDecide(me, b, people: Directory.people)) {
         context.push('/validations/${b.id}');
       } else {
         context.push('/bookings/${b.id}');
