@@ -129,7 +129,7 @@ class _RulesScreenState extends ConsumerState<RulesScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Durée d’un créneau', style: EsText.titleS),
+              const Text('Durée d’un créneau', style: EsText.titleS),
               const SizedBox(height: 8),
               SegmentedButton<int>(
                 segments: [

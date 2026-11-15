@@ -8,7 +8,6 @@ import '../../core/theme/es_colors.dart';
 import '../../core/theme/es_text.dart';
 import '../../core/widgets/layout.dart';
 import '../../data/app_state.dart';
-import '../../data/demo_world.dart';
 import '../../data/projects_state.dart';
 import '../../domain/bookings.dart';
 import '../../domain/people.dart';

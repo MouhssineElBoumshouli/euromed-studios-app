@@ -69,7 +69,9 @@ class AdminService {
   Future<void> updateRules(Person by, RulesDraft d) async {
     final problem = rulesProblem(d);
     if (problem != null) throw AdminProblem(adminProblemText(problem));
-    if (!by.has(Role.admin)) throw AdminProblem(adminProblemText('not_allowed'));
+    if (!by.has(Role.admin)) {
+      throw AdminProblem(adminProblemText('not_allowed'));
+    }
     if (isLive) {
       await _live(
         () => _db.rpc(
@@ -110,7 +112,9 @@ class AdminService {
 
   /// I4 · Open or close a studio to booking.
   Future<void> setStudioBookable(Person by, String studioId, bool value) async {
-    if (!by.has(Role.admin)) throw AdminProblem(adminProblemText('not_allowed'));
+    if (!by.has(Role.admin)) {
+      throw AdminProblem(adminProblemText('not_allowed'));
+    }
     if (isLive) {
       await _live(
         () => _db.rpc(
@@ -213,8 +217,12 @@ class AdminService {
 
   /// I5 · Stock of an equipment item.
   Future<void> setStock(Person by, String itemId, int stock) async {
-    if (!by.has(Role.admin)) throw AdminProblem(adminProblemText('not_allowed'));
-    if (stock < 0 || stock > 999) throw AdminProblem(adminProblemText('bad_stock'));
+    if (!by.has(Role.admin)) {
+      throw AdminProblem(adminProblemText('not_allowed'));
+    }
+    if (stock < 0 || stock > 999) {
+      throw AdminProblem(adminProblemText('bad_stock'));
+    }
     if (isLive) {
       await _live(
         () => _db.rpc(
@@ -237,7 +245,9 @@ class AdminService {
   Future<void> publishCharter(Person by, String version) async {
     final problem = charterVersionProblem(version, _world.policy.charterVersion);
     if (problem != null) throw AdminProblem(adminProblemText(problem));
-    if (!by.has(Role.admin)) throw AdminProblem(adminProblemText('not_allowed'));
+    if (!by.has(Role.admin)) {
+      throw AdminProblem(adminProblemText('not_allowed'));
+    }
     if (isLive) {
       await _live(
         () => _db.rpc('publish_charter', params: {'p_version': version.trim()}),
