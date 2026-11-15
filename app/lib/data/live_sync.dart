@@ -19,9 +19,9 @@ import '../domain/projects.dart';
 import 'app_state.dart';
 import 'backend.dart';
 import 'admin_state.dart';
-import 'demo_world.dart';
 import 'directory.dart';
 import 'projects_state.dart';
+import 'catalog.dart';
 
 /// Set by main() when the app runs against the server.
 LiveSync? liveSync;
@@ -238,9 +238,28 @@ class LiveSync {
             .then<dynamic>((v) => v)
             .catchError((_) => <dynamic>[]),
       ),
+      // What an admin can change in the catalogue (I4, I5).
+      Future<dynamic>.value(
+        db
+            .from('studios')
+            .select('id, bookable')
+            .then<dynamic>((v) => v)
+            .catchError((_) => null),
+      ),
+      Future<dynamic>.value(
+        db
+            .from('equipment')
+            .select('id, stock')
+            .then<dynamic>((v) => v)
+            .catchError((_) => null),
+      ),
     ]);
     final settings = results[0] as Map<String, dynamic>;
-    final known = {for (final s in DemoWorld.studios) s.id};
+    final n = results.length;
+    // A failed read keeps the last known values (never "everything open").
+    final studioRows = results[n - 2] as List?;
+    final stockRows = results[n - 1] as List?;
+    final known = {for (final s in Catalog.studios) s.id};
     final visible = [
       for (final r in results[1] as List)
         if (known.contains(r['studio_id'])) bookingFromRow(r as Map<String, dynamic>),
@@ -272,6 +291,16 @@ class LiveSync {
       }
     }
     if (gen != _generation) return;
+    if (studioRows != null && stockRows != null) {
+      Catalog.apply(
+        bookable: {
+          for (final r in studioRows) r['id'] as String: r['bookable'] as bool,
+        },
+        stock: {
+          for (final r in stockRows) r['id'] as String: r['stock'] as int,
+        },
+      );
+    }
     container.read(worldProvider.notifier).load(
           WorldState(
             now: now,
@@ -280,6 +309,7 @@ class LiveSync {
             maintenance: [
               for (final m in results[3] as List)
                 MaintenanceBlock(
+                  id: m['id'] as String,
                   roomId: m['room_id'] as String,
                   start: _time(m['start_at']),
                   end: _time(m['end_at']),
@@ -423,7 +453,7 @@ Booking bookingFromRow(Map<String, dynamic> r) => Booking(
       technicianId: r['technician_slug'] as String?,
       equipment: [
         for (final e in (r['equipment'] as List? ?? const []))
-          if (DemoWorld.equipment.any((x) => x.id == e['item_id']))
+          if (Catalog.equipment.any((x) => x.id == e['item_id']))
           EquipmentRequest(
             itemId: e['item_id'] as String,
             quantity: e['quantity'] as int,

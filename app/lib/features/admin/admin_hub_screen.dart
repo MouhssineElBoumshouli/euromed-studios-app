@@ -43,24 +43,28 @@ class AdminHubScreen extends ConsumerWidget {
         title: 'Règles',
         text: 'Horaires, durée des créneaux, quotas, fenêtre de réservation.',
         route: '/admin/rules',
+        ready: true,
       ),
       const _Section(
         icon: Icons.meeting_room_outlined,
         title: 'Studios et maintenance',
         text: 'Studios ouverts à la réservation, fermetures pour maintenance.',
         route: '/admin/studios',
+        ready: true,
       ),
       const _Section(
         icon: Icons.inventory_2_outlined,
         title: 'Matériel',
         text: 'Catalogue et quantités disponibles.',
         route: '/admin/equipment',
+        ready: true,
       ),
       const _Section(
         icon: Icons.gavel_rounded,
         title: 'Charte d’utilisation',
         text: 'Publier une nouvelle version : chacun la signe à nouveau.',
         route: '/admin/charter',
+        ready: true,
       ),
       _Section(
         icon: Icons.history_rounded,

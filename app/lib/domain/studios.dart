@@ -69,4 +69,19 @@ class Studio {
 
   /// Professors get priority here (R-04).
   final bool professorPriority;
+
+  Studio withBookable(bool value) => Studio(
+        id: id,
+        name: name,
+        zone: zone,
+        roomId: roomId,
+        photo: photo,
+        description: description,
+        capabilities: capabilities,
+        isolation: isolation,
+        capacity: capacity,
+        included: included,
+        bookable: value,
+        professorPriority: professorPriority,
+      );
 }

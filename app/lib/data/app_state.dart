@@ -17,6 +17,7 @@ import '../domain/rules/sessions.dart';
 import '../domain/studios.dart';
 import 'demo_world.dart';
 import 'directory.dart';
+import 'catalog.dart';
 
 /// Why a request cannot be sent. Each one has its own screen or message.
 enum SubmitProblem {
@@ -75,12 +76,13 @@ class WorldState {
     Map<String, DateTime>? charterSignedAt,
     Map<String, DateTime>? noticesSeenAt,
     Policy? policy,
+    List<MaintenanceBlock>? maintenance,
   }) =>
       WorldState(
         now: now,
         policy: policy ?? this.policy,
         bookings: bookings ?? this.bookings,
-        maintenance: maintenance,
+        maintenance: maintenance ?? this.maintenance,
         signedCharterVersion: signedCharterVersion ?? this.signedCharterVersion,
         charterSignedAt: charterSignedAt ?? this.charterSignedAt,
         noticesSeenAt: noticesSeenAt ?? this.noticesSeenAt,
@@ -88,6 +90,15 @@ class WorldState {
 }
 
 class WorldNotifier extends Notifier<WorldState> {
+  /// Offline admin changes (rules, closures). Live, the server is the
+  /// source and LiveSync reloads.
+  void setPolicy(Policy p) => state = state.copyWith(policy: p);
+  void setMaintenance(List<MaintenanceBlock> m) =>
+      state = state.copyWith(maintenance: m);
+
+  /// Rebuilds screens after a catalogue change (studio open/closed, stock).
+  void touch() => state = state.copyWith();
+
   @override
   WorldState build() => WorldState(
         now: DemoWorld.now,
@@ -147,7 +158,7 @@ class WorldNotifier extends Notifier<WorldState> {
       studio: studio,
       day: start,
       policy: state.policy,
-      allStudios: DemoWorld.studios,
+      allStudios: Catalog.studios,
       bookings: state.bookings,
       maintenance: state.maintenance,
       now: state.now,
@@ -286,7 +297,7 @@ class WorldNotifier extends Notifier<WorldState> {
   String? level2Conflict(Booking b) {
     final roomId = studioById(b.studioId).roomId;
     final roomStudios = {
-      for (final s in DemoWorld.studios)
+      for (final s in Catalog.studios)
         if (s.roomId == roomId) s.id,
     };
     for (final o in state.bookings) {
@@ -457,10 +468,10 @@ Person personById(String id) => Directory.people.firstWhere(
             ),
     );
 
-Studio studioById(String id) => DemoWorld.studios.firstWhere((s) => s.id == id);
+Studio studioById(String id) => Catalog.studios.firstWhere((s) => s.id == id);
 
 EquipmentItem equipmentById(String id) =>
-    DemoWorld.equipment.firstWhere((e) => e.id == id);
+    Catalog.equipment.firstWhere((e) => e.id == id);
 
 Establishment? establishmentById(String? id) =>
     id == null ? null : DemoWorld.establishments.firstWhere((e) => e.id == id);

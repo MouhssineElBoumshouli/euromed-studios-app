@@ -12,6 +12,7 @@ import '../../data/app_state.dart';
 import '../../data/demo_world.dart';
 import '../../data/selectors.dart';
 import '../../domain/studios.dart';
+import '../../data/catalog.dart';
 
 /// Selected capability filter on the studios list (null = all).
 final _filterProvider = StateProvider.autoDispose<Capability?>((ref) => null);
@@ -45,10 +46,10 @@ class StudiosScreen extends ConsumerWidget {
 
     final groups = [
       for (final z in Zone.values)
-        (z, DemoWorld.studios.where((s) => s.zone == z && matches(s)).toList()),
+        (z, Catalog.studios.where((s) => s.zone == z && matches(s)).toList()),
     ].where((g) => g.$2.isNotEmpty);
 
-    final total = DemoWorld.studios.where((s) => s.bookable).length;
+    final total = Catalog.studios.where((s) => s.bookable).length;
     final freeNow = live.values.where((l) => l.state == LiveState.free).length;
 
     return BlobBackground(
@@ -266,7 +267,7 @@ class StudioCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.es;
     final room = DemoWorld.rooms.firstWhere((r) => r.id == studio.roomId);
-    final shared = DemoWorld.studios
+    final shared = Catalog.studios
         .where((s) => s.roomId == studio.roomId && s.id != studio.id)
         .isNotEmpty;
     return EsCard(

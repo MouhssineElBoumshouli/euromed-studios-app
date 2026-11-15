@@ -727,6 +727,7 @@ abstract final class DemoWorld {
 
   static final maintenance = [
     MaintenanceBlock(
+      id: 'mt1',
       roomId: 'area4',
       start: _at(11, 14),
       end: _at(11, 17),

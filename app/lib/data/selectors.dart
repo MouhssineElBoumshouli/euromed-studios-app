@@ -10,9 +10,9 @@ import '../domain/rules/notifications.dart';
 import '../domain/rules/quota.dart';
 import '../domain/studios.dart';
 import 'app_state.dart';
-import 'demo_world.dart';
 import 'projects_state.dart';
 import 'directory.dart';
+import 'catalog.dart';
 
 /// The requester type a person books as by default.
 RequesterType defaultRequesterType(Person p) {
@@ -57,7 +57,18 @@ class LiveRoom {
 List<LiveRoom> liveStatus(WorldState w) {
   final now = w.now;
   final result = <LiveRoom>[];
-  for (final s in DemoWorld.studios.where((s) => s.bookable)) {
+  // Closed studios still show while one of their kept sessions runs.
+  for (final s in Catalog.studios.where(
+    (s) =>
+        s.bookable ||
+        w.bookings.any(
+          (b) =>
+              b.studioId == s.id &&
+              b.status.holdsSlot &&
+              !b.start.isAfter(now) &&
+              b.end.isAfter(now),
+        ),
+  )) {
     final m = w.maintenance.where(
       (m) =>
           m.roomId == s.roomId && !m.start.isAfter(now) && m.end.isAfter(now),
@@ -67,7 +78,7 @@ List<LiveRoom> liveStatus(WorldState w) {
       continue;
     }
     final roomIds = {
-      for (final x in DemoWorld.studios)
+      for (final x in Catalog.studios)
         if (x.roomId == s.roomId) x.id,
     };
     final busy = w.bookings.where(

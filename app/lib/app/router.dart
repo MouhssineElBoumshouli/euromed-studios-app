@@ -5,7 +5,11 @@ import 'package:go_router/go_router.dart';
 import '../data/backend.dart';
 import '../features/admin/activity_screen.dart';
 import '../features/admin/admin_hub_screen.dart';
+import '../features/admin/charter_admin_screen.dart';
 import '../features/admin/dashboard_screen.dart';
+import '../features/admin/equipment_admin_screen.dart';
+import '../features/admin/rules_screen.dart';
+import '../features/admin/studios_admin_screen.dart';
 import '../features/admin/user_detail_screen.dart';
 import '../features/admin/users_screen.dart';
 import '../features/booking/booking_flow_screen.dart';
@@ -158,6 +162,30 @@ final appRouter = GoRouter(
               parentNavigatorKey: _rootKey,
               builder: (_, __) =>
                   const WideFrame(maxWidth: 960, child: ActivityScreen()),
+            ),
+            GoRoute(
+              path: 'rules',
+              parentNavigatorKey: _rootKey,
+              builder: (_, __) =>
+                  const WideFrame(maxWidth: 760, child: RulesScreen()),
+            ),
+            GoRoute(
+              path: 'studios',
+              parentNavigatorKey: _rootKey,
+              builder: (_, __) =>
+                  const WideFrame(maxWidth: 860, child: StudiosAdminScreen()),
+            ),
+            GoRoute(
+              path: 'equipment',
+              parentNavigatorKey: _rootKey,
+              builder: (_, __) =>
+                  const WideFrame(maxWidth: 760, child: EquipmentAdminScreen()),
+            ),
+            GoRoute(
+              path: 'charter',
+              parentNavigatorKey: _rootKey,
+              builder: (_, __) =>
+                  const WideFrame(maxWidth: 760, child: CharterAdminScreen()),
             ),
             GoRoute(
               path: 'users',

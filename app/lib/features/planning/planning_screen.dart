@@ -11,10 +11,12 @@ import '../../core/widgets/status_chip.dart';
 import '../../data/app_state.dart';
 import '../../data/demo_world.dart';
 import '../../domain/bookings.dart';
+import '../../domain/people.dart';
 import '../../domain/rules/approval.dart';
 import '../../domain/rules/availability.dart';
 import '../../domain/studios.dart';
 import '../../data/directory.dart';
+import '../../data/catalog.dart';
 
 /// F1 · Planning: every studio on one day, hour by hour.
 ///
@@ -40,9 +42,15 @@ class _PlanningState extends ConsumerState<PlanningScreen> {
     final day = _day ?? _firstOpen(today);
     final monday = day.subtract(Duration(days: day.weekday - 1));
     final week = [for (var i = 0; i < 5; i++) monday.add(Duration(days: i))];
+    // A studio closed to booking keeps its column while it still has
+    // sessions: they are kept and staff must see them.
     final studios = [
-      for (final s in DemoWorld.studios)
-        if (s.bookable) s,
+      for (final s in Catalog.studios)
+        if (s.bookable ||
+            w.bookings.any((b) =>
+                b.studioId == s.id &&
+                (b.status.holdsSlot || b.status == BookingStatus.completed)))
+          s,
     ];
     final dayBookings = [
       for (final b in w.bookings)
@@ -143,7 +151,18 @@ class _PlanningState extends ConsumerState<PlanningScreen> {
             ],
           ),
           const SizedBox(height: EsSpace.s3),
-          const _Legend(),
+          Row(
+            children: [
+              const Expanded(child: _Legend()),
+              // Closures are planned by the studio manager or the admin.
+              if (me.has(Role.admin) || me.has(Role.studioManager))
+                TextButton.icon(
+                  onPressed: () => context.push('/admin/studios'),
+                  icon: const Icon(Icons.build_outlined, size: 18),
+                  label: const Text('Fermetures'),
+                ),
+            ],
+          ),
         ],
       ),
     );
@@ -473,7 +492,7 @@ class _Timeline extends StatelessWidget {
   bool _inRow(Booking b, Studio s) {
     if (b.studioId == s.id) return true;
     final other =
-        DemoWorld.studios.where((x) => x.id == b.studioId).firstOrNull;
+        Catalog.studios.where((x) => x.id == b.studioId).firstOrNull;
     return other?.roomId == s.roomId && b.status.holdsSlot;
   }
 }

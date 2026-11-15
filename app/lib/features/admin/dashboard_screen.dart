@@ -8,7 +8,6 @@ import '../../core/theme/es_colors.dart';
 import '../../core/theme/es_text.dart';
 import '../../core/widgets/layout.dart';
 import '../../data/app_state.dart';
-import '../../data/demo_world.dart';
 import '../../data/projects_state.dart';
 import '../../domain/bookings.dart';
 import '../../domain/people.dart';
@@ -16,6 +15,7 @@ import '../../domain/projects.dart';
 import '../../domain/rules/projects.dart';
 import '../../domain/rules/stats.dart';
 import '../notifications/notifications_screen.dart';
+import '../../data/catalog.dart';
 
 /// I1 · Pilotage: how the studios are doing this week, and what needs
 /// attention now. For the admin and the studio manager.
@@ -32,7 +32,7 @@ class DashboardScreen extends ConsumerWidget {
     final thisWeek = !from.isAfter(w.now);
     final to = DateTime(from.year, from.month, from.day + 7);
     final loads = occupancy(
-      DemoWorld.studios,
+      Catalog.studios,
       w.bookings,
       w.policy,
       from,
@@ -161,6 +161,11 @@ class DashboardScreen extends ConsumerWidget {
     );
     final attention = _Panel(
       title: 'À traiter maintenant',
+      action: TextButton.icon(
+        onPressed: () => context.push('/admin/studios'),
+        icon: const Icon(Icons.build_outlined, size: 18),
+        label: const Text('Fermetures'),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -278,7 +283,7 @@ class DashboardScreen extends ConsumerWidget {
 
   static String _roomName(String roomId) {
     final names = [
-      for (final s in DemoWorld.studios)
+      for (final s in Catalog.studios)
         if (s.roomId == roomId) s.name,
     ];
     return names.isEmpty ? roomId : names.join(' / ');
