@@ -13,6 +13,7 @@ import '../../data/demo_world.dart';
 import '../../data/directory.dart';
 import '../../data/people_service.dart';
 import '../../domain/activity.dart';
+import '../../domain/bookings.dart';
 import '../../domain/people.dart';
 import '../../domain/rules/admin.dart';
 
@@ -34,6 +35,9 @@ class _UserDetailState extends ConsumerState<UserDetailScreen> {
   late bool active;
   bool saving = false;
 
+  /// Establishments picked earlier, kept if a scope is turned off and on.
+  final Map<RequesterType, String?> _lastEstablishment = {};
+
   void _reset(Person p) {
     base = p;
     roles = {...p.roles};
@@ -49,10 +53,12 @@ class _UserDetailState extends ConsumerState<UserDetailScreen> {
       scopes.where((s) => s.requesterType == t).firstOrNull?.establishmentId;
 
   void _toggleScope(RequesterType t, bool on) => setState(() {
+        final current = _scopeEstablishment(t);
+        if (!on) _lastEstablishment[t] = current;
         scopes = [
           for (final s in scopes)
             if (s.requesterType != t) s,
-          if (on) ApproverScope(t),
+          if (on) ApproverScope(t, establishmentId: _lastEstablishment[t]),
         ];
       });
 
@@ -67,10 +73,29 @@ class _UserDetailState extends ConsumerState<UserDetailScreen> {
   Future<void> _save(Person me, List<String> changes) async {
     final serious = !active ||
         roles.contains(Role.admin) != base!.has(Role.admin);
+    final w = ref.read(worldProvider);
+    final turningOff = !active && base!.active;
+    final waiting = turningOff
+        ? w.bookings
+            .where((b) => b.requesterId == base!.id && b.status.isPending)
+            .length
+        : 0;
+    final upcoming = turningOff
+        ? w.bookings
+            .where(
+              (b) =>
+                  b.requesterId == base!.id &&
+                  b.status == BookingStatus.approved &&
+                  b.start.isAfter(w.now),
+            )
+            .length
+        : 0;
+    var cancelPending = true;
     final ok = await showModalBottomSheet<bool>(
       context: context,
       showDragHandle: true,
-      builder: (ctx) {
+      isScrollControlled: true,
+      builder: (ctx) => StatefulBuilder(builder: (ctx, setSheet) {
         final c = ctx.es;
         return SafeArea(
           child: Padding(
@@ -102,6 +127,34 @@ class _UserDetailState extends ConsumerState<UserDetailScreen> {
                       ],
                     ),
                   ),
+                if (waiting > 0)
+                  CheckboxListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: cancelPending,
+                    onChanged: (v) => setSheet(() => cancelPending = v!),
+                    title: Text(
+                      'Annuler ses $waiting demande${waiting > 1 ? 's' : ''} '
+                      'en attente',
+                      style: EsText.titleS,
+                    ),
+                    subtitle: const Text(
+                      'Sinon, elles restent dans la file des validateurs.',
+                    ),
+                    controlAffinity: ListTileControlAffinity.leading,
+                  ),
+                if (upcoming > 0)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: InfoBanner(
+                      tone: BannerTone.warning,
+                      icon: Icons.event_busy_outlined,
+                      title: '$upcoming séance${upcoming > 1 ? 's' : ''} '
+                          'validée${upcoming > 1 ? 's' : ''} à venir',
+                      text: 'Elles ne sont pas annulées automatiquement. '
+                          'Prévenez la régie ou annulez-les depuis la '
+                          'réservation.',
+                    ),
+                  ),
                 const SizedBox(height: 8),
                 Text(
                   !active
@@ -130,7 +183,7 @@ class _UserDetailState extends ConsumerState<UserDetailScreen> {
             ),
           ),
         );
-      },
+      }),
     );
     if (ok != true || !mounted) return;
     setState(() => saving = true);
@@ -143,6 +196,7 @@ class _UserDetailState extends ConsumerState<UserDetailScreen> {
             scopes: scopes,
             clubs: clubs,
             active: active,
+            cancelPending: waiting > 0 && cancelPending,
           );
       m.showSnackBar(const SnackBar(content: Text('Accès mis à jour.')));
       if (mounted) {
@@ -234,10 +288,7 @@ class _UserDetailState extends ConsumerState<UserDetailScreen> {
       active: active,
       everyone: everyone,
     );
-    final changedElsewhere = person != base &&
-        (person.roles.length != base!.roles.length ||
-            !person.roles.containsAll(base!.roles) ||
-            person.active != base!.active);
+    final changedElsewhere = !person.sameAs(base!);
     final history = [
       for (final a in ref.watch(adminProvider).audit)
         if (a.targetType == 'person' && a.targetId == person.id) a,
@@ -386,7 +437,10 @@ class _UserDetailState extends ConsumerState<UserDetailScreen> {
                             }),
                     title: Text(r.label, style: EsText.titleS),
                     subtitle: Text(
-                      roleHelp[r] ?? '',
+                      self && r == Role.admin
+                          ? 'Vous ne pouvez pas retirer votre propre rôle '
+                              'd’administrateur.'
+                          : roleHelp[r] ?? '',
                       style: EsText.bodyS.copyWith(color: c.textSecondary),
                     ),
                     controlAffinity: ListTileControlAffinity.leading,

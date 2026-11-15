@@ -75,6 +75,9 @@ String accessProblemText(String code) => switch (code) {
         'Vous ne pouvez pas retirer votre propre accès administrateur.',
       'last_admin' => 'Il doit toujours rester au moins un administrateur '
           'actif.',
+      'stale' => 'Cet accès a été modifié entre-temps. Rechargez la page, '
+          'puis recommencez.',
+      'bad_scope' => 'Périmètre de validation invalide.',
       _ => 'La modification n’a pas pu être enregistrée. Réessayez.',
     };
 

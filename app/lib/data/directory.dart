@@ -8,6 +8,7 @@ library;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../domain/people.dart';
+import 'backend.dart';
 import 'demo_world.dart';
 
 /// A plain mirror of the directory, for code that has no `ref`
@@ -19,9 +20,19 @@ abstract final class Directory {
 
 class DirectoryNotifier extends Notifier<List<Person>> {
   @override
-  List<Person> build() => Directory._people;
+  List<Person> build() {
+    // Live, nobody is known until the first load (no fictional names).
+    if (isLive) Directory._people = const [];
+    return Directory._people;
+  }
 
   void replace(List<Person> people) {
+    // Skip identical reloads, so the 30 s refresh doesn't rebuild screens.
+    if (people.length == state.length &&
+        [for (var i = 0; i < people.length; i++) people[i].sameAs(state[i])]
+            .every((x) => x)) {
+      return;
+    }
     Directory._people = people;
     state = people;
   }

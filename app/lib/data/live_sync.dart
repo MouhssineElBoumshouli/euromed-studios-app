@@ -93,8 +93,9 @@ class LiveSync {
     container
         .read(projectsProvider.notifier)
         .load(const ProjectsState(loaded: false));
-    // An admin's log must not stay visible to the next person.
+    // An admin's log and the directory must not stay for the next person.
     container.read(adminProvider.notifier).load(const AdminState());
+    container.read(directoryProvider.notifier).replace(const []);
   }
 
   Future<void> _enter(int gen, String uid) async {

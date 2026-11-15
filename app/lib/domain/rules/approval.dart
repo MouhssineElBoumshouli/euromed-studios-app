@@ -32,7 +32,7 @@ bool _decidedEarlier(Person person, Booking booking) => booking.history.any(
 /// self-approval, so the request goes to the Administrator instead (Q18).
 bool needsLevel1Fallback(Booking b, List<Person> people) {
   final eligible = people.where(
-    (p) => p.id != b.requesterId && _coversLevel1(p, b),
+    (p) => p.active && p.id != b.requesterId && _coversLevel1(p, b),
   );
   return eligible.isEmpty;
 }

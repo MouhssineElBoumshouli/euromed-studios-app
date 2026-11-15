@@ -120,3 +120,6 @@ Proposition actuelle : l’équipe technique des studios fait le montage et le c
 
 ## Q24 · Nombre de collaborateurs par projet
 Proposition actuelle : 10 collaborateurs au plus par projet (le porteur en plus). Cette limite vous convient-elle ?
+
+## Q25 · Que deviennent les réservations d’un compte désactivé ?
+Proposition actuelle : à la désactivation, l’administrateur peut annuler les demandes en attente de la personne ; les séances déjà validées restent et la régie est prévenue. Faut-il plutôt tout annuler automatiquement ?

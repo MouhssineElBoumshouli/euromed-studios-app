@@ -88,6 +88,24 @@ class Person {
   /// False when an admin turned the account off (it can't sign in).
   final bool active;
 
+  /// Same person with the same access (for skipping identical reloads).
+  bool sameAs(Person o) =>
+      id == o.id &&
+      firstName == o.firstName &&
+      lastName == o.lastName &&
+      title == o.title &&
+      establishmentId == o.establishmentId &&
+      active == o.active &&
+      roles.length == o.roles.length &&
+      roles.containsAll(o.roles) &&
+      clubIds.join(',') == o.clubIds.join(',') &&
+      approverScopes
+              .map((s) => '${s.requesterType.name}/${s.establishmentId}')
+              .join(',') ==
+          o.approverScopes
+              .map((s) => '${s.requesterType.name}/${s.establishmentId}')
+              .join(',');
+
   Person copyWith({
     Set<Role>? roles,
     List<ApproverScope>? approverScopes,

@@ -32,6 +32,7 @@ class PeopleService {
     required List<ApproverScope> scopes,
     required List<String> clubs,
     required bool active,
+    bool cancelPending = false,
   }) async {
     final keepScopes =
         roles.contains(Role.entityApprover) ? scopes : const <ApproverScope>[];
@@ -65,17 +66,40 @@ class PeopleService {
             ],
             'p_clubs': keepClubs,
             'p_active': active,
+            // What the admin saw: the server refuses if it changed since.
+            'p_expected': {
+              'roles': [for (final r in target.roles) r.name],
+              'scopes': [
+                for (final s in target.approverScopes)
+                  {
+                    'type': s.requesterType.name,
+                    if (s.establishmentId != null)
+                      'establishment_id': s.establishmentId,
+                  },
+              ],
+              'clubs': target.clubIds,
+              'active': target.active,
+            },
+            'p_cancel_pending': cancelPending,
           },
         );
-        await liveSync?.refresh();
       } on PostgrestException catch (e) {
         final code = RegExp('[a-z_]+').stringMatch(e.message) ?? '';
         throw AccessProblem(accessProblemText(code));
       }
+      // Saved. A failed reload must not look like a failed save.
+      try {
+        await liveSync?.refresh();
+      } catch (_) {}
       return;
     }
 
     await Future<void>.delayed(const Duration(milliseconds: 400));
+    final current =
+        Directory.people.where((p) => p.id == target.id).firstOrNull;
+    if (current == null || !current.sameAs(target)) {
+      throw AccessProblem(accessProblemText('stale'));
+    }
     final changes = accessChanges(
       target,
       roles: roles,
@@ -84,6 +108,15 @@ class PeopleService {
       active: active,
     );
     if (changes.isEmpty) return;
+    if (!active && cancelPending) {
+      final world = _ref.read(worldProvider.notifier);
+      for (final b in _ref.read(worldProvider).bookings) {
+        if (b.requesterId == target.id && b.status.isPending) {
+          world.cancel(b.id, by: by, reason: 'Compte désactivé par '
+              'l’administration');
+        }
+      }
+    }
     _ref.read(directoryProvider.notifier).update(
           target.copyWith(
             roles: roles,
