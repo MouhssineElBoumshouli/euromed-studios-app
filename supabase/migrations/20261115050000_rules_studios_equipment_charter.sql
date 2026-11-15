@@ -30,7 +30,8 @@ begin
   end if;
   if s.student_quota_minutes <> p_quota then
     parts := parts || format('Quota étudiant : %s → %s h/semaine',
-      trim(to_char(s.student_quota_minutes / 60.0, 'FM990.0')), trim(to_char(p_quota / 60.0, 'FM990.0')));
+      replace(trim_scale(s.student_quota_minutes / 60.0)::text, '.', ','),
+      replace(trim_scale(p_quota / 60.0)::text, '.', ','));
   end if;
   if s.qr_grace_minutes <> p_grace then
     parts := parts || format('Accès avant la séance : %s → %s min', s.qr_grace_minutes, p_grace);
