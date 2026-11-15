@@ -15,6 +15,18 @@ DateTime weekStart(DateTime now) {
   return DateTime(d.year, d.month, d.day - (d.weekday - 1));
 }
 
+/// The week to report on: this week, or next week once this week has no
+/// open day left (e.g. on a Saturday or Sunday).
+DateTime reportWeek(DateTime now, Policy policy) {
+  final start = weekStart(now);
+  final lastOpen = policy.openWeekdays.isEmpty
+      ? 7
+      : policy.openWeekdays.reduce((a, b) => a > b ? a : b);
+  return now.weekday > lastOpen
+      ? DateTime(start.year, start.month, start.day + 7)
+      : start;
+}
+
 /// Hours the studios are open between [from] and [to] (whole days).
 int openMinutes(Policy policy, DateTime from, DateTime to) {
   var total = 0;

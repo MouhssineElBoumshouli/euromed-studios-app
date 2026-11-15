@@ -28,7 +28,8 @@ class DashboardScreen extends ConsumerWidget {
     final w = ref.watch(worldProvider);
     final me = ref.watch(currentPersonProvider);
     final projects = ref.watch(projectsProvider).projects;
-    final from = weekStart(w.now);
+    final from = reportWeek(w.now, w.policy);
+    final thisWeek = !from.isAfter(w.now);
     final to = DateTime(from.year, from.month, from.day + 7);
     final loads = occupancy(DemoWorld.studios, w.bookings, w.policy, from, to)
       ..sort((a, b) => b.rate.compareTo(a.rate));
@@ -64,19 +65,20 @@ class DashboardScreen extends ConsumerWidget {
     final kpis = [
       _Kpi(
         icon: Icons.donut_large_rounded,
-        label: 'Occupation cette semaine',
+        label: 'Occupation',
         value: '${(rate * 100).round()} %',
-        sub: 'des heures d’ouverture réservées',
+        sub: thisWeek
+            ? 'des heures d’ouverture, cette semaine'
+            : 'des heures d’ouverture, semaine prochaine',
         tone: _Tone.brand,
       ),
       _Kpi(
         icon: Icons.inbox_outlined,
-        label: 'Demandes en attente',
+        label: 'En attente',
         value: '${pending.total}',
         sub: pending.total == 0
-            ? 'Rien en attente'
-            : '${pending.atEntity} au niveau 1 · ${pending.atStudio} au '
-                'niveau 2',
+            ? 'Aucune demande'
+            : '${pending.atEntity} niveau 1 · ${pending.atStudio} niveau 2',
         tone: pending.total > 0 ? _Tone.warn : _Tone.ok,
         onTap: () => context.go('/validations'),
       ),
@@ -107,7 +109,8 @@ class DashboardScreen extends ConsumerWidget {
 
     final occupancyCard = _Panel(
       title: 'Occupation par studio',
-      subtitle: 'Semaine du ${Fmt.dayMonth(from)}',
+      subtitle: '${thisWeek ? 'Cette semaine' : 'Semaine prochaine'} · '
+          'à partir du ${Fmt.dayMonth(from)}',
       child: Column(
         children: [
           for (final l in loads) _LoadRow(load: l),
@@ -161,7 +164,8 @@ class DashboardScreen extends ConsumerWidget {
                   : c.reviewText,
               title: '${personById(b.requesterId).fullName} · '
                   '${studioById(b.studioId).name}',
-              detail: '${b.status.label} · en attente depuis '
+              detail: '${b.status == BookingStatus.pendingEntity ? 'Niveau 1' : 'Niveau 2'}'
+                  ' · attend depuis '
                   '${Fmt.duration(w.now.difference(b.history.last.at))}',
               onTap: () => context.push('/validations/${b.id}'),
             ),
@@ -192,8 +196,7 @@ class DashboardScreen extends ConsumerWidget {
       children: [
         BrandHeader(
           title: 'Pilotage',
-          subtitle: 'Semaine du ${Fmt.dayMonth(from)} · '
-              'mis à jour ${Fmt.time(w.now)}',
+          subtitle: 'Mis à jour à ${Fmt.time(w.now)}',
           trailing: wide ? null : const NoticeBell(),
         ),
         Padding(
@@ -476,7 +479,7 @@ class _DayBars extends StatelessWidget {
                           width: 22,
                           height: maxH * d.waiting / top,
                           decoration: BoxDecoration(
-                            color: c.lilac,
+                            color: c.accent.withValues(alpha: 0.45),
                             borderRadius: BorderRadius.vertical(
                               top: const Radius.circular(4),
                               bottom: Radius.circular(d.validated == 0 ? 4 : 0),
@@ -519,7 +522,10 @@ class _DayBars extends StatelessWidget {
           children: [
             _Dot(color: c.actionPrimary, label: 'Validées'),
             const SizedBox(width: 16),
-            _Dot(color: c.lilac, label: 'En attente'),
+            _Dot(
+              color: c.accent.withValues(alpha: 0.45),
+              label: 'En attente',
+            ),
           ],
         ),
       ],

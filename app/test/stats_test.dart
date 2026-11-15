@@ -103,4 +103,11 @@ void main() {
     }
     expect(feed.any((i) => i.category == ActivityCategory.admin), isTrue);
   });
+
+  test('report week moves to next week once no open day is left', () {
+    expect(reportWeek(DateTime(2026, 11, 13, 10), policy),
+        DateTime(2026, 11, 9)); // Friday
+    expect(reportWeek(DateTime(2026, 11, 15, 10), policy),
+        DateTime(2026, 11, 16)); // Sunday
+  });
 }

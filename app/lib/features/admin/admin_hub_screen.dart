@@ -31,31 +31,31 @@ class AdminHubScreen extends ConsumerWidget {
     }
 
     final sections = <_Section>[
-      _Section(
+      const _Section(
         icon: Icons.manage_accounts_outlined,
         title: 'Utilisateurs et rôles',
         text: 'Rôles, périmètres de validation, clubs.',
         route: '/admin/users',
       ),
-      _Section(
+      const _Section(
         icon: Icons.rule_rounded,
         title: 'Règles',
         text: 'Horaires, durée des créneaux, quotas, fenêtre de réservation.',
         route: '/admin/rules',
       ),
-      _Section(
+      const _Section(
         icon: Icons.meeting_room_outlined,
         title: 'Studios et maintenance',
         text: 'Studios ouverts à la réservation, fermetures pour maintenance.',
         route: '/admin/studios',
       ),
-      _Section(
+      const _Section(
         icon: Icons.inventory_2_outlined,
         title: 'Matériel',
         text: 'Catalogue et quantités disponibles.',
         route: '/admin/equipment',
       ),
-      _Section(
+      const _Section(
         icon: Icons.gavel_rounded,
         title: 'Charte d’utilisation',
         text: 'Publier une nouvelle version : chacun la signe à nouveau.',
