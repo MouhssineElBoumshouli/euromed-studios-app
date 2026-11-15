@@ -11,7 +11,6 @@ import '../../core/widgets/es_button.dart';
 import '../../core/widgets/layout.dart';
 import '../../core/widgets/status_chip.dart';
 import '../../data/app_state.dart';
-import '../../data/demo_world.dart';
 import '../../data/project_service.dart';
 import '../../data/projects_state.dart';
 import '../../domain/people.dart';

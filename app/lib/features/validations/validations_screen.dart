@@ -9,7 +9,6 @@ import '../../core/theme/es_text.dart';
 import '../../core/widgets/layout.dart';
 import '../../core/widgets/status_chip.dart';
 import '../../data/app_state.dart';
-import '../../data/demo_world.dart';
 import '../../domain/bookings.dart';
 import '../../domain/people.dart';
 import '../../domain/rules/approval.dart';
