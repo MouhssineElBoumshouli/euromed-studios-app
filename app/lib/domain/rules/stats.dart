@@ -27,67 +27,105 @@ DateTime reportWeek(DateTime now, Policy policy) {
       : start;
 }
 
-/// Hours the studios are open between [from] and [to] (whole days).
-int openMinutes(Policy policy, DateTime from, DateTime to) {
-  var total = 0;
-  for (var d = DateTime(from.year, from.month, from.day);
-      d.isBefore(to);
-      d = DateTime(d.year, d.month, d.day + 1)) {
-    if (policy.openWeekdays.contains(d.weekday)) {
-      total += (policy.closingHour - policy.openingHour) * 60;
-    }
-  }
-  return total;
-}
+/// The opening window of each open day between [from] and [to].
+List<({DateTime start, DateTime end})> openWindows(
+  Policy policy,
+  DateTime from,
+  DateTime to,
+) =>
+    [
+      for (var d = DateTime(from.year, from.month, from.day);
+          d.isBefore(to);
+          d = DateTime(d.year, d.month, d.day + 1))
+        if (policy.openWeekdays.contains(d.weekday))
+          (
+            start: DateTime(d.year, d.month, d.day, policy.openingHour),
+            end: DateTime(d.year, d.month, d.day, policy.closingHour),
+          ),
+    ];
 
-/// A booking that holds the studio (counts for occupancy).
+/// Minutes the studios are open between [from] and [to].
+int openMinutes(Policy policy, DateTime from, DateTime to) =>
+    openWindows(policy, from, to)
+        .fold(0, (s, w) => s + w.end.difference(w.start).inMinutes);
+
+/// A booking that holds the room (counts for occupancy).
 bool holdsStudio(Booking b) =>
     b.status == BookingStatus.approved ||
     b.status == BookingStatus.completed ||
     b.status == BookingStatus.noShow;
 
-int _overlap(Booking b, DateTime from, DateTime to) {
-  final s = b.start.isAfter(from) ? b.start : from;
-  final e = b.end.isBefore(to) ? b.end : to;
+int _overlap(DateTime s1, DateTime e1, DateTime s2, DateTime e2) {
+  final s = s1.isAfter(s2) ? s1 : s2;
+  final e = e1.isBefore(e2) ? e1 : e2;
   return e.isAfter(s) ? e.difference(s).inMinutes : 0;
 }
 
-class StudioLoad {
-  const StudioLoad(this.studio, this.bookedMinutes, this.openMinutes);
-  final Studio studio;
+/// One physical room: studios that share it can't be used at the same
+/// time (R-08), so occupancy is measured per room.
+class RoomLoad {
+  const RoomLoad({
+    required this.roomId,
+    required this.studios,
+    required this.bookedMinutes,
+    required this.openMinutes,
+  });
+  final String roomId;
+  final List<Studio> studios;
   final int bookedMinutes;
+
+  /// Opening hours minus planned maintenance.
   final int openMinutes;
 
-  double get rate => openMinutes == 0 ? 0 : bookedMinutes / openMinutes;
+  String get name => studios.map((s) => s.name).join(' / ');
+  double get rate =>
+      openMinutes == 0 ? 0 : (bookedMinutes / openMinutes).clamp(0, 1);
 }
 
-/// Booked share of each bookable studio between [from] and [to].
-List<StudioLoad> occupancy(
+/// Booked share of each room between [from] and [to], counted only
+/// inside opening hours, with maintenance taken out of the open time.
+List<RoomLoad> occupancy(
   List<Studio> studios,
   List<Booking> bookings,
   Policy policy,
   DateTime from,
-  DateTime to,
-) {
-  final open = openMinutes(policy, from, to);
+  DateTime to, {
+  List<MaintenanceBlock> maintenance = const [],
+}) {
+  final windows = openWindows(policy, from, to);
+  final byRoom = <String, List<Studio>>{};
+  for (final s in studios) {
+    if (s.bookable) byRoom.putIfAbsent(s.roomId, () => []).add(s);
+  }
   return [
-    for (final s in studios)
-      if (s.bookable)
-        StudioLoad(
-          s,
-          bookings
-              .where((b) => b.studioId == s.id && holdsStudio(b))
-              .fold(0, (sum, b) => sum + _overlap(b, from, to)),
-          open,
-        ),
+    for (final e in byRoom.entries)
+      () {
+        final ids = {for (final s in e.value) s.id};
+        var open = 0, booked = 0;
+        for (final w in windows) {
+          final closed = maintenance
+              .where((m) => m.roomId == e.key)
+              .fold(0, (s, m) => s + _overlap(m.start, m.end, w.start, w.end));
+          open += w.end.difference(w.start).inMinutes - closed;
+          booked += bookings
+              .where((b) => ids.contains(b.studioId) && holdsStudio(b))
+              .fold(0, (s, b) => s + _overlap(b.start, b.end, w.start, w.end));
+        }
+        return RoomLoad(
+          roomId: e.key,
+          studios: e.value,
+          bookedMinutes: booked,
+          openMinutes: open < 0 ? 0 : open,
+        );
+      }(),
   ];
 }
 
-/// Overall booked share across all bookable studios.
-double overallRate(List<StudioLoad> loads) {
+/// Overall booked share across all rooms.
+double overallRate(List<RoomLoad> loads) {
   final open = loads.fold(0, (s, l) => s + l.openMinutes);
   final booked = loads.fold(0, (s, l) => s + l.bookedMinutes);
-  return open == 0 ? 0 : booked / open;
+  return open == 0 ? 0 : (booked / open).clamp(0, 1).toDouble();
 }
 
 class PendingSummary {
@@ -107,7 +145,7 @@ class PendingSummary {
 PendingSummary pendingSummary(List<Booking> bookings) {
   final pending = [
     for (final b in bookings)
-      if (b.status.isPending && !b.isPrivate) b,
+      if (b.status.isPending && !b.isPrivate && b.history.isNotEmpty) b,
   ]..sort((a, b) => a.history.last.at.compareTo(b.history.last.at));
   return PendingSummary(
     atEntity:
@@ -183,23 +221,33 @@ Map<RequesterType, int> requestsByType(
   final out = {for (final t in RequesterType.values) t: 0};
   for (final b in bookings) {
     if (b.isPrivate) continue;
-    final sent = b.history.first.at;
-    if (sent.isAfter(since)) out[b.requesterType] = out[b.requesterType]! + 1;
+    final sent = b.history
+        .where((e) => e.type == BookingEventType.submitted)
+        .firstOrNull
+        ?.at;
+    if (sent != null && sent.isAfter(since)) {
+      out[b.requesterType] = out[b.requesterType]! + 1;
+    }
   }
   return out;
 }
 
-/// Sessions (validated or waiting) on each of the next [days] days.
+/// Sessions (validated or waiting) on each of the next [days] open days.
 List<({DateTime day, int validated, int waiting})> dailyLoad(
   List<Booking> bookings,
-  DateTime now, {
-  int days = 7,
+  DateTime now,
+  Policy policy, {
+  int days = 5,
 }) {
   final today = DateTime(now.year, now.month, now.day);
+  final open = <DateTime>[];
+  for (var i = 0; open.length < days && i < 21; i++) {
+    final d = DateTime(today.year, today.month, today.day + i);
+    if (policy.openWeekdays.contains(d.weekday)) open.add(d);
+  }
   return [
-    for (var i = 0; i < days; i++)
+    for (final d in open)
       () {
-        final d = DateTime(today.year, today.month, today.day + i);
         final same = bookings.where(
           (b) =>
               !b.isPrivate &&
@@ -209,13 +257,7 @@ List<({DateTime day, int validated, int waiting})> dailyLoad(
         );
         return (
           day: d,
-          validated: same
-              .where(
-                (b) =>
-                    b.status == BookingStatus.approved ||
-                    b.status == BookingStatus.completed,
-              )
-              .length,
+          validated: same.where(holdsStudio).length,
           waiting: same.where((b) => b.status.isPending).length,
         );
       }(),

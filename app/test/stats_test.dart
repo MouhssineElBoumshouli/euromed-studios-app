@@ -28,13 +28,11 @@ void main() {
         occupancy(DemoWorld.studios, DemoWorld.bookings, policy, from, to);
     for (final l in loads) {
       expect(l.rate, inInclusiveRange(0, 1));
-      expect(l.studio.bookable, isTrue);
+      expect(l.studios.every((s) => s.bookable), isTrue);
     }
-    final held = DemoWorld.bookings.where(
-      (b) => holdsStudio(b) && !b.start.isBefore(from) && b.end.isBefore(to),
-    );
-    final minutes = held.fold(0, (s, b) => s + b.end.difference(b.start).inMinutes);
-    expect(loads.fold(0, (s, l) => s + l.bookedMinutes), minutes);
+    // Studios sharing a room are measured together (one row per room).
+    final rooms = {for (final s in DemoWorld.studios) if (s.bookable) s.roomId};
+    expect(loads.length, rooms.length);
   });
 
   test('pending summary splits the two levels and finds the oldest', () {
@@ -109,5 +107,26 @@ void main() {
         DateTime(2026, 11, 9)); // Friday
     expect(reportWeek(DateTime(2026, 11, 15, 10), policy),
         DateTime(2026, 11, 16)); // Sunday
+  });
+
+  test('maintenance is taken out of the open time', () {
+    final from = DateTime(2026, 11, 9);
+    final to = DateTime(2026, 11, 10); // one Monday
+    final s = DemoWorld.studios.firstWhere((s) => s.bookable);
+    final loads = occupancy([s], const [], policy, from, to, maintenance: [
+      MaintenanceBlock(
+        roomId: s.roomId,
+        start: DateTime(2026, 11, 9, 9),
+        end: DateTime(2026, 11, 9, 12),
+        reason: 'test',
+      ),
+    ]);
+    expect(loads.single.openMinutes, 6 * 60);
+  });
+
+  test('daily load lists open days only', () {
+    final d = dailyLoad(const [], DateTime(2026, 11, 14), policy); // Saturday
+    expect(d.length, 5);
+    expect(d.every((x) => x.day.weekday <= 5), isTrue);
   });
 }

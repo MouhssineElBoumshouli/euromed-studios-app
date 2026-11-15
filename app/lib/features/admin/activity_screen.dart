@@ -76,8 +76,8 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
                 style: EsText.displayL.copyWith(color: c.textPrimary),
               ),
               Text(
-                'Qui a fait quoi, et quand. Les entrées ne peuvent pas être '
-                'modifiées.',
+                'Qui a fait quoi, et quand. Les actions d’administration sont '
+                'enregistrées et ne peuvent pas être modifiées.',
                 style: EsText.bodyM.copyWith(color: c.textSecondary),
               ),
               const SizedBox(height: EsSpace.s4),
@@ -155,10 +155,12 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
       ),
       const SizedBox(height: EsSpace.s3),
       if (items.isEmpty)
-        const EmptyState(
+        EmptyState(
           icon: Icons.manage_search_rounded,
           title: 'Aucune activité',
-          message: 'Rien ne correspond à cette recherche.',
+          message: q.isEmpty && category == null
+              ? 'Les actions apparaîtront ici au fil de l’eau.'
+              : 'Rien ne correspond à cette recherche.',
         ),
       for (final g in groups.entries) ...[
         Padding(

@@ -436,12 +436,19 @@ const otherPersonId = '_other';
 
 Person personById(String id) => DemoWorld.people.firstWhere(
       (p) => p.id == id,
-      orElse: () => const Person(
-        id: otherPersonId,
-        firstName: 'Autre',
-        lastName: 'demandeur',
-        roles: {},
-      ),
+      orElse: () => id == otherPersonId
+          ? const Person(
+              id: otherPersonId,
+              firstName: 'Autre',
+              lastName: 'demandeur',
+              roles: {},
+            )
+          : Person(
+              id: id,
+              firstName: 'Utilisateur',
+              lastName: 'inconnu',
+              roles: const {},
+            ),
     );
 
 Studio studioById(String id) => DemoWorld.studios.firstWhere((s) => s.id == id);

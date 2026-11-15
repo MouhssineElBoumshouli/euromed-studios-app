@@ -31,14 +31,20 @@ class DashboardScreen extends ConsumerWidget {
     final from = reportWeek(w.now, w.policy);
     final thisWeek = !from.isAfter(w.now);
     final to = DateTime(from.year, from.month, from.day + 7);
-    final loads = occupancy(DemoWorld.studios, w.bookings, w.policy, from, to)
-      ..sort((a, b) => b.rate.compareTo(a.rate));
+    final loads = occupancy(
+      DemoWorld.studios,
+      w.bookings,
+      w.policy,
+      from,
+      to,
+      maintenance: w.maintenance,
+    )..sort((a, b) => b.rate.compareTo(a.rate));
     final rate = overallRate(loads);
     final pending = pendingSummary(w.bookings);
     final times = approvalTimes(w.bookings, w.now);
     final absences = noShowRate(w.bookings, w.now);
     final byType = requestsByType(w.bookings, w.now);
-    final days = dailyLoad(w.bookings, w.now);
+    final days = dailyLoad(w.bookings, w.now, w.policy);
     final stages = projectsByStage(projects);
     final toCheck = [
       for (final p in projects)
@@ -56,8 +62,17 @@ class DashboardScreen extends ConsumerWidget {
     ]..sort((a, b) => a.start.compareTo(b.start));
     final wide = isWide(context);
 
+    if (!(me.has(Role.admin) || me.has(Role.studioManager))) {
+      return const EmptyState(
+        icon: Icons.lock_outline_rounded,
+        title: 'Accès réservé',
+        message: 'Le pilotage est réservé à la Direction des Studios et à '
+            'l’administration.',
+      );
+    }
+
     String hours(Duration d) {
-      if (d.inHours < 24) return '${d.inHours} h';
+      if (d.inHours < 24) return Fmt.duration(d);
       final days = d.inMinutes / (60 * 24);
       return '${days.toStringAsFixed(1).replaceAll('.', ',')} j';
     }
@@ -88,7 +103,8 @@ class DashboardScreen extends ConsumerWidget {
         value: times == null ? '—' : hours(times.median),
         sub: times == null
             ? 'Pas encore de validation sur 30 jours'
-            : 'médiane sur ${times.count} demande'
+            : 'médiane · ${times.count} demande'
+                '${times.count > 1 ? 's' : ''} validée'
                 '${times.count > 1 ? 's' : ''} (30 j)',
         tone: _Tone.neutral,
       ),
@@ -108,7 +124,7 @@ class DashboardScreen extends ConsumerWidget {
     ];
 
     final occupancyCard = _Panel(
-      title: 'Occupation par studio',
+      title: 'Occupation par salle',
       subtitle: '${thisWeek ? 'Cette semaine' : 'Semaine prochaine'} · '
           'à partir du ${Fmt.dayMonth(from)}',
       child: Column(
@@ -118,7 +134,7 @@ class DashboardScreen extends ConsumerWidget {
       ),
     );
     final weekCard = _Panel(
-      title: 'Les 7 prochains jours',
+      title: 'Les prochains jours d’ouverture',
       subtitle: 'Séances validées et demandes en attente',
       child: _DayBars(days: days, now: w.now),
     );
@@ -387,7 +403,7 @@ class _Panel extends StatelessWidget {
 
 class _LoadRow extends StatelessWidget {
   const _LoadRow({required this.load});
-  final StudioLoad load;
+  final RoomLoad load;
 
   @override
   Widget build(BuildContext context) {
@@ -396,17 +412,17 @@ class _LoadRow extends StatelessWidget {
     final h = (load.bookedMinutes / 60).toStringAsFixed(0);
     final open = (load.openMinutes / 60).toStringAsFixed(0);
     return Semantics(
-      label: '${load.studio.name} : $pct %, $h heures sur $open',
+      label: '${load.name} : $pct %, $h heures sur $open',
       excludeSemantics: true,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 7),
         child: Row(
           children: [
             SizedBox(
-              width: 140,
+              width: 170,
               child: Text(
-                load.studio.name,
-                maxLines: 1,
+                load.name,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: EsText.bodyM.copyWith(color: c.textPrimary),
               ),
@@ -418,7 +434,7 @@ class _LoadRow extends StatelessWidget {
                   children: [
                     Container(height: 10, color: c.bgSubtle),
                     FractionallySizedBox(
-                      widthFactor: load.rate.clamp(0, 1).toDouble(),
+                      widthFactor: load.rate.toDouble(),
                       child: Container(height: 10, color: c.actionPrimary),
                     ),
                   ],
@@ -479,7 +495,7 @@ class _DayBars extends StatelessWidget {
                           width: 22,
                           height: maxH * d.waiting / top,
                           decoration: BoxDecoration(
-                            color: c.accent.withValues(alpha: 0.45),
+                            color: c.accent,
                             borderRadius: BorderRadius.vertical(
                               top: const Radius.circular(4),
                               bottom: Radius.circular(d.validated == 0 ? 4 : 0),
@@ -523,7 +539,7 @@ class _DayBars extends StatelessWidget {
             _Dot(color: c.actionPrimary, label: 'Validées'),
             const SizedBox(width: 16),
             _Dot(
-              color: c.accent.withValues(alpha: 0.45),
+              color: c.accent,
               label: 'En attente',
             ),
           ],
