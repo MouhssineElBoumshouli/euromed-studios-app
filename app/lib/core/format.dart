@@ -2,7 +2,6 @@ import 'package:intl/intl.dart';
 
 import '../domain/rules/availability.dart';
 import 'l10n/tr.dart';
-import '../core/l10n/text.dart';
 
 /// Date and time wording used across the app, in the app language.
 /// (The French words below are shown in English by tr() when needed.)
