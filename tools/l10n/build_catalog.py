@@ -35,7 +35,8 @@ def typed(k):
     loose = re.findall(r'\{\d\}', t)
     # One word plus a free value ("Demande {0}") would match any text
     # starting with that word.
-    if len(words) <= 1 and loose and not re.search(r'[:.·«»"()]', rest):
+    if (len(words) <= 1 and loose and words != ['Bonjour']
+            and not re.search(r'[:.,·«»"()?!]', rest)):
         return None
     return t
 
