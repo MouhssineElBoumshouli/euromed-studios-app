@@ -364,7 +364,8 @@ void main() {
       addTearDown(c.dispose);
       final n = c.read(worldProvider.notifier);
       SubmitProblem? problem(String who, RequesterType t, String studio,
-              DateTime s, DateTime e, {String? club}) =>
+              DateTime s, DateTime e,
+              {String? club}) =>
           n.check(
             requesterId: who,
             requesterType: t,

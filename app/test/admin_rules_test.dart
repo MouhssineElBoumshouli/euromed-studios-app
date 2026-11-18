@@ -62,8 +62,10 @@ void main() {
     // But not when the target is the last active admin.
     final lonely = [admin, second.copyWith(active: false)];
     expect(
-      check(admin, by: second.copyWith(roles: {Role.admin}),
-          roles: {Role.regisseur}, everyone: lonely),
+      check(admin,
+          by: second.copyWith(roles: {Role.admin}),
+          roles: {Role.regisseur},
+          everyone: lonely),
       'last_admin',
     );
   });

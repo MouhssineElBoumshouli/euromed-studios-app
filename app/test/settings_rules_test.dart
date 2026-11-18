@@ -96,7 +96,9 @@ void main() {
     final now = DateTime(2026, 11, 16, 8);
     final start = DateTime(2026, 11, 17, 9);
     final end = DateTime(2026, 11, 17, 12);
-    String? check({String by = 'tazi', String reason = 'Réparation',
+    String? check(
+            {String by = 'tazi',
+            String reason = 'Réparation',
             List<MaintenanceBlock> existing = const []}) =>
         maintenanceProblem(
           by: people[by]!,

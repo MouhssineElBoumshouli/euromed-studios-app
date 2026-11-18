@@ -138,14 +138,16 @@ class WorldNotifier extends Notifier<WorldState> {
     final p = personById(requesterId);
     final allowedType = switch (requesterType) {
       RequesterType.student => p.has(Role.student),
-      RequesterType.club =>
-        p.has(Role.clubRepresentative) && clubId != null && p.clubIds.contains(clubId),
+      RequesterType.club => p.has(Role.clubRepresentative) &&
+          clubId != null &&
+          p.clubIds.contains(clubId),
       RequesterType.professor => p.has(Role.professor),
       RequesterType.communication => p.has(Role.communication),
       RequesterType.external => p.has(Role.externalClient),
     };
     if (!allowedType) return SubmitProblem.notAllowed;
-    if (state.signedCharterVersion[requesterId] != state.policy.charterVersion) {
+    if (state.signedCharterVersion[requesterId] !=
+        state.policy.charterVersion) {
       return SubmitProblem.charterMissing;
     }
     final studio = studioById(studioId);
@@ -310,7 +312,9 @@ class WorldNotifier extends Notifier<WorldState> {
       }
     }
     for (final m in state.maintenance) {
-      if (m.roomId == roomId && m.start.isBefore(b.end) && b.start.isBefore(m.end)) {
+      if (m.roomId == roomId &&
+          m.start.isBefore(b.end) &&
+          b.start.isBefore(m.end)) {
         return 'Maintenance prévue : ${m.reason}.';
       }
     }

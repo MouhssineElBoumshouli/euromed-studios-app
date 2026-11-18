@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -17,6 +17,7 @@ import '../../domain/rules/approval.dart';
 import '../../domain/rules/quota.dart';
 import '../notifications/notifications_screen.dart';
 import '../../data/directory.dart';
+import '../../core/l10n/text.dart';
 
 /// B1 · Home. Requesters see their next session, quota and requests.
 /// The studio manager sees what is waiting for them.
@@ -39,8 +40,12 @@ class HomeScreen extends ConsumerWidget {
           tabBarSpace(context),
         ),
         children: [
-          const _TopRow(),
-          const SizedBox(height: EsSpace.s5),
+          // On computers and tablets the side menu already has the logo,
+          // the bell and the profile.
+          if (!isWide(context)) ...[
+            const _TopRow(),
+            const SizedBox(height: EsSpace.s5),
+          ],
           if (isRequester) _RequesterHome(w: w) else _ManagerHome(w: w),
         ],
       ),
@@ -48,6 +53,47 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
+/// Phones: one column. Wide screens: the main column on the left and the
+/// lists on the right, so the page uses the room instead of a thin strip.
+class _TwoColumns extends StatelessWidget {
+  const _TwoColumns({required this.main, required this.side});
+  final List<Widget> main;
+  final List<Widget> side;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, box) {
+        if (box.maxWidth < 960) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [...main, const SizedBox(height: EsSpace.s4), ...side],
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 11,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: main,
+              ),
+            ),
+            const SizedBox(width: EsSpace.s6),
+            Expanded(
+              flex: 9,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: side,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
 
 /// Euromed Studios logo on the left, notifications and profile on the right.
 class _TopRow extends ConsumerWidget {
@@ -70,7 +116,7 @@ class _TopRow extends ConsumerWidget {
         const SizedBox(width: 10),
         Semantics(
           button: true,
-          label: 'Mon profil',
+          label: tr('Mon profil'),
           excludeSemantics: true,
           child: InkWell(
             customBorder: const CircleBorder(),
@@ -148,59 +194,64 @@ class _RequesterHome extends ConsumerWidget {
           accent: 'en studio.',
         ),
         const SizedBox(height: EsSpace.s5),
-        FadeInUp(
-          child: next != null
-              ? _NextSessionHero(booking: next, now: w.now)
-              : const _EmptyHero(),
-        ),
-        const SizedBox(height: EsSpace.s5),
-        FadeInUp(
-          index: 1,
-          child: _QuickActions(nextQrId: next?.id),
-        ),
-        if (!quota.unlimited) ...[
-          const SizedBox(height: EsSpace.s5),
-          FadeInUp(index: 2, child: _QuotaCard(quota: quota)),
-        ],
-        const SizedBox(height: EsSpace.s4),
-        SectionTitle(
-          'Demandes en cours',
-          actionLabel: 'Voir tout',
-          onAction: () => context.go('/bookings'),
-        ),
-        const SizedBox(height: EsSpace.s2),
-        if (pending.isEmpty)
-          EsCard(
-            child: Row(
-              children: [
-                const IconTile(Icons.inbox_outlined, size: 40),
-                const SizedBox(width: EsSpace.s3),
-                Expanded(
-                  child: Text(
-                    'Aucune demande en attente. Tout est à jour.',
-                    style: EsText.bodyM
-                        .copyWith(color: context.es.textSecondary),
+        _TwoColumns(
+          main: [
+            FadeInUp(
+              child: next != null
+                  ? _NextSessionHero(booking: next, now: w.now)
+                  : const _EmptyHero(),
+            ),
+            const SizedBox(height: EsSpace.s5),
+            FadeInUp(
+              index: 1,
+              child: _QuickActions(nextQrId: next?.id),
+            ),
+            if (!quota.unlimited) ...[
+              const SizedBox(height: EsSpace.s5),
+              FadeInUp(index: 2, child: _QuotaCard(quota: quota)),
+            ],
+          ],
+          side: [
+            SectionTitle(
+              'Demandes en cours',
+              actionLabel: 'Voir tout',
+              onAction: () => context.go('/bookings'),
+            ),
+            const SizedBox(height: EsSpace.s2),
+            if (pending.isEmpty)
+              EsCard(
+                child: Row(
+                  children: [
+                    const IconTile(Icons.inbox_outlined, size: 40),
+                    const SizedBox(width: EsSpace.s3),
+                    Expanded(
+                      child: Text(
+                        'Aucune demande en attente. Tout est à jour.',
+                        style: EsText.bodyM
+                            .copyWith(color: context.es.textSecondary),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              for (var i = 0; i < pending.length; i++)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: EsSpace.s3),
+                  child: FadeInUp(
+                    index: 3 + i,
+                    child: RequestCard(booking: pending[i], now: w.now),
                   ),
                 ),
-              ],
+            const SizedBox(height: EsSpace.s2),
+            SectionTitle(
+              'En ce moment',
+              trailing: _LiveLegend(count: live.length),
             ),
-          )
-        else
-          for (var i = 0; i < pending.length; i++)
-            Padding(
-              padding: const EdgeInsets.only(bottom: EsSpace.s3),
-              child: FadeInUp(
-                index: 3 + i,
-                child: RequestCard(booking: pending[i], now: w.now),
-              ),
-            ),
-        const SizedBox(height: EsSpace.s2),
-        SectionTitle(
-          'En ce moment',
-          trailing: _LiveLegend(count: live.length),
+            const SizedBox(height: EsSpace.s2),
+            _LiveStrip(rooms: live),
+          ],
         ),
-        const SizedBox(height: EsSpace.s2),
-        _LiveStrip(rooms: live),
       ],
     );
   }
@@ -229,9 +280,9 @@ class _NextSessionHero extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: '${ongoing ? 'Séance en cours' : 'Prochaine séance'} : '
+      label: tr('${ongoing ? 'Séance en cours' : 'Prochaine séance'} : '
           '${s.name}, ${Fmt.relativeDay(booking.start, now)}, '
-          '${Fmt.range(booking.start, booking.end)}. Ouvrir le QR code.',
+          '${Fmt.range(booking.start, booking.end)}. Ouvrir le QR code.'),
       excludeSemantics: true,
       child: EsCard(
         padding: EdgeInsets.zero,
@@ -294,8 +345,8 @@ class _NextSessionHero extends StatelessWidget {
                           const SizedBox(height: 4),
                           Text(
                             s.name,
-                            style: EsText.displayM
-                                .copyWith(color: Colors.white),
+                            style:
+                                EsText.displayM.copyWith(color: Colors.white),
                           ),
                           const SizedBox(height: 4),
                           Text(
@@ -374,7 +425,10 @@ class _EmptyHero extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, c.bgBrand.withValues(alpha: 0.9)],
+                  colors: [
+                    Colors.transparent,
+                    c.bgBrand.withValues(alpha: 0.9)
+                  ],
                 ),
               ),
             ),
@@ -434,7 +488,7 @@ class _QuickActions extends StatelessWidget {
           Expanded(
             child: Semantics(
               button: true,
-              label: label,
+              label: tr(label),
               excludeSemantics: true,
               child: InkWell(
                 onTap: onTap,
@@ -548,7 +602,8 @@ class RequestCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(s.name, style: EsText.titleM.copyWith(color: c.textPrimary)),
+                Text(s.name,
+                    style: EsText.titleM.copyWith(color: c.textPrimary)),
                 const SizedBox(height: 2),
                 Text(
                   '${Fmt.relativeDay(booking.start, now)} · '
@@ -589,7 +644,7 @@ class ApprovalDots extends StatelessWidget {
     };
     if (done < 0) return const SizedBox.shrink();
     return Semantics(
-      label: 'Étape $done sur 2 validée',
+      label: tr('Étape $done sur 2 validée'),
       excludeSemantics: true,
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -637,6 +692,23 @@ class _LiveStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Computers and tablets: every studio at once, as a grid.
+    if (isWide(context)) {
+      return LayoutBuilder(
+        builder: (context, box) {
+          const gap = EsSpace.s3;
+          final cols = (box.maxWidth / 170).floor().clamp(2, 6);
+          final w = (box.maxWidth - gap * (cols - 1)) / cols;
+          return Wrap(
+            spacing: gap,
+            runSpacing: gap,
+            children: [
+              for (final r in rooms) LiveCard(room: r, width: w),
+            ],
+          );
+        },
+      );
+    }
     return SizedBox(
       height: 178,
       child: ListView.separated(
@@ -750,95 +822,100 @@ class _ManagerHome extends ConsumerWidget {
           accent: 'aujourd’hui.',
         ),
         const SizedBox(height: EsSpace.s5),
-        FadeInUp(
-          child: EsCard(
-            color: c.bgBrand,
-            radius: EsRadius.xl,
-            padding: const EdgeInsets.all(EsSpace.s5),
-            onTap: () => context.go('/validations'),
-            semanticLabel: '${inbox.length} demandes attendent votre '
-                'validation. Ouvrir.',
-            child: Row(
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        _TwoColumns(
+          main: [
+            FadeInUp(
+              child: EsCard(
+                color: c.bgBrand,
+                radius: EsRadius.xl,
+                padding: const EdgeInsets.all(EsSpace.s5),
+                onTap: () => context.go('/validations'),
+                semanticLabel: '${inbox.length} demandes attendent votre '
+                    'validation. Ouvrir.',
+                child: Row(
                   children: [
-                    Text(
-                      '${inbox.length}',
-                      style: EsText.hero.copyWith(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${inbox.length}',
+                          style: EsText.hero.copyWith(
+                            color: Colors.white,
+                            fontSize: 52,
+                            height: 1,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: EsSpace.s4),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            inbox.length == 1
+                                ? 'demande attend votre validation'
+                                : 'demandes attendent votre validation',
+                            style: EsText.titleM.copyWith(color: Colors.white),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Les plus anciennes en premier.',
+                            style: EsText.bodyS
+                                .copyWith(color: c.textOnBrandMuted),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.14),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.arrow_forward_rounded,
                         color: Colors.white,
-                        fontSize: 52,
-                        height: 1,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(width: EsSpace.s4),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        inbox.length == 1
-                            ? 'demande attend votre validation'
-                            : 'demandes attendent votre validation',
-                        style: EsText.titleM.copyWith(color: Colors.white),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Les plus anciennes en premier.',
-                        style:
-                            EsText.bodyS.copyWith(color: c.textOnBrandMuted),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.14),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.arrow_forward_rounded,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
-        const SizedBox(height: EsSpace.s4),
-        SectionTitle(
-          'Séances d’aujourd’hui',
-          trailing: Text(
-            '${today.length}',
-            style: EsText.titleM.copyWith(color: c.textSecondary),
-          ),
-        ),
-        const SizedBox(height: EsSpace.s2),
-        if (today.isEmpty)
-          Text(
-            'Aucune séance validée aujourd’hui.',
-            style: EsText.bodyM.copyWith(color: c.textSecondary),
-          ),
-        for (var i = 0; i < today.length; i++)
-          FadeInUp(
-            index: i + 1,
-            child: _TimelineRow(
-              booking: today[i],
-              now: w.now,
-              last: i == today.length - 1,
+            const SizedBox(height: EsSpace.s4),
+            SectionTitle(
+              'Séances d’aujourd’hui',
+              trailing: Text(
+                '${today.length}',
+                style: EsText.titleM.copyWith(color: c.textSecondary),
+              ),
             ),
-          ),
-        const SizedBox(height: EsSpace.s4),
-        SectionTitle(
-          'En ce moment',
-          trailing: _LiveLegend(count: live.length),
+            const SizedBox(height: EsSpace.s2),
+            if (today.isEmpty)
+              Text(
+                'Aucune séance validée aujourd’hui.',
+                style: EsText.bodyM.copyWith(color: c.textSecondary),
+              ),
+            for (var i = 0; i < today.length; i++)
+              FadeInUp(
+                index: i + 1,
+                child: _TimelineRow(
+                  booking: today[i],
+                  now: w.now,
+                  last: i == today.length - 1,
+                ),
+              ),
+          ],
+          side: [
+            SectionTitle(
+              'En ce moment',
+              trailing: _LiveLegend(count: live.length),
+            ),
+            const SizedBox(height: EsSpace.s2),
+            _LiveStrip(rooms: live),
+          ],
         ),
-        const SizedBox(height: EsSpace.s2),
-        _LiveStrip(rooms: live),
       ],
     );
   }
@@ -893,8 +970,7 @@ class _TimelineRow extends StatelessWidget {
                   ),
                 ),
               ),
-              if (!last)
-                Expanded(child: Container(width: 2, color: c.border)),
+              if (!last) Expanded(child: Container(width: 2, color: c.border)),
             ],
           ),
           const SizedBox(width: 12),
@@ -914,8 +990,7 @@ class _TimelineRow extends StatelessWidget {
                         children: [
                           Text(
                             s.name,
-                            style:
-                                EsText.titleS.copyWith(color: c.textPrimary),
+                            style: EsText.titleS.copyWith(color: c.textPrimary),
                           ),
                           Text(
                             '${Fmt.range(booking.start, booking.end)} · '

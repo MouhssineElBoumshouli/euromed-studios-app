@@ -7,6 +7,7 @@
 /// no extra writes. Only "read up to" is stored, per person.
 library;
 
+import '../../core/l10n/tr.dart';
 import '../bookings.dart';
 import '../people.dart';
 import '../projects.dart';
@@ -294,7 +295,7 @@ List<Notice> projectNoticesFor(
         ProjectEventType.stageChanged when mine && p.ownerId != person.id => (
             NoticeKind.progress,
             'Le projet avance',
-            '« ${p.title} » passe en ${ProjectStage.values.where((s) => s.name == e.detail).firstOrNull?.label.toLowerCase() ?? e.detail}.',
+            '« ${p.title} » passe en ${(tr(ProjectStage.values.where((s) => s.name == e.detail).firstOrNull?.label) ?? e.detail ?? '').toLowerCase()}.',
           ),
         _ => null,
       };

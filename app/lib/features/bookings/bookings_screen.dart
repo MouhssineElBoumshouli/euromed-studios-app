@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,6 +13,7 @@ import '../../data/app_state.dart';
 import '../../data/demo_world.dart';
 import '../../data/selectors.dart';
 import '../../domain/bookings.dart';
+import '../../core/l10n/text.dart';
 
 /// E1 · My bookings, in four tabs.
 class BookingsScreen extends ConsumerWidget {
@@ -120,7 +121,7 @@ class BookingsScreen extends ConsumerWidget {
             bottomPadding: EsSpace.s4,
             trailing: Semantics(
               button: true,
-              label: 'Nouvelle réservation',
+              label: tr('Nouvelle réservation'),
               excludeSemantics: true,
               child: Material(
                 color: c.actionPrimary,
@@ -210,8 +211,18 @@ class BookingCard extends StatelessWidget {
   final DateTime now;
 
   static const _mo = [
-    'JANV', 'FÉVR', 'MARS', 'AVR', 'MAI', 'JUIN',
-    'JUIL', 'AOÛT', 'SEPT', 'OCT', 'NOV', 'DÉC',
+    'JANV',
+    'FÉVR',
+    'MARS',
+    'AVR',
+    'MAI',
+    'JUIN',
+    'JUIL',
+    'AOÛT',
+    'SEPT',
+    'OCT',
+    'NOV',
+    'DÉC',
   ];
 
   @override
@@ -283,7 +294,7 @@ class BookingCard extends StatelessWidget {
               ),
               if (canShowQr)
                 IconButton.filled(
-                  tooltip: 'Afficher le QR code',
+                  tooltip: tr('Afficher le QR code'),
                   style: IconButton.styleFrom(
                     backgroundColor: c.actionPrimary,
                     foregroundColor: c.onActionPrimary,

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -17,6 +17,7 @@ import '../../domain/rules/availability.dart';
 import '../../domain/studios.dart';
 import '../../data/directory.dart';
 import '../../data/catalog.dart';
+import '../../core/l10n/text.dart';
 
 /// F1 · Planning: every studio on one day, hour by hour.
 ///
@@ -97,7 +98,7 @@ class _PlanningState extends ConsumerState<PlanningScreen> {
                 ),
               ),
               IconButton.outlined(
-                tooltip: 'Semaine précédente',
+                tooltip: tr('Semaine précédente'),
                 onPressed: () => setState(
                   () => _day = day.subtract(const Duration(days: 7)),
                 ),
@@ -110,7 +111,7 @@ class _PlanningState extends ConsumerState<PlanningScreen> {
               ),
               const SizedBox(width: 6),
               IconButton.outlined(
-                tooltip: 'Semaine suivante',
+                tooltip: tr('Semaine suivante'),
                 onPressed: () =>
                     setState(() => _day = day.add(const Duration(days: 7))),
                 icon: const Icon(Icons.chevron_right_rounded),
@@ -239,7 +240,7 @@ class _DayTab extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      label: '${Fmt.longDay(day)}, $count réservations',
+      label: tr('${Fmt.longDay(day)}, $count réservations'),
       excludeSemantics: true,
       child: InkWell(
         onTap: onTap,
@@ -261,7 +262,7 @@ class _DayTab extends StatelessWidget {
           child: Row(
             children: [
               Text(
-                '${_wd[day.weekday - 1]} ${day.day}',
+                '${tr(_wd[day.weekday - 1])} ${day.day}',
                 style: EsText.titleS.copyWith(color: fg),
               ),
               const Spacer(),
@@ -363,9 +364,8 @@ class _Timeline extends StatelessWidget {
             double x(DateTime t) =>
                 _label +
                 ((t.hour + t.minute / 60) - opening).clamp(0, hours) * hourW;
-            final showNow = _sameDay(now, day) &&
-                now.hour >= opening &&
-                now.hour < closing;
+            final showNow =
+                _sameDay(now, day) && now.hour >= opening && now.hour < closing;
             return SingleChildScrollView(
               child: Stack(
                 children: [
@@ -416,7 +416,8 @@ class _Timeline extends StatelessWidget {
                                   x(m.end) - x(m.start) > 8)
                                 Positioned(
                                   left: x(m.start) + 2,
-                                  width: (x(m.end) - x(m.start) - 4).clamp(0, double.infinity),
+                                  width: (x(m.end) - x(m.start) - 4)
+                                      .clamp(0, double.infinity),
                                   top: 8,
                                   bottom: 8,
                                   child: Container(
@@ -442,7 +443,8 @@ class _Timeline extends StatelessWidget {
                                   x(b.end) - x(b.start) > 8)
                                 Positioned(
                                   left: x(b.start) + 2,
-                                  width: (x(b.end) - x(b.start) - 4).clamp(0, double.infinity),
+                                  width: (x(b.end) - x(b.start) - 4)
+                                      .clamp(0, double.infinity),
                                   top: 6,
                                   bottom: 6,
                                   child: _Block(
@@ -491,8 +493,7 @@ class _Timeline extends StatelessWidget {
   /// studio in the same room shows faded, because it blocks this one too.
   bool _inRow(Booking b, Studio s) {
     if (b.studioId == s.id) return true;
-    final other =
-        Catalog.studios.where((x) => x.id == b.studioId).firstOrNull;
+    final other = Catalog.studios.where((x) => x.id == b.studioId).firstOrNull;
     return other?.roomId == s.roomId && b.status.holdsSlot;
   }
 }
@@ -551,8 +552,8 @@ class _TimelineRow extends StatelessWidget {
                             ),
                             Text(
                               room.name,
-                              style: EsText.bodyS
-                                  .copyWith(color: c.textSecondary),
+                              style:
+                                  EsText.bodyS.copyWith(color: c.textSecondary),
                             ),
                           ],
                         ),
@@ -597,10 +598,10 @@ class _Block extends StatelessWidget {
         ? '${studioById(b.studioId).name} (salle partagée)'
         : '$who · ${b.activity.label}';
     return Tooltip(
-      message: b.isPrivate
+      message: tr(b.isPrivate
           ? 'Créneau réservé'
           : '${studioById(b.studioId).name} · ${Fmt.range(b.start, b.end)}\n'
-              '$who · ${b.status.label}',
+              '$who · ${b.status.label}'),
       child: Opacity(
         opacity: shared ? 0.45 : 1,
         child: Material(

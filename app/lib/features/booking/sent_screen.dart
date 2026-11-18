@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -9,6 +9,7 @@ import '../../core/widgets/es_button.dart';
 import '../../core/widgets/layout.dart';
 import '../../data/app_state.dart';
 import '../bookings/booking_widgets.dart';
+import '../../core/l10n/text.dart';
 
 /// D4 · Request sent.
 class SentScreen extends ConsumerWidget {
@@ -82,19 +83,17 @@ class SentScreen extends ConsumerWidget {
                         children: [
                           Text(
                             s.name,
-                            style:
-                                EsText.titleM.copyWith(color: c.textPrimary),
+                            style: EsText.titleM.copyWith(color: c.textPrimary),
                           ),
                           Text(
                             '${Fmt.shortDay(b.start)} · '
                             '${Fmt.range(b.start, b.end)}',
-                            style: EsText.bodyS
-                                .copyWith(color: c.textSecondary),
+                            style:
+                                EsText.bodyS.copyWith(color: c.textSecondary),
                           ),
                           Text(
                             'Réf. ${b.reference}',
-                            style: EsText.bodyS
-                                .copyWith(color: c.textDisabled),
+                            style: EsText.bodyS.copyWith(color: c.textDisabled),
                           ),
                         ],
                       ),

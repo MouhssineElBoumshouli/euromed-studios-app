@@ -129,7 +129,8 @@ abstract final class AppTheme {
       ),
       switchTheme: SwitchThemeData(
         trackColor: WidgetStateProperty.resolveWith(
-          (s) => s.contains(WidgetState.selected) ? c.actionPrimary : c.bgSubtle,
+          (s) =>
+              s.contains(WidgetState.selected) ? c.actionPrimary : c.bgSubtle,
         ),
       ),
     );

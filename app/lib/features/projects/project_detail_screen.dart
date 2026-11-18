@@ -1,5 +1,5 @@
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -19,6 +19,7 @@ import '../../domain/rules/projects.dart';
 import 'project_sections.dart';
 import 'project_widgets.dart';
 import '../../data/catalog.dart';
+import '../../core/l10n/text.dart';
 
 /// F3–F5 · One project: where it stands, its documents, its sessions,
 /// and the step that moves it forward.
@@ -36,8 +37,8 @@ class _ProjectDetailState extends ConsumerState<ProjectDetailScreen> {
 
   ProjectService get _service => ref.read(projectServiceProvider);
 
-  void _say(String text) => ScaffoldMessenger.of(context)
-      .showSnackBar(SnackBar(content: Text(text)));
+  void _say(String text) =>
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
 
   Future<void> _advance(Project p) async {
     final next = p.stage.next!;
@@ -45,7 +46,7 @@ class _ProjectDetailState extends ConsumerState<ProjectDetailScreen> {
       context: context,
       showDragHandle: true,
       builder: (ctx) => _ConfirmSheet(
-        title: 'Passer en ${next.label.toLowerCase()} ?',
+        title: 'Passer en ${tr(next.label).toLowerCase()} ?',
         text: switch (next) {
           ProjectStage.production =>
             'Les documents de préparation sont prêts. Vous pourrez réserver '
@@ -54,14 +55,14 @@ class _ProjectDetailState extends ConsumerState<ProjectDetailScreen> {
             'Les séances sont faites. Le projet passe au montage.',
           _ => '',
         },
-        action: 'Passer en ${next.label.toLowerCase()}',
+        action: 'Passer en ${tr(next.label).toLowerCase()}',
       ),
     );
     if (ok != true) return;
     setState(() => advancing = true);
     try {
       await _service.advance(p.id, by: ref.read(currentPersonProvider));
-      _say('Projet passé en ${next.label.toLowerCase()}.');
+      _say('Projet passé en ${tr(next.label).toLowerCase()}.');
     } on ProjectProblem catch (e) {
       _say(e.message);
     } finally {
@@ -183,135 +184,134 @@ class _ProjectDetailState extends ConsumerState<ProjectDetailScreen> {
     final owner = personById(p.ownerId);
 
     final back = <Widget>[
-          Align(
-            alignment: Alignment.centerLeft,
-            child: EsBackButton(
-              onPressed: () =>
-                  context.canPop() ? context.pop() : context.go('/projects'),
-            ),
-          ),
+      Align(
+        alignment: Alignment.centerLeft,
+        child: EsBackButton(
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go('/projects'),
+        ),
+      ),
     ];
     final main = <Widget>[
-          const SizedBox(height: EsSpace.s4),
-          Row(children: [TypeTag(p.type)]),
-          const SizedBox(height: 10),
-          Text(p.title, style: EsText.displayL.copyWith(color: c.textPrimary)),
-          if (p.description != null) ...[
-            const SizedBox(height: 6),
-            Text(
-              p.description!,
-              style: EsText.bodyM.copyWith(color: c.textSecondary),
+      const SizedBox(height: EsSpace.s4),
+      Row(children: [TypeTag(p.type)]),
+      const SizedBox(height: 10),
+      Text.user(p.title, style: EsText.displayL.copyWith(color: c.textPrimary)),
+      if (p.description != null) ...[
+        const SizedBox(height: 6),
+        Text.user(
+          p.description!,
+          style: EsText.bodyM.copyWith(color: c.textSecondary),
+        ),
+      ],
+      const SizedBox(height: EsSpace.s3),
+      Row(
+        children: [
+          PeopleStack([p.ownerId, ...p.memberIds], size: 32),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              p.memberIds.isEmpty
+                  ? 'Porté par ${owner.fullName}'
+                  : 'Porté par ${owner.fullName} · '
+                      '${p.memberIds.map((m) => personById(m).firstName).join(', ')}',
+              style: EsText.bodyS.copyWith(color: c.textSecondary),
             ),
-          ],
-          const SizedBox(height: EsSpace.s3),
-          Row(
-            children: [
-              PeopleStack([p.ownerId, ...p.memberIds], size: 32),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  p.memberIds.isEmpty
-                      ? 'Porté par ${owner.fullName}'
-                      : 'Porté par ${owner.fullName} · '
-                          '${p.memberIds.map((m) => personById(m).firstName).join(', ')}',
-                  style: EsText.bodyS.copyWith(color: c.textSecondary),
-                ),
-              ),
-            ],
           ),
-          const SizedBox(height: EsSpace.s5),
-          _Pipeline(stage: p.stage),
-          const SizedBox(height: EsSpace.s4),
-          switch (p.stage) {
-            ProjectStage.postProduction => PostProductionPanel(project: p),
-            ProjectStage.archived => DeliveryCard(project: p),
-            _ => _NextStep(
-                project: p,
-                problem: problem,
-                mayAdvance: mayAdvance,
-                busy: advancing,
-                onAdvance: () => _advance(p),
-              ),
-          },
-          const SizedBox(height: EsSpace.s5),
-          const SectionTitle('Échanges'),
-          const SizedBox(height: EsSpace.s2),
-          ProjectThread(project: p),
-          const SizedBox(height: EsSpace.s5),
+        ],
+      ),
+      const SizedBox(height: EsSpace.s5),
+      _Pipeline(stage: p.stage),
+      const SizedBox(height: EsSpace.s4),
+      switch (p.stage) {
+        ProjectStage.postProduction => PostProductionPanel(project: p),
+        ProjectStage.archived => DeliveryCard(project: p),
+        _ => _NextStep(
+            project: p,
+            problem: problem,
+            mayAdvance: mayAdvance,
+            busy: advancing,
+            onAdvance: () => _advance(p),
+          ),
+      },
+      const SizedBox(height: EsSpace.s5),
+      const SectionTitle('Échanges'),
+      const SizedBox(height: EsSpace.s2),
+      ProjectThread(project: p),
+      const SizedBox(height: EsSpace.s5),
     ];
     final aside = <Widget>[
-          SectionTitle(
-            'Documents',
-            actionLabel: work ? 'Ajouter' : null,
-            onAction: work && !uploading ? () => _upload(p) : null,
+      SectionTitle(
+        'Documents',
+        actionLabel: work ? 'Ajouter' : null,
+        onAction: work && !uploading ? () => _upload(p) : null,
+      ),
+      const SizedBox(height: EsSpace.s2),
+      if (uploading) const LinearProgressIndicator(minHeight: 3),
+      if (files.isEmpty)
+        InfoBanner(
+          icon: Icons.upload_file_rounded,
+          title: 'Aucun document',
+          text: work
+              ? 'Ajoutez le script, le conducteur ou le storyboard. '
+                  'Il en faut au moins un avant la production.'
+              : 'Le porteur du projet n’a pas encore ajouté de document.',
+        )
+      else
+        EsCard(
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              for (var i = 0; i < files.length; i++) ...[
+                if (i > 0) Divider(height: 1, indent: 64, color: c.border),
+                _FileTile(
+                  file: files[i],
+                  onOpen: () => _open(files[i]),
+                  onRemove: p.stage == ProjectStage.preProduction &&
+                          (files[i].uploadedBy == me.id || p.ownerId == me.id)
+                      ? () => _remove(files[i])
+                      : null,
+                ),
+              ],
+            ],
           ),
-          const SizedBox(height: EsSpace.s2),
-          if (uploading) const LinearProgressIndicator(minHeight: 3),
-          if (files.isEmpty)
-            InfoBanner(
-              icon: Icons.upload_file_rounded,
-              title: 'Aucun document',
-              text: work
-                  ? 'Ajoutez le script, le conducteur ou le storyboard. '
-                      'Il en faut au moins un avant la production.'
-                  : 'Le porteur du projet n’a pas encore ajouté de document.',
-            )
-          else
-            EsCard(
-              padding: EdgeInsets.zero,
-              child: Column(
-                children: [
-                  for (var i = 0; i < files.length; i++) ...[
-                    if (i > 0) Divider(height: 1, indent: 64, color: c.border),
-                    _FileTile(
-                      file: files[i],
-                      onOpen: () => _open(files[i]),
-                      onRemove: p.stage == ProjectStage.preProduction &&
-                              (files[i].uploadedBy == me.id ||
-                                  p.ownerId == me.id)
-                          ? () => _remove(files[i])
-                          : null,
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          const SizedBox(height: EsSpace.s5),
-          SectionTitle(
-            'Séances liées',
-            actionLabel: work ? 'Réserver' : null,
-            onAction: work ? () => _bookFor(p) : null,
+        ),
+      const SizedBox(height: EsSpace.s5),
+      SectionTitle(
+        'Séances liées',
+        actionLabel: work ? 'Réserver' : null,
+        onAction: work ? () => _bookFor(p) : null,
+      ),
+      const SizedBox(height: EsSpace.s2),
+      if (sessions.isEmpty)
+        InfoBanner(
+          icon: Icons.event_outlined,
+          title: 'Aucune séance pour ce projet',
+          text: work
+              ? 'Réservez depuis ce projet : la séance y sera liée '
+                  'automatiquement.'
+              : 'Les séances réservées pour ce projet apparaîtront ici.',
+        )
+      else
+        EsCard(
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: [
+              for (var i = 0; i < sessions.length; i++) ...[
+                if (i > 0) Divider(height: 1, indent: 64, color: c.border),
+                _SessionTile(booking: sessions[i]),
+              ],
+            ],
           ),
-          const SizedBox(height: EsSpace.s2),
-          if (sessions.isEmpty)
-            InfoBanner(
-              icon: Icons.event_outlined,
-              title: 'Aucune séance pour ce projet',
-              text: work
-                  ? 'Réservez depuis ce projet : la séance y sera liée '
-                      'automatiquement.'
-                  : 'Les séances réservées pour ce projet apparaîtront ici.',
-            )
-          else
-            EsCard(
-              padding: EdgeInsets.zero,
-              child: Column(
-                children: [
-                  for (var i = 0; i < sessions.length; i++) ...[
-                    if (i > 0) Divider(height: 1, indent: 64, color: c.border),
-                    _SessionTile(booking: sessions[i]),
-                  ],
-                ],
-              ),
-            ),
-          const SizedBox(height: EsSpace.s5),
-          const SectionTitle('Équipe du projet'),
-          const SizedBox(height: EsSpace.s2),
-          MembersSection(project: p),
-          const SizedBox(height: EsSpace.s5),
-          const SectionTitle('Historique'),
-          const SizedBox(height: EsSpace.s2),
-          _History(events: p.history.reversed.toList()),
+        ),
+      const SizedBox(height: EsSpace.s5),
+      const SectionTitle('Équipe du projet'),
+      const SizedBox(height: EsSpace.s2),
+      MembersSection(project: p),
+      const SizedBox(height: EsSpace.s5),
+      const SectionTitle('Historique'),
+      const SizedBox(height: EsSpace.s2),
+      _History(events: p.history.reversed.toList()),
     ];
 
     // On a large screen (staff console), documents, sessions, team and
@@ -375,7 +375,7 @@ class _Pipeline extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.es;
     return Semantics(
-      label: 'Étape ${stage.index + 1} sur 4 : ${stage.label}',
+      label: tr('Étape ${stage.index + 1} sur 4 : ${stage.label}'),
       excludeSemantics: true,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -408,8 +408,9 @@ class _Pipeline extends StatelessWidget {
                                   ? c.accent
                                   : c.bgSurface,
                           border: Border.all(
-                            color:
-                                s.index <= stage.index ? Colors.transparent : c.border,
+                            color: s.index <= stage.index
+                                ? Colors.transparent
+                                : c.border,
                           ),
                         ),
                         child: Center(
@@ -448,7 +449,8 @@ class _Pipeline extends StatelessWidget {
                     style: EsText.labelS.copyWith(
                       fontSize: 11,
                       color: s == stage ? c.textPrimary : c.textSecondary,
-                      fontWeight: s == stage ? FontWeight.w700 : FontWeight.w500,
+                      fontWeight:
+                          s == stage ? FontWeight.w700 : FontWeight.w500,
                     ),
                   ),
                 ],
@@ -533,7 +535,7 @@ class _NextStep extends StatelessWidget {
                 ),
               ),
             EsButton(
-              'Passer en ${next.label.toLowerCase()}',
+              'Passer en ${tr(next.label).toLowerCase()}',
               size: EsButtonSize.medium,
               trailingIcon: Icons.arrow_forward_rounded,
               loading: busy,
@@ -588,7 +590,7 @@ class _FileTile extends StatelessWidget {
             ),
             if (onRemove != null)
               IconButton(
-                tooltip: 'Retirer ${file.name}',
+                tooltip: tr('Retirer ${file.name}'),
                 onPressed: onRemove,
                 icon: Icon(Icons.delete_outline_rounded, color: c.dangerText),
               )
@@ -665,16 +667,15 @@ class _HistoryState extends State<_History> {
       return switch (e.type) {
         ProjectEventType.created => '$who a créé le projet',
         ProjectEventType.stageChanged =>
-          '$who a passé le projet en ${ProjectStage.values.where((s) => s.name == e.detail).firstOrNull?.label.toLowerCase() ?? e.detail}',
+          '$who a passé le projet en ${(tr(ProjectStage.values.where((s) => s.name == e.detail).firstOrNull?.label) ?? e.detail ?? '').toLowerCase()}',
         ProjectEventType.fileAdded => '$who a ajouté « ${e.detail} »',
         ProjectEventType.fileRemoved => '$who a retiré « ${e.detail} »',
         ProjectEventType.postStatus =>
-          '$who : ${PostStatus.values.where((s) => s.name == e.detail).firstOrNull?.label.toLowerCase() ?? e.detail}',
+          '$who : ${(tr(PostStatus.values.where((s) => s.name == e.detail).firstOrNull?.label) ?? e.detail ?? '').toLowerCase()}',
         ProjectEventType.correction => '$who a demandé une correction',
         ProjectEventType.qcPassed =>
           '$who a validé le contrôle qualité et livré le projet',
-        ProjectEventType.qcFailed =>
-          '$who a renvoyé le montage en correction',
+        ProjectEventType.qcFailed => '$who a renvoyé le montage en correction',
         ProjectEventType.memberInvited =>
           '$who a invité ${personById(e.detail ?? '').fullName}',
         ProjectEventType.memberJoined => '$who a rejoint le projet',
@@ -817,7 +818,10 @@ class _StudioSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.es;
-    final studios = [for (final s in Catalog.studios) if (s.bookable) s];
+    final studios = [
+      for (final s in Catalog.studios)
+        if (s.bookable) s
+    ];
     return SafeArea(
       child: ConstrainedBox(
         constraints: BoxConstraints(

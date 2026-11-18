@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,6 +13,7 @@ import '../../data/demo_world.dart';
 import '../../data/selectors.dart';
 import '../../domain/studios.dart';
 import '../../data/catalog.dart';
+import '../../core/l10n/text.dart';
 
 /// Selected capability filter on the studios list (null = all).
 final _filterProvider = StateProvider.autoDispose<Capability?>((ref) => null);
@@ -78,7 +79,7 @@ class StudiosScreen extends ConsumerWidget {
                       onChanged: (v) =>
                           ref.read(_queryProvider.notifier).state = v,
                       decoration: InputDecoration(
-                        hintText: 'Rechercher un studio…',
+                        hintText: tr('Rechercher un studio…'),
                         prefixIcon: const Icon(Icons.search_rounded),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(EsRadius.pill),
@@ -154,8 +155,7 @@ class StudiosScreen extends ConsumerWidget {
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: EsSpace.page),
                 sliver: SliverGrid.builder(
-                  gridDelegate:
-                      const SliverGridDelegateWithMaxCrossAxisExtent(
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                     maxCrossAxisExtent: 420,
                     mainAxisSpacing: EsSpace.s4,
                     crossAxisSpacing: EsSpace.s4,
@@ -172,11 +172,9 @@ class StudiosScreen extends ConsumerWidget {
             else
               SliverList.separated(
                 itemCount: studios.length,
-                separatorBuilder: (_, __) =>
-                    const SizedBox(height: EsSpace.s4),
+                separatorBuilder: (_, __) => const SizedBox(height: EsSpace.s4),
                 itemBuilder: (context, i) => Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: EsSpace.page),
+                  padding: const EdgeInsets.symmetric(horizontal: EsSpace.page),
                   child: FadeInUp(
                     index: i,
                     child: StudioCard(
@@ -286,7 +284,7 @@ class StudioCard extends StatelessWidget {
                   child: Image.asset(
                     studio.photo,
                     fit: BoxFit.cover,
-                    semanticLabel: 'Photo du ${studio.name}',
+                    semanticLabel: tr('Photo du ${studio.name}'),
                   ),
                 ),
               ),
@@ -333,7 +331,7 @@ class StudioCard extends StatelessWidget {
                         children: [
                           for (final cap in studio.capabilities.take(4))
                             Tooltip(
-                              message: cap.label,
+                              message: tr(cap.label),
                               child: Container(
                                 padding: const EdgeInsets.all(6),
                                 decoration: BoxDecoration(
@@ -344,7 +342,7 @@ class StudioCard extends StatelessWidget {
                                   capabilityIcon(cap),
                                   size: 16,
                                   color: c.textSecondary,
-                                  semanticLabel: cap.label,
+                                  semanticLabel: tr(cap.label),
                                 ),
                               ),
                             ),

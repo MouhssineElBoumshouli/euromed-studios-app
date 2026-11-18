@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,6 +11,7 @@ import '../../data/app_state.dart';
 import '../../data/booking_service.dart';
 import '../../data/selectors.dart';
 import '../../domain/rules/notifications.dart';
+import '../../core/l10n/text.dart';
 
 /// I1 · Notifications: what changed for me, and what waits for me.
 class NotificationsScreen extends ConsumerStatefulWidget {
@@ -53,7 +54,12 @@ class _NotificationsState extends ConsumerState<NotificationsScreen> {
       final days = DateTime(w.now.year, w.now.month, w.now.day)
           .difference(DateTime(n.at.year, n.at.month, n.at.day))
           .inDays;
-      (days <= 0 ? today : days < 7 ? week : older).add(n);
+      (days <= 0
+              ? today
+              : days < 7
+                  ? week
+                  : older)
+          .add(n);
     }
 
     Widget section(String title, List<Notice> items) => items.isEmpty
@@ -129,13 +135,33 @@ class _NotificationsState extends ConsumerState<NotificationsScreen> {
 }
 
 (IconData, Color, Color) noticeStyle(EsColors c, NoticeKind k) => switch (k) {
-      NoticeKind.toDecide => (Icons.task_alt_rounded, c.pendingBg, c.pendingText),
-      NoticeKind.approved => (Icons.qr_code_2_rounded, c.successBg, c.successText),
-      NoticeKind.progress => (Icons.hourglass_bottom_rounded, c.reviewBg, c.reviewText),
+      NoticeKind.toDecide => (
+          Icons.task_alt_rounded,
+          c.pendingBg,
+          c.pendingText
+        ),
+      NoticeKind.approved => (
+          Icons.qr_code_2_rounded,
+          c.successBg,
+          c.successText
+        ),
+      NoticeKind.progress => (
+          Icons.hourglass_bottom_rounded,
+          c.reviewBg,
+          c.reviewText
+        ),
       NoticeKind.refused => (Icons.close_rounded, c.dangerBg, c.dangerText),
-      NoticeKind.cancelled => (Icons.event_busy_outlined, c.dangerBg, c.dangerText),
+      NoticeKind.cancelled => (
+          Icons.event_busy_outlined,
+          c.dangerBg,
+          c.dangerText
+        ),
       NoticeKind.reminder => (Icons.alarm_rounded, c.lilac, c.onLilac),
-      NoticeKind.assigned => (Icons.engineering_outlined, c.reviewBg, c.reviewText),
+      NoticeKind.assigned => (
+          Icons.engineering_outlined,
+          c.reviewBg,
+          c.reviewText
+        ),
       NoticeKind.closed => (Icons.done_all_rounded, c.neutralBg, c.neutralText),
       NoticeKind.invite => (Icons.group_add_outlined, c.lilac, c.onLilac),
       NoticeKind.project => (Icons.layers_outlined, c.reviewBg, c.reviewText),
@@ -157,7 +183,7 @@ class _NoticeTile extends StatelessWidget {
     final (icon, bg, fg) = noticeStyle(c, notice.kind);
     return Semantics(
       button: true,
-      label: '${unread ? 'Nouveau. ' : ''}${notice.title}. ${notice.body}',
+      label: tr('${unread ? 'Nouveau. ' : ''}${notice.title}. ${notice.body}'),
       excludeSemantics: true,
       child: InkWell(
         onTap: () => context.push(notice.route),
@@ -227,7 +253,7 @@ class NoticeBell extends ConsumerWidget {
     final n = ref.watch(unreadNoticesProvider);
     return Semantics(
       button: true,
-      label: n == 0 ? 'Notifications' : 'Notifications, $n nouvelles',
+      label: tr(n == 0 ? 'Notifications' : 'Notifications, $n nouvelles'),
       excludeSemantics: true,
       child: Material(
         color: onDark ? Colors.white.withValues(alpha: 0.12) : c.bgSurface,

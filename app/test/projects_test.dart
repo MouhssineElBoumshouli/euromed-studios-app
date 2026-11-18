@@ -57,9 +57,8 @@ void main() {
     });
 
     test('production needs a validated session linked to the project', () {
-      final linked = DemoWorld.bookings
-          .where((b) => b.projectId == 'p1')
-          .toList();
+      final linked =
+          DemoWorld.bookings.where((b) => b.projectId == 'p1').toList();
       final approved = linked.any(
         (b) =>
             b.status == BookingStatus.approved ||
@@ -91,8 +90,8 @@ void main() {
     final now = DateTime(2026, 11, 11, 10);
     final haddad = people['haddad']!;
     final adam = people['adam']!;
-    Project p3() => box.read(projectsProvider).projects
-        .firstWhere((p) => p.id == 'p3');
+    Project p3() =>
+        box.read(projectsProvider).projects.firstWhere((p) => p.id == 'p3');
 
     setUp(() {
       box = ProviderContainer();
@@ -120,8 +119,8 @@ void main() {
 
     test('the owner asks for a correction while editing', () {
       store.setPostStatus('p3', PostStatus.inProgress, by: haddad, now: now);
-      store.postMessage('p3', 'Plus de son', by: adam, now: now,
-          correction: true);
+      store.postMessage('p3', 'Plus de son',
+          by: adam, now: now, correction: true);
       expect(p3().postStatus, PostStatus.correctionRequested);
       final last = box.read(projectsProvider).messagesOf('p3').last;
       expect(last.kind, MessageKind.correction);
@@ -129,41 +128,47 @@ void main() {
 
     test('someone outside the project cannot write in the thread', () {
       expect(
-        () => store.postMessage('p3', 'Bonjour', by: people['rami']!,
-            now: now),
+        () => store.postMessage('p3', 'Bonjour', by: people['rami']!, now: now),
         throwsStateError,
       );
     });
 
     test('a failed check needs a reason and sends back to corrections', () {
       store.setPostStatus('p3', PostStatus.inProgress, by: haddad, now: now);
-      store.setPostStatus('p3', PostStatus.readyForCheck, by: haddad,
-          now: now);
+      store.setPostStatus('p3', PostStatus.readyForCheck, by: haddad, now: now);
       expect(
         () => store.qualityCheck('p3', by: haddad, passed: false, now: now),
         throwsStateError,
       );
-      store.qualityCheck('p3', by: haddad, passed: false, now: now,
-          note: 'Son trop bas');
+      store.qualityCheck('p3',
+          by: haddad, passed: false, now: now, note: 'Son trop bas');
       expect(p3().postStatus, PostStatus.correctionRequested);
       expect(p3().stage, ProjectStage.postProduction);
     });
 
     test('a passed check needs a secure link, then archives', () {
       store.setPostStatus('p3', PostStatus.inProgress, by: haddad, now: now);
-      store.setPostStatus('p3', PostStatus.readyForCheck, by: haddad,
-          now: now);
+      store.setPostStatus('p3', PostStatus.readyForCheck, by: haddad, now: now);
       expect(
-        () => store.qualityCheck('p3', by: haddad, passed: true, now: now,
+        () => store.qualityCheck('p3',
+            by: haddad,
+            passed: true,
+            now: now,
             deliveryUrl: 'http://exemple.ma/film'),
         throwsStateError,
       );
       expect(
-        () => store.qualityCheck('p3', by: adam, passed: true, now: now,
+        () => store.qualityCheck('p3',
+            by: adam,
+            passed: true,
+            now: now,
             deliveryUrl: 'https://exemple.ma/film'),
         throwsStateError,
       );
-      store.qualityCheck('p3', by: haddad, passed: true, now: now,
+      store.qualityCheck('p3',
+          by: haddad,
+          passed: true,
+          now: now,
           deliveryUrl: 'https://exemple.ma/film');
       expect(p3().stage, ProjectStage.archived);
       expect(p3().deliveryUrl, 'https://exemple.ma/film');
@@ -175,8 +180,8 @@ void main() {
     late ProviderContainer box;
     late ProjectsNotifier store;
     final now = DateTime(2026, 11, 11, 10);
-    Project p2() => box.read(projectsProvider).projects
-        .firstWhere((p) => p.id == 'p2');
+    Project p2() =>
+        box.read(projectsProvider).projects.firstWhere((p) => p.id == 'p2');
 
     setUp(() {
       box = ProviderContainer();
@@ -188,12 +193,12 @@ void main() {
       store.invite('p2', 'yasmine', by: people['rami']!, now: now);
       final inv = box.read(projectsProvider).invitesFor('yasmine').single;
       expect(
-        () => store.answerInvite(inv.id, by: people['adam']!, accept: true,
-            now: now),
+        () => store.answerInvite(inv.id,
+            by: people['adam']!, accept: true, now: now),
         throwsStateError,
       );
-      store.answerInvite(inv.id, by: people['yasmine']!, accept: true,
-          now: now);
+      store.answerInvite(inv.id,
+          by: people['yasmine']!, accept: true, now: now);
       expect(p2().memberIds, contains('yasmine'));
       expect(box.read(projectsProvider).invitesFor('yasmine'), isEmpty);
     });
@@ -212,33 +217,32 @@ void main() {
 
     test('a collaborator can leave; the owner can remove', () {
       store.removeMember('p1', 'adam', by: people['adam']!, now: now);
-      final p1 = box.read(projectsProvider).projects
-          .firstWhere((p) => p.id == 'p1');
+      final p1 =
+          box.read(projectsProvider).projects.firstWhere((p) => p.id == 'p1');
       expect(p1.memberIds, isNot(contains('adam')));
     });
   });
 
   test('notices: invitation for the invitee, check for the tech team', () {
     final invites = DemoProjects.invites;
-    final forRami = projectNoticesFor(people['rami']!,
-        DemoProjects.projects, invites, DateTime(2026, 11, 11, 10),
+    final forRami = projectNoticesFor(people['rami']!, DemoProjects.projects,
+        invites, DateTime(2026, 11, 11, 10),
         nameOf: (id) => id);
     expect(forRami.where((n) => n.actionable), isNotEmpty);
 
     final ready = DemoProjects.projects
         .firstWhere((p) => p.id == 'p3')
         .copyWith(postStatus: PostStatus.readyForCheck);
-    final forHaddad = projectNoticesFor(people['haddad']!, [ready],
-        const [], DateTime(2026, 11, 11, 10),
+    final forHaddad = projectNoticesFor(
+        people['haddad']!, [ready], const [], DateTime(2026, 11, 11, 10),
         messages: DemoProjects.messages, nameOf: (id) => id);
     expect(forHaddad.any((n) => n.title == 'Correction demandée'), isTrue);
     // Another régisseur who never worked on this edit is not disturbed.
-    final forTazi = projectNoticesFor(people['tazi']!, [ready], const [],
-        DateTime(2026, 11, 11, 10),
+    final forTazi = projectNoticesFor(
+        people['tazi']!, [ready], const [], DateTime(2026, 11, 11, 10),
         messages: DemoProjects.messages, nameOf: (id) => id);
-    expect(forTazi.any((n) => n.title == 'Contrôle qualité à faire'),
-        isTrue, reason: 'the studio manager always follows edits');
-    expect(forHaddad.any((n) => n.title == 'Contrôle qualité à faire'),
-        isTrue);
+    expect(forTazi.any((n) => n.title == 'Contrôle qualité à faire'), isTrue,
+        reason: 'the studio manager always follows edits');
+    expect(forHaddad.any((n) => n.title == 'Contrôle qualité à faire'), isTrue);
   });
 }

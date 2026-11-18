@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -12,6 +12,7 @@ import '../../data/app_state.dart';
 import '../../data/projects_state.dart';
 import '../../domain/activity.dart';
 import '../../domain/people.dart';
+import '../../core/l10n/text.dart';
 
 /// I8 · Activity log: who did what, and when (P-11). Admins only.
 class ActivityScreen extends ConsumerStatefulWidget {
@@ -120,16 +121,17 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
     // Group by day.
     final groups = <DateTime, List<ActivityItem>>{};
     for (final i in page) {
-      groups.putIfAbsent(DateTime(i.at.year, i.at.month, i.at.day), () => [])
+      groups
+          .putIfAbsent(DateTime(i.at.year, i.at.month, i.at.day), () => [])
           .add(i);
     }
 
     return frame([
       TextField(
         controller: search,
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
           prefixIcon: Icon(Icons.search_rounded),
-          hintText: 'Rechercher une personne, une référence, un projet',
+          hintText: tr('Rechercher une personne, une référence, un projet'),
         ),
       ),
       const SizedBox(height: 10),
@@ -206,9 +208,17 @@ class _Row extends StatelessWidget {
     final c = context.es;
     final actor = item.actorId == null ? null : personById(item.actorId!);
     final (icon, bg, fg) = switch (item.category) {
-      ActivityCategory.booking => (Icons.event_note_outlined, c.reviewBg, c.reviewText),
+      ActivityCategory.booking => (
+          Icons.event_note_outlined,
+          c.reviewBg,
+          c.reviewText
+        ),
       ActivityCategory.project => (Icons.layers_outlined, c.lilac, c.onLilac),
-      ActivityCategory.admin => (Icons.admin_panel_settings_outlined, c.pendingBg, c.pendingText),
+      ActivityCategory.admin => (
+          Icons.admin_panel_settings_outlined,
+          c.pendingBg,
+          c.pendingText
+        ),
     };
     return InkWell(
       onTap: item.route == null ? null : () => context.push(item.route!),

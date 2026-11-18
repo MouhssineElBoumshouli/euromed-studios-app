@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import '../../core/l10n/text.dart';
 
 /// Euromed Studios logo, drawn as vectors so it stays sharp at any size
 /// (traced from the logo provided by the team, decision 0006).
@@ -15,6 +16,9 @@ class EuromedStudiosLogo extends StatelessWidget {
 
   /// Height of the whole logo.
   final double height;
+
+  /// True on navy or photo backgrounds. False on the page background: then
+  /// it is navy in the light look and white in the dark look.
   final bool onDark;
 
   /// False shows the mark alone (small places, app icon).
@@ -25,7 +29,9 @@ class EuromedStudiosLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final light = onDark ? Colors.white : navy;
+    final light = onDark || Theme.of(context).brightness == Brightness.dark
+        ? Colors.white
+        : navy;
     final mark = CustomPaint(
       size: Size(height * 0.64, height),
       painter: _MarkPainter(light: light, gold: gold),
@@ -52,7 +58,7 @@ class EuromedStudiosLogo extends StatelessWidget {
             ],
           );
     return Semantics(
-      label: 'Euromed Studios',
+      label: tr('Euromed Studios'),
       image: true,
       excludeSemantics: true,
       child: logo,

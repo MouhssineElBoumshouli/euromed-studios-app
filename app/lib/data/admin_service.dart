@@ -68,7 +68,8 @@ class AdminService {
     );
   }
 
-  Future<void> _wait() => Future<void>.delayed(const Duration(milliseconds: 350));
+  Future<void> _wait() =>
+      Future<void>.delayed(const Duration(milliseconds: 350));
 
   /// I6 · Opening hours, slot length, booking window, quota, entry window.
   Future<void> updateRules(Person by, RulesDraft d) async {
@@ -199,8 +200,11 @@ class AdminService {
         reason: reason.trim(),
       ),
     ]);
-    _log(by, 'maintenancePlanned', '${roomName(roomId)} : ${reason.trim()}'
-        '${clashes > 0 ? ' · $clashes séance(s) concernée(s)' : ''}');
+    _log(
+        by,
+        'maintenancePlanned',
+        '${roomName(roomId)} : ${reason.trim()}'
+            '${clashes > 0 ? ' · $clashes séance(s) concernée(s)' : ''}');
     return clashes;
   }
 
@@ -250,7 +254,8 @@ class AdminService {
 
   /// I7 · Publish a new charter version: everyone signs again.
   Future<void> publishCharter(Person by, String version) async {
-    final problem = charterVersionProblem(version, _world.policy.charterVersion);
+    final problem =
+        charterVersionProblem(version, _world.policy.charterVersion);
     if (problem != null) throw AdminProblem(adminProblemText(problem));
     if (!by.has(Role.admin)) {
       throw AdminProblem(adminProblemText('not_allowed'));

@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter/services.dart';
 
 import '../theme/es_colors.dart';
 import '../theme/es_text.dart';
+import '../../core/l10n/text.dart';
 
 /// Soft shadow used under cards, so they float on the airy background.
 List<BoxShadow> esShadow(EsColors c, {double strength = 1}) => [
@@ -88,7 +89,7 @@ class _EsCardState extends State<EsCard> {
     if (widget.semanticLabel == null) return card;
     return Semantics(
       button: widget.onTap != null,
-      label: widget.semanticLabel,
+      label: tr(widget.semanticLabel),
       child: card,
     );
   }
@@ -152,7 +153,7 @@ class Overline extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.es;
     return Text(
-      text.toUpperCase(),
+      tr(text).toUpperCase(),
       style: EsText.overline.copyWith(
         color: color ?? (onBrand ? c.brandAccent : c.accent),
       ),
@@ -185,7 +186,11 @@ class InfoBanner extends StatelessWidget {
     final c = context.es;
     final (Color bg, Color fg, IconData ic) = switch (tone) {
       BannerTone.info => (c.reviewBg, c.reviewText, Icons.info_outline_rounded),
-      BannerTone.warning => (c.pendingBg, c.pendingText, Icons.schedule_rounded),
+      BannerTone.warning => (
+          c.pendingBg,
+          c.pendingText,
+          Icons.schedule_rounded
+        ),
       BannerTone.danger => (
           c.dangerBg,
           c.dangerText,
@@ -318,28 +323,60 @@ class PhotoThumb extends StatelessWidget {
 
 /// The large soft shapes behind content (from the original design).
 class BlobBackground extends StatelessWidget {
-  const BlobBackground({super.key, required this.child, this.variant = 0});
+  const BlobBackground({super.key, required this.child, this.variant = 0})
+      : _page = false;
+
+  /// The computer layout's content area: one set of shapes for the whole
+  /// width. Screens inside it then skip their own (it would be cut at the
+  /// edges of their centred column).
+  const BlobBackground.page({super.key, required this.child})
+      : variant = 0,
+        _page = true;
+
   final Widget child;
   final int variant;
+  final bool _page;
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: _BlobPainter(context.es.blob, variant),
+    if (!_page && _BlobScope.of(context)) return child;
+    final paint = CustomPaint(
+      painter: _BlobPainter(context.es.blob, variant, wide: _page),
       child: child,
     );
+    // The page version is clipped: its shapes must never spill over the
+    // side menu.
+    return _page ? _BlobScope(child: ClipRect(child: paint)) : paint;
   }
 }
 
+class _BlobScope extends InheritedWidget {
+  const _BlobScope({required super.child});
+
+  static bool of(BuildContext context) =>
+      context.getInheritedWidgetOfExactType<_BlobScope>() != null;
+
+  @override
+  bool updateShouldNotify(_BlobScope old) => false;
+}
+
 class _BlobPainter extends CustomPainter {
-  _BlobPainter(this.color, this.variant);
+  _BlobPainter(this.color, this.variant, {this.wide = false});
   final Color color;
   final int variant;
+  final bool wide;
 
   @override
   void paint(Canvas canvas, Size size) {
     final p = Paint()..color = color;
     final w = size.width;
+    if (wide) {
+      // Same shapes, sized for a phone-like width, at the area's corners.
+      final r = w.clamp(0.0, 820.0);
+      canvas.drawCircle(Offset(w - r * 0.08, 230), r * 0.6, p);
+      canvas.drawCircle(Offset(r * 0.12, 700), r * 0.48, p);
+      return;
+    }
     if (variant == 0) {
       canvas.drawCircle(Offset(w * 1.02, 250), w * 0.62, p);
       canvas.drawCircle(Offset(w * 0.05, 640), w * 0.5, p);
@@ -351,7 +388,7 @@ class _BlobPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_BlobPainter old) =>
-      old.color != color || old.variant != variant;
+      old.color != color || old.variant != variant || old.wide != wide;
 }
 
 /// Page title block used at the top of tab screens.
@@ -436,14 +473,16 @@ class ZelligePainter extends CustomPainter {
     for (var y = step / 2; y < size.height + step; y += step) {
       for (var x = step / 2; x < size.width + step; x += step) {
         canvas.drawRect(
-          Rect.fromCenter(center: Offset(x, y), width: half * 2, height: half * 2),
+          Rect.fromCenter(
+              center: Offset(x, y), width: half * 2, height: half * 2),
           p,
         );
         canvas.save();
         canvas.translate(x, y);
         canvas.rotate(math.pi / 4);
         canvas.drawRect(
-          Rect.fromCenter(center: Offset.zero, width: half * 2, height: half * 2),
+          Rect.fromCenter(
+              center: Offset.zero, width: half * 2, height: half * 2),
           p,
         );
         canvas.restore();
@@ -557,8 +596,8 @@ class _FadeInUpState extends State<FadeInUp>
     return FadeTransition(
       opacity: t,
       child: SlideTransition(
-        position: Tween(begin: const Offset(0, 0.06), end: Offset.zero)
-            .animate(t),
+        position:
+            Tween(begin: const Offset(0, 0.06), end: Offset.zero).animate(t),
         child: widget.child,
       ),
     );
@@ -593,37 +632,46 @@ class PhotoPage extends StatelessWidget {
       excludeFromSemantics: true,
     );
     if (heroTag != null) image = Hero(tag: heroTag!, child: image);
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
+      // White status bar icons over the photo; the navigation bar keeps
+      // the page's own look.
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarIconBrightness:
+            dark ? Brightness.light : Brightness.dark,
+        systemNavigationBarContrastEnforced: false,
+      ),
       child: Stack(
-      children: [
-        Positioned.fill(child: ColoredBox(color: c.bgApp)),
-        SingleChildScrollView(
-          child: Stack(
-            children: [
-              image,
-              Padding(
-                padding: EdgeInsets.only(top: height - 28),
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: c.bgApp,
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(EsRadius.xl),
+        children: [
+          Positioned.fill(child: ColoredBox(color: c.bgApp)),
+          SingleChildScrollView(
+            child: Stack(
+              children: [
+                image,
+                Padding(
+                  padding: EdgeInsets.only(top: height - 28),
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: c.bgApp,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(EsRadius.xl),
+                      ),
                     ),
+                    child: sheet,
                   ),
-                  child: sheet,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        Positioned(
-          top: MediaQuery.paddingOf(context).top + 10,
-          left: 16,
-          child: _PinnedBack(onPressed: onBack),
-        ),
-      ],
+          Positioned(
+            top: MediaQuery.paddingOf(context).top + 10,
+            left: 16,
+            child: _PinnedBack(onPressed: onBack),
+          ),
+        ],
       ),
     );
   }
@@ -638,7 +686,7 @@ class _PinnedBack extends StatelessWidget {
     final c = context.es;
     return Semantics(
       button: true,
-      label: 'Retour',
+      label: tr('Retour'),
       excludeSemantics: true,
       child: Material(
         color: c.bgSurface,

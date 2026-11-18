@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -14,6 +14,7 @@ import '../features/notifications/notifications_screen.dart';
 import 'demo_mode.dart';
 import 'demo_switcher.dart';
 import 'tabs.dart';
+import '../core/l10n/text.dart';
 
 /// The frame around every tab screen: demo bar on top, tabs at the bottom.
 /// Whose feed the live banner last looked at.
@@ -52,7 +53,7 @@ class AppShell extends ConsumerWidget {
           SnackBar(
             content: Text('${n.title} · ${n.body}'),
             action: SnackBarAction(
-              label: 'Voir',
+              label: tr('Voir'),
               onPressed: () => context.push(n.route),
             ),
           ),
@@ -78,6 +79,13 @@ class AppShell extends ConsumerWidget {
           );
 
     if (isWide(context)) {
+      // Lists and boards use the room; Home gets two columns; reading
+      // screens stay at a comfortable width.
+      final maxWidth = console || _roomy.any(location.startsWith)
+          ? 1440.0
+          : location.startsWith('/home')
+              ? 1240.0
+              : 760.0;
       return Scaffold(
         body: Row(
           children: [
@@ -88,16 +96,26 @@ class AppShell extends ConsumerWidget {
               onSelect: (i) => context.go(tabs[i].path),
             ),
             Expanded(
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: ConstrainedBox(
-                  // Lists and boards use the room; reading screens stay
-                  // at a comfortable width.
-                  constraints: BoxConstraints(
-                    maxWidth:
-                        console || _roomy.any(location.startsWith) ? 1440 : 760,
+              // The soft background shapes cover the whole area, not just
+              // the centred column, so nothing looks cut at the sides.
+              child: BlobBackground.page(
+                child: MediaQuery.removePadding(
+                  context: context,
+                  // The side menu already sits next to the screen's edge.
+                  removeLeft: true,
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: maxWidth),
+                      // Phones in landscape put their buttons on the right.
+                      child: SafeArea(
+                        left: false,
+                        top: false,
+                        bottom: false,
+                        child: page,
+                      ),
+                    ),
                   ),
-                  child: page,
                 ),
               ),
             ),
@@ -132,7 +150,13 @@ class AppShell extends ConsumerWidget {
   }
 }
 
-const _roomy = ['/studios', '/validations', '/planning', '/dashboard', '/admin'];
+const _roomy = [
+  '/studios',
+  '/validations',
+  '/planning',
+  '/dashboard',
+  '/admin'
+];
 
 /// Shows a full-screen page (detail, booking flow, QR…) as a centered
 /// column on computers, instead of stretching it edge to edge.
@@ -144,14 +168,42 @@ class WideFrame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!isWide(context)) return child;
-    return ColoredBox(
-      color: context.es.bgSubtle,
-      child: Center(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: maxWidth),
-          child: DecoratedBox(
-            decoration: BoxDecoration(boxShadow: esShadow(context.es, strength: 2)),
-            child: child,
+    // A floating card over the same soft background as the tab screens,
+    // so the page reads as a focused step, not as a strip cut out of the
+    // screen.
+    final insets = MediaQuery.paddingOf(context);
+    return Material(
+      color: context.es.bgApp,
+      child: BlobBackground.page(
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(
+              24 + insets.left,
+              20 + insets.top,
+              24 + insets.right,
+              20 + insets.bottom,
+            ),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: maxWidth),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(EsRadius.xl),
+                  boxShadow: esShadow(context.es, strength: 2),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(EsRadius.xl),
+                  // The card already sits inside the safe area.
+                  child: MediaQuery.removePadding(
+                    context: context,
+                    removeTop: true,
+                    removeBottom: true,
+                    removeLeft: true,
+                    removeRight: true,
+                    child: child,
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -169,9 +221,8 @@ bool isWide(BuildContext context) =>
 /// Height the floating tab bar takes at the bottom of the screen, so
 /// scrolling content can leave room for it. On computers there is no
 /// bottom bar, only a normal margin.
-double tabBarSpace(BuildContext context) => isWide(context)
-    ? EsSpace.s8
-    : 100 + MediaQuery.paddingOf(context).bottom;
+double tabBarSpace(BuildContext context) =>
+    (isWide(context) ? EsSpace.s8 : 100) + MediaQuery.paddingOf(context).bottom;
 
 /// The floating pill tab bar from the original design, refined: the
 /// selected tab sits in a lilac capsule that slides between tabs.
@@ -269,42 +320,42 @@ class _PillTab extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      label: spec.label,
+      label: tr(spec.label),
       excludeSemantics: true,
       child: Material(
         type: MaterialType.transparency,
         child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(EsRadius.lg),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AnimatedSwitcher(
-              duration: EsMotion.fast,
-              child: Icon(
-                selected ? spec.selectedIcon : spec.icon,
-                key: ValueKey(selected),
-                size: 23,
-                color: fg,
-              ),
-            ),
-            const SizedBox(height: 3),
-            // Long labels ("Maintenance") shrink a little instead of cutting.
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                spec.label,
-                maxLines: 1,
-                softWrap: false,
-                style: EsText.labelS.copyWith(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(EsRadius.lg),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedSwitcher(
+                duration: EsMotion.fast,
+                child: Icon(
+                  selected ? spec.selectedIcon : spec.icon,
+                  key: ValueKey(selected),
+                  size: 23,
                   color: fg,
-                  fontSize: 11.5,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                 ),
               ),
-            ),
-          ],
-        ),
+              const SizedBox(height: 3),
+              // Long labels ("Maintenance") shrink a little instead of cutting.
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  spec.label,
+                  maxLines: 1,
+                  softWrap: false,
+                  style: EsText.labelS.copyWith(
+                    color: fg,
+                    fontSize: 11.5,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -337,13 +388,21 @@ class SideMenu extends ConsumerWidget {
     final muted = console ? c.textOnBrandMuted : c.textSecondary;
     final selBg = console ? Colors.white.withValues(alpha: 0.12) : c.lilac;
     final selFg = console ? Colors.white : c.onLilac;
+    // Stay clear of the status bar and of Android's navigation buttons
+    // (tablets draw them over the bottom of the app).
+    final insets = MediaQuery.paddingOf(context);
     return Container(
-      width: 264,
+      width: 264 + insets.left,
       decoration: BoxDecoration(
         color: bg,
         border: console ? null : Border(right: BorderSide(color: c.border)),
       ),
-      padding: const EdgeInsets.fromLTRB(16, 28, 16, 16),
+      padding: EdgeInsets.fromLTRB(
+        16 + insets.left,
+        28 + insets.top,
+        16,
+        16 + insets.bottom,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -480,53 +539,54 @@ class DemoBar extends ConsumerWidget {
     final top = MediaQuery.paddingOf(context).top;
     return Semantics(
       button: true,
-      label: 'Mode démo. Vous êtes ${p.fullName}. Changer de rôle',
+      label: tr('Mode démo. Vous êtes ${p.fullName}. Changer de rôle'),
       excludeSemantics: true,
       child: Material(
-      color: c.bgBrand,
-      elevation: 0,
-      child: InkWell(
-        onTap: () => showDemoSwitcher(context, ref),
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(16, top + 8, 12, 8),
-          child: Row(
-            children: [
-              Icon(Icons.swap_horiz_rounded, size: 18, color: c.brandAccent),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  '${isLive ? 'En direct' : 'Démo'} · ${p.displayName}'
-                  '${p.title == null ? '' : ' · ${p.title}'}',
-                  overflow: TextOverflow.ellipsis,
-                  style: EsText.labelS.copyWith(color: c.textOnBrand),
+        color: c.bgBrand,
+        elevation: 0,
+        child: InkWell(
+          onTap: () => showDemoSwitcher(context, ref),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(16, top + 8, 12, 8),
+            child: Row(
+              children: [
+                Icon(Icons.swap_horiz_rounded, size: 18, color: c.brandAccent),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '${isLive ? 'En direct' : 'Démo'} · ${p.displayName}'
+                    '${p.title == null ? '' : ' · ${p.title}'}',
+                    overflow: TextOverflow.ellipsis,
+                    style: EsText.labelS.copyWith(color: c.textOnBrand),
+                  ),
                 ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(EsRadius.pill),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(EsRadius.pill),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Changer de rôle',
+                        style: EsText.labelS.copyWith(color: c.textOnBrand),
+                      ),
+                      Icon(
+                        Icons.expand_more_rounded,
+                        size: 16,
+                        color: c.textOnBrand,
+                      ),
+                    ],
+                  ),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Changer de rôle',
-                      style: EsText.labelS.copyWith(color: c.textOnBrand),
-                    ),
-                    Icon(
-                      Icons.expand_more_rounded,
-                      size: 16,
-                      color: c.textOnBrand,
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
-    ),
     );
   }
 }

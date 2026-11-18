@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,6 +11,7 @@ import '../data/demo_world.dart';
 import '../data/live_sync.dart';
 import 'login_screen.dart';
 import 'tabs.dart';
+import '../core/l10n/text.dart';
 
 /// Lets a viewer see the app as any role. Demo only: in the real app,
 /// your roles come from your UEMF account.

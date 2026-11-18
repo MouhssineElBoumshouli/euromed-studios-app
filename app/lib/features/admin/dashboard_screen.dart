@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -16,6 +16,7 @@ import '../../domain/rules/projects.dart';
 import '../../domain/rules/stats.dart';
 import '../notifications/notifications_screen.dart';
 import '../../data/catalog.dart';
+import '../../core/l10n/text.dart';
 
 /// I1 · Pilotage: how the studios are doing this week, and what needs
 /// attention now. For the admin and the studio manager.
@@ -111,8 +112,7 @@ class DashboardScreen extends ConsumerWidget {
       _Kpi(
         icon: Icons.person_off_outlined,
         label: 'Absences',
-        value:
-            absences == null ? '—' : '${(absences.rate * 100).round()} %',
+        value: absences == null ? '—' : '${(absences.rate * 100).round()} %',
         sub: absences == null
             ? 'Aucune séance passée sur 30 jours'
             : '${absences.noShows} sur ${absences.held} séance'
@@ -185,7 +185,8 @@ class DashboardScreen extends ConsumerWidget {
                   : c.reviewText,
               title: '${personById(b.requesterId).fullName} · '
                   '${studioById(b.studioId).name}',
-              detail: '${b.status == BookingStatus.pendingEntity ? 'Niveau 1' : 'Niveau 2'}'
+              detail:
+                  '${b.status == BookingStatus.pendingEntity ? 'Niveau 1' : 'Niveau 2'}'
                   ' · attend depuis '
                   '${Fmt.duration(w.now.difference(b.history.last.at))}',
               onTap: () => context.push('/validations/${b.id}'),
@@ -388,8 +389,7 @@ class _Panel extends StatelessWidget {
                       if (subtitle != null)
                         Text(
                           subtitle!,
-                          style:
-                              EsText.bodyS.copyWith(color: c.textSecondary),
+                          style: EsText.bodyS.copyWith(color: c.textSecondary),
                         ),
                     ],
                   ),
@@ -417,7 +417,7 @@ class _LoadRow extends StatelessWidget {
     final h = (load.bookedMinutes / 60).toStringAsFixed(0);
     final open = (load.openMinutes / 60).toStringAsFixed(0);
     return Semantics(
-      label: '${load.name} : $pct %, $h heures sur $open',
+      label: tr('${load.name} : $pct %, $h heures sur $open'),
       excludeSemantics: true,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 7),
@@ -484,16 +484,15 @@ class _DayBars extends StatelessWidget {
               for (final d in days)
                 Expanded(
                   child: Semantics(
-                    label: '${Fmt.longDay(d.day)} : ${d.validated} '
-                        'validées, ${d.waiting} en attente',
+                    label: tr('${Fmt.longDay(d.day)} : ${d.validated} '
+                        'validées, ${d.waiting} en attente'),
                     excludeSemantics: true,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Text(
                           '${d.validated + d.waiting}',
-                          style: EsText.labelS
-                              .copyWith(color: c.textSecondary),
+                          style: EsText.labelS.copyWith(color: c.textSecondary),
                         ),
                         const SizedBox(height: 4),
                         Container(

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,6 +11,7 @@ import '../../data/admin_state.dart';
 import '../../data/app_state.dart';
 import '../../domain/people.dart';
 import '../notifications/notifications_screen.dart';
+import '../../core/l10n/text.dart';
 
 /// I3–I9 · Gestion: everything an admin can adjust, in one place.
 class AdminHubScreen extends ConsumerWidget {
@@ -90,7 +91,11 @@ class AdminHubScreen extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: EsSpace.page),
           child: LayoutBuilder(
             builder: (_, box) {
-              final cols = box.maxWidth >= 900 ? 3 : box.maxWidth >= 560 ? 2 : 1;
+              final cols = box.maxWidth >= 900
+                  ? 3
+                  : box.maxWidth >= 560
+                      ? 2
+                      : 1;
               final w = (box.maxWidth - 12 * (cols - 1)) / cols;
               return Wrap(
                 spacing: 12,
@@ -167,4 +172,3 @@ class _Section {
   /// Sections still being built show "Bientôt" and can't be opened.
   final bool ready;
 }
-

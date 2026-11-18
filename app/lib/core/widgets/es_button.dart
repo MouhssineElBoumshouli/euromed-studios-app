@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 
 import '../theme/es_colors.dart';
 import '../theme/es_text.dart';
+import '../../core/l10n/text.dart';
 
 enum EsButtonStyle { primary, secondary, ghost, destructive }
 
@@ -152,7 +153,7 @@ class EsBackButton extends StatelessWidget {
     final fg = onDark ? c.textOnBrand : c.textPrimary;
     return Semantics(
       button: true,
-      label: close ? 'Fermer' : 'Retour',
+      label: tr(close ? 'Fermer' : 'Retour'),
       excludeSemantics: true,
       child: InkWell(
         onTap: onPressed,
@@ -171,9 +172,8 @@ class EsBackButton extends StatelessWidget {
                       : c.bgSurface,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: onDark
-                        ? Colors.white.withValues(alpha: 0.2)
-                        : c.border,
+                    color:
+                        onDark ? Colors.white.withValues(alpha: 0.2) : c.border,
                   ),
                 ),
                 child: Icon(

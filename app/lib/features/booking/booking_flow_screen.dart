@@ -1,5 +1,4 @@
-
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -24,6 +23,7 @@ import '../../domain/rules/quota.dart';
 import '../../domain/studios.dart';
 import 'month_calendar.dart';
 import '../../data/catalog.dart';
+import '../../core/l10n/text.dart';
 
 /// D0–D3 · Booking in four steps (R-10 to R-15, R-33):
 /// 1. choose the date on a month calendar, 2. choose the time,
@@ -93,7 +93,8 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
     if (usable && widget.initialDay!.hour >= w.policy.openingHour) {
       // Came from a suggested slot: skip the calendar, slot already picked.
       rangeStart = widget.initialDay;
-      rangeEnd = widget.initialDay!.add(Duration(minutes: w.policy.slotMinutes));
+      rangeEnd =
+          widget.initialDay!.add(Duration(minutes: w.policy.slotMinutes));
       step = 1;
     }
   }
@@ -183,27 +184,27 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
     setState(() => sending = true);
     try {
       final b = await ref.read(bookingServiceProvider).submit(
-            requesterId: me.id,
-            requesterType: _type(me),
-            establishmentId: me.establishmentId,
-            clubId: forClub ? me.clubIds.first : null,
-            projectId: projectId,
-            studioId: studio.id,
-            start: rangeStart!,
-            end: rangeEnd!,
-            activity: activity!,
-            note: note.text.trim().isEmpty ? null : note.text.trim(),
-            equipment: [
-              // Never more than the stock, even if it was lowered meanwhile.
-              for (final e in equip)
-                if (e.qty.clamp(0, e.item.stock) > 0)
-                  EquipmentRequest(
-                    itemId: e.id,
-                    quantity: e.qty.clamp(0, e.item.stock),
-                    required: e.required,
-                  ),
-            ],
-          );
+        requesterId: me.id,
+        requesterType: _type(me),
+        establishmentId: me.establishmentId,
+        clubId: forClub ? me.clubIds.first : null,
+        projectId: projectId,
+        studioId: studio.id,
+        start: rangeStart!,
+        end: rangeEnd!,
+        activity: activity!,
+        note: note.text.trim().isEmpty ? null : note.text.trim(),
+        equipment: [
+          // Never more than the stock, even if it was lowered meanwhile.
+          for (final e in equip)
+            if (e.qty.clamp(0, e.item.stock) > 0)
+              EquipmentRequest(
+                itemId: e.id,
+                quantity: e.qty.clamp(0, e.item.stock),
+                required: e.required,
+              ),
+        ],
+      );
       if (!mounted) return;
       context.go('/sent/${b.id}');
     } on SubmitRejected catch (e) {
@@ -398,8 +399,8 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
                           child: Text(
                             titles[step],
                             key: ValueKey(step),
-                            style: EsText.displayL
-                                .copyWith(color: c.textPrimary),
+                            style:
+                                EsText.displayL.copyWith(color: c.textPrimary),
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -551,8 +552,7 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
                         children: [
                           Text(
                             Fmt.longDay(day),
-                            style:
-                                EsText.titleM.copyWith(color: c.textPrimary),
+                            style: EsText.titleM.copyWith(color: c.textPrimary),
                           ),
                           Text(
                             freeCount == 0
@@ -560,9 +560,8 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
                                 : '$freeCount créneau${freeCount > 1 ? 'x' : ''} '
                                     'libre${freeCount > 1 ? 's' : ''}',
                             style: EsText.bodyS.copyWith(
-                              color: freeCount == 0
-                                  ? c.dangerText
-                                  : c.successText,
+                              color:
+                                  freeCount == 0 ? c.dangerText : c.successText,
                             ),
                           ),
                         ],
@@ -592,9 +591,8 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
                   SlotTile(
                     slot: slots[i],
                     selected: _selected(slots[i]),
-                    joinTop: i > 0 &&
-                        _selected(slots[i]) &&
-                        _selected(slots[i - 1]),
+                    joinTop:
+                        i > 0 && _selected(slots[i]) && _selected(slots[i - 1]),
                     joinBottom: i < slots.length - 1 &&
                         _selected(slots[i]) &&
                         _selected(slots[i + 1]),
@@ -618,8 +616,7 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
                 ),
                 const SizedBox(height: EsSpace.s3),
               ],
-              if (!q.unlimited)
-                _QuotaMeter(q: q, adding: _minutes),
+              if (!q.unlimited) _QuotaMeter(q: q, adding: _minutes),
             ],
           ),
         ),
@@ -631,7 +628,8 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
   Widget _detailsStep(Person me) {
     final c = context.es;
     final clubs = [
-      for (final id in me.clubIds) DemoWorld.clubs.firstWhere((x) => x.id == id),
+      for (final id in me.clubIds)
+        DemoWorld.clubs.firstWhere((x) => x.id == id),
     ];
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -677,7 +675,8 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
           const SizedBox(height: 10),
           _Choice(
             title: 'Pour ${clubs.first.name}',
-            subtitle: 'Vous êtes représentant·e. La demande est au nom du club.',
+            subtitle:
+                'Vous êtes représentant·e. La demande est au nom du club.',
             icon: Icons.groups_outlined,
             selected: forClub,
             onTap: () => setState(() => forClub = true),
@@ -703,7 +702,7 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
               for (final p in _myProjects(me))
                 ChoiceChip(
                   avatar: const Icon(Icons.layers_outlined, size: 16),
-                  label: Text(p.title),
+                  label: Text.user(p.title),
                   selected: projectId == p.id,
                   onSelected: (_) => setState(() => projectId = p.id),
                 ),
@@ -730,8 +729,8 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
           controller: note,
           maxLines: 3,
           maxLength: 300,
-          decoration: const InputDecoration(
-            hintText: 'Ex. : enregistrement avec deux invités externes',
+          decoration: InputDecoration(
+            hintText: tr('Ex. : enregistrement avec deux invités externes'),
           ),
         ),
       ],
@@ -803,8 +802,7 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
                         children: [
                           Text(
                             studio.name,
-                            style:
-                                EsText.titleL.copyWith(color: Colors.white),
+                            style: EsText.titleL.copyWith(color: Colors.white),
                           ),
                           Text(
                             room.name,
@@ -920,7 +918,9 @@ class _ChosenDate extends StatelessWidget {
         child: Row(
           children: [
             IconTile(
-              free == 0 ? Icons.event_busy_outlined : Icons.event_available_rounded,
+              free == 0
+                  ? Icons.event_busy_outlined
+                  : Icons.event_available_rounded,
               size: 44,
               bg: free == 0 ? c.dangerBg : c.lilac,
               fg: free == 0 ? c.dangerText : c.onLilac,
@@ -1072,8 +1072,7 @@ class _BottomBar extends StatelessWidget {
                         Expanded(
                           child: Text(
                             summary!,
-                            style: EsText.titleS
-                                .copyWith(color: c.textPrimary),
+                            style: EsText.titleS.copyWith(color: c.textPrimary),
                           ),
                         ),
                         Tag(
@@ -1176,7 +1175,7 @@ class SlotTile extends StatelessWidget {
       child: Semantics(
         button: onTap != null,
         selected: selected,
-        label: '${Fmt.range(slot.start, slot.end)}, $label',
+        label: tr('${Fmt.range(slot.start, slot.end)}, $label'),
         excludeSemantics: true,
         child: AnimatedContainer(
           duration: EsMotion.fast,
@@ -1201,8 +1200,7 @@ class SlotTile extends StatelessWidget {
                         '${Fmt.time(slot.start)}  —  ${Fmt.time(slot.end)}',
                         style: EsText.numeric.copyWith(
                           color: fg,
-                          decoration: slot.state == SlotState.taken &&
-                                  !selected
+                          decoration: slot.state == SlotState.taken && !selected
                               ? TextDecoration.lineThrough
                               : null,
                         ),
@@ -1335,7 +1333,7 @@ class _ActivityCard extends StatelessWidget {
     return Semantics(
       selected: selected,
       button: true,
-      label: activity.label,
+      label: tr(activity.label),
       excludeSemantics: true,
       child: GestureDetector(
         onTap: onTap,
@@ -1520,8 +1518,8 @@ class _EquipRow extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      tooltip: 'Retirer un',
-                                            onPressed: e.qty == 0
+                      tooltip: tr('Retirer un'),
+                      onPressed: e.qty == 0
                           ? null
                           : () {
                               e.qty--;
@@ -1539,8 +1537,8 @@ class _EquipRow extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Ajouter un',
-                                            onPressed: e.qty >= e.item.stock
+                      tooltip: tr('Ajouter un'),
+                      onPressed: e.qty >= e.item.stock
                           ? null
                           : () {
                               e.qty++;
@@ -1572,8 +1570,7 @@ class _EquipRow extends StatelessWidget {
                                 ? 'Indispensable pour la séance'
                                 : 'Souhaité, pas indispensable',
                             style: EsText.labelS.copyWith(
-                              color:
-                                  e.required ? c.textGold : c.textSecondary,
+                              color: e.required ? c.textGold : c.textSecondary,
                             ),
                           ),
                         ),

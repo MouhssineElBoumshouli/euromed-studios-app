@@ -43,14 +43,16 @@ void main() {
           isNull);
     });
     test('closes at the end of the slot', () {
-      expect(checkInProblem(b, DateTime(2026, 11, 16, 10, 59), earlyMinutes: 15),
+      expect(
+          checkInProblem(b, DateTime(2026, 11, 16, 10, 59), earlyMinutes: 15),
           isNull);
       expect(checkInProblem(b, DateTime(2026, 11, 16, 11), earlyMinutes: 15),
           isNotNull);
     });
     test('only once', () {
       expect(
-        checkInProblem(session(extra: [checkedIn]), DateTime(2026, 11, 16, 10, 5),
+        checkInProblem(
+            session(extra: [checkedIn]), DateTime(2026, 11, 16, 10, 5),
             earlyMinutes: 15),
         isNotNull,
       );
@@ -61,15 +63,19 @@ void main() {
     test('a session closes only after a check-in', () {
       expect(canComplete(session(), DateTime(2026, 11, 16, 12)), isFalse);
       expect(
-        canComplete(session(extra: [checkedIn]), DateTime(2026, 11, 16, 10, 30)),
+        canComplete(
+            session(extra: [checkedIn]), DateTime(2026, 11, 16, 10, 30)),
         isTrue,
       );
     });
-    test('an absence can be noted 15 minutes after the start, never after a check-in', () {
+    test(
+        'an absence can be noted 15 minutes after the start, never after a check-in',
+        () {
       expect(canMarkNoShow(session(), DateTime(2026, 11, 16, 10, 14)), isFalse);
       expect(canMarkNoShow(session(), DateTime(2026, 11, 16, 10, 15)), isTrue);
       expect(
-        canMarkNoShow(session(extra: [checkedIn]), DateTime(2026, 11, 16, 10, 30)),
+        canMarkNoShow(
+            session(extra: [checkedIn]), DateTime(2026, 11, 16, 10, 30)),
         isFalse,
       );
     });
@@ -79,7 +85,8 @@ void main() {
       expect(phaseOf(b, DateTime(2026, 11, 16, 9, 50)), SessionPhase.ready);
       expect(phaseOf(b, DateTime(2026, 11, 16, 10, 20)), SessionPhase.late);
       expect(phaseOf(b, DateTime(2026, 11, 16, 11)), SessionPhase.missed);
-      expect(phaseOf(session(extra: [checkedIn]), DateTime(2026, 11, 16, 10, 20)),
+      expect(
+          phaseOf(session(extra: [checkedIn]), DateTime(2026, 11, 16, 10, 20)),
           SessionPhase.inProgress);
     });
     test('a started session can no longer be cancelled', () {

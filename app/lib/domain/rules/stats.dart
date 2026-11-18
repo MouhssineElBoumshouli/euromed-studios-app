@@ -179,9 +179,8 @@ PendingSummary pendingSummary(List<Booking> bookings) {
   waits.sort();
   final total = waits.fold(Duration.zero, (s, d) => s + d);
   final mid = waits.length ~/ 2;
-  final median = waits.length.isOdd
-      ? waits[mid]
-      : (waits[mid - 1] + waits[mid]) ~/ 2;
+  final median =
+      waits.length.isOdd ? waits[mid] : (waits[mid - 1] + waits[mid]) ~/ 2;
   return (
     average: total ~/ waits.length,
     median: median,

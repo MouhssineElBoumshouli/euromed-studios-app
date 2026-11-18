@@ -31,8 +31,10 @@ class ProjectsState {
   /// saying "not found").
   final bool loaded;
 
-  List<ProjectFile> filesOf(String projectId) =>
-      [for (final f in files) if (f.projectId == projectId) f];
+  List<ProjectFile> filesOf(String projectId) => [
+        for (final f in files)
+          if (f.projectId == projectId) f
+      ];
 
   /// Oldest first.
   List<ProjectMessage> messagesOf(String projectId) => [
@@ -328,7 +330,10 @@ class ProjectsNotifier extends Notifier<ProjectsState> {
       _find(f.projectId).log(ProjectEventType.fileRemoved, by, now, f.name),
     );
     state = state.copyWith(
-      files: [for (final x in state.files) if (x.id != fileId) x],
+      files: [
+        for (final x in state.files)
+          if (x.id != fileId) x
+      ],
     );
   }
 
@@ -411,8 +416,8 @@ class ProjectsNotifier extends Notifier<ProjectsState> {
             )
             .log(ProjectEventType.qcPassed, by.id, now),
       );
-      _say(id, by.id, MessageKind.qcPassed,
-          note ?? 'Contrôle qualité validé.', now);
+      _say(id, by.id, MessageKind.qcPassed, note ?? 'Contrôle qualité validé.',
+          now);
     } else {
       if (note == null || note.trim().isEmpty) {
         throw StateError('reason_required');
@@ -492,9 +497,8 @@ class ProjectsNotifier extends Notifier<ProjectsState> {
     if (accept) {
       final p = _find(inv.projectId);
       _replace(
-        p
-            .copyWith(memberIds: [...p.memberIds, by.id])
-            .log(ProjectEventType.memberJoined, by.id, now),
+        p.copyWith(memberIds: [...p.memberIds, by.id]).log(
+            ProjectEventType.memberJoined, by.id, now),
       );
     }
   }

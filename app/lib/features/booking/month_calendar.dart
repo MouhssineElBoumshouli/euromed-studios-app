@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 
 import '../../core/format.dart';
 import '../../core/theme/es_colors.dart';
 import '../../core/theme/es_text.dart';
 import '../../core/widgets/layout.dart';
+import '../../core/l10n/text.dart';
 
 /// Month calendar for picking a booking date (D0).
 ///
@@ -36,11 +37,6 @@ class MonthCalendar extends StatelessWidget {
   final bool canGoForward;
   final ValueChanged<DateTime> onMonth;
   final ValueChanged<DateTime> onDay;
-
-  static const _letters = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
-  static const _weekdays = [
-    'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche',
-  ];
 
   void _shift(int by) => onMonth(DateTime(month.year, month.month + by));
 
@@ -92,7 +88,7 @@ class MonthCalendar extends StatelessWidget {
             ExcludeSemantics(
               child: Row(
                 children: [
-                  for (final l in _letters)
+                  for (final l in Fmt.weekdayLetters())
                     Expanded(
                       child: Text(
                         l,
@@ -119,7 +115,8 @@ class MonthCalendar extends StatelessWidget {
                         children: [
                           for (var col = 0; col < 7; col++) ...[
                             if (col > 0) const SizedBox(width: 3),
-                            Expanded(child: _cell(r * 7 + col - lead + 1, count)),
+                            Expanded(
+                                child: _cell(r * 7 + col - lead + 1, count)),
                           ],
                         ],
                       ),
@@ -157,7 +154,7 @@ class MonthCalendar extends StatelessWidget {
       free: free,
       isToday: d == today,
       isSelected: d == selected,
-      semanticLabel: '${_weekdays[d.weekday - 1]} ${Fmt.dayMonthYear(d)}, '
+      semanticLabel: '${Fmt.weekdayName(d)} ${Fmt.dayMonthYear(d)}, '
           '${free == null ? 'fermé' : free == 0 ? 'complet' : '$free '
               'créneau${free > 1 ? 'x' : ''} libre${free > 1 ? 's' : ''}'}',
       onTap: free != null && free > 0 ? () => onDay(d) : null,
@@ -210,7 +207,7 @@ class _DayCell extends StatelessWidget {
       button: open,
       selected: isSelected,
       enabled: open,
-      label: semanticLabel,
+      label: tr(semanticLabel),
       excludeSemantics: true,
       child: AspectRatio(
         aspectRatio: 1,
@@ -246,30 +243,30 @@ class _DayCell extends StatelessWidget {
               child: FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    '${day.day}',
-                    style: EsText.titleM.copyWith(
-                      color: fg,
-                      fontWeight: isSelected || isToday
-                          ? FontWeight.w800
-                          : FontWeight.w600,
-                      decoration: full ? TextDecoration.lineThrough : null,
-                      decorationColor: c.textDisabled,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '${day.day}',
+                      style: EsText.titleM.copyWith(
+                        color: fg,
+                        fontWeight: isSelected || isToday
+                            ? FontWeight.w800
+                            : FontWeight.w600,
+                        decoration: full ? TextDecoration.lineThrough : null,
+                        decorationColor: c.textDisabled,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 3),
-                  Container(
-                    width: 5,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: dot ?? Colors.transparent,
-                      shape: BoxShape.circle,
+                    const SizedBox(height: 3),
+                    Container(
+                      width: 5,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: dot ?? Colors.transparent,
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -289,7 +286,7 @@ class _NavButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.es;
     return IconButton(
-      tooltip: label,
+      tooltip: tr(label),
       onPressed: onTap,
       style: IconButton.styleFrom(
         minimumSize: const Size(44, 44),
@@ -304,7 +301,8 @@ class _NavButton extends StatelessWidget {
 }
 
 class _Legend extends StatelessWidget {
-  const _Legend({required this.color, required this.label, this.hollow = false});
+  const _Legend(
+      {required this.color, required this.label, this.hollow = false});
   final Color color;
   final String label;
   final bool hollow;

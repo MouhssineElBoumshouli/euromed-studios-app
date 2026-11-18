@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -8,6 +8,7 @@ import '../../core/widgets/es_button.dart';
 import '../../core/widgets/layout.dart';
 import '../../data/app_state.dart';
 import '../../data/booking_service.dart';
+import '../../core/l10n/text.dart';
 
 /// A6 · House rules, signed before any request (R-13).
 /// Returns `true` to the caller once signed.
@@ -105,14 +106,14 @@ class _CharterState extends ConsumerState<CharterScreen> {
                           children: [
                             Text(
                               _rules[i].$1,
-                              style: EsText.titleS
-                                  .copyWith(color: c.textPrimary),
+                              style:
+                                  EsText.titleS.copyWith(color: c.textPrimary),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               _rules[i].$2,
-                              style: EsText.bodyM
-                                  .copyWith(color: c.textSecondary),
+                              style:
+                                  EsText.bodyM.copyWith(color: c.textSecondary),
                             ),
                           ],
                         ),

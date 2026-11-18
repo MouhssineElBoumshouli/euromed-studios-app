@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/demo_mode.dart';
@@ -8,10 +8,12 @@ import '../../core/theme/es_colors.dart';
 import '../../core/theme/es_text.dart';
 import '../../core/widgets/es_button.dart';
 import '../../core/widgets/layout.dart';
+import '../../core/widgets/preferences.dart';
 import '../../core/widgets/status_chip.dart';
 import '../../data/app_state.dart';
 import '../../data/selectors.dart';
 import '../../domain/rules/quota.dart';
+import '../../core/l10n/text.dart';
 
 /// J1 · Profile.
 class ProfileScreen extends ConsumerWidget {
@@ -77,21 +79,24 @@ class ProfileScreen extends ConsumerWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: EsSpace.s4),
+              const SectionTitle('Préférences'),
+              const PreferencesCard(),
               if (kDemoMode) ...[
-              const SizedBox(height: EsSpace.s5),
-              EsButton(
-                'Voir l’application avec un autre rôle',
-                icon: Icons.swap_horiz_rounded,
-                style: EsButtonStyle.secondary,
-                onPressed: () => showDemoSwitcher(context, ref),
-              ),
-              const SizedBox(height: EsSpace.s3),
-              Text(
-                'Mode démo. Dans la version finale, vos rôles viennent de '
-                'votre compte UEMF et ne se changent pas ici.',
-                textAlign: TextAlign.center,
-                style: EsText.bodyS.copyWith(color: c.textSecondary),
-              ),
+                const SizedBox(height: EsSpace.s5),
+                EsButton(
+                  'Voir l’application avec un autre rôle',
+                  icon: Icons.swap_horiz_rounded,
+                  style: EsButtonStyle.secondary,
+                  onPressed: () => showDemoSwitcher(context, ref),
+                ),
+                const SizedBox(height: EsSpace.s3),
+                Text(
+                  'Mode démo. Dans la version finale, vos rôles viennent de '
+                  'votre compte UEMF et ne se changent pas ici.',
+                  textAlign: TextAlign.center,
+                  style: EsText.bodyS.copyWith(color: c.textSecondary),
+                ),
               ],
             ],
           ),

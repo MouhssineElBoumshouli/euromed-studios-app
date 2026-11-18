@@ -29,7 +29,11 @@ void main() {
     if (world.level2Conflict(afterL1) == null) {
       world.approve(afterL1.id, by: manager);
       expect(
-        c.read(worldProvider).bookings.firstWhere((b) => b.id == pending.id).status,
+        c
+            .read(worldProvider)
+            .bookings
+            .firstWhere((b) => b.id == pending.id)
+            .status,
         BookingStatus.approved,
       );
     }
@@ -47,7 +51,8 @@ void main() {
     expect(() => world.refuse(b.id, by: manager, reason: '  '),
         throwsArgumentError);
     world.refuse(b.id, by: manager, reason: refusalPresets.first);
-    final after = c.read(worldProvider).bookings.firstWhere((x) => x.id == b.id);
+    final after =
+        c.read(worldProvider).bookings.firstWhere((x) => x.id == b.id);
     expect(after.status, BookingStatus.refused);
     expect(after.refusalReason, refusalPresets.first);
   });
