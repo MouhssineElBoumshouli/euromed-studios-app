@@ -30,7 +30,11 @@ class PreferencesCard extends StatelessWidget {
                   showSelectedIcon: false,
                   segments: [
                     for (final (mode, icon, label) in const [
-                      (ThemeMode.system, Icons.brightness_auto_outlined, 'Système'),
+                      (
+                        ThemeMode.system,
+                        Icons.brightness_auto_outlined,
+                        'Système'
+                      ),
                       (ThemeMode.light, Icons.light_mode_outlined, 'Clair'),
                       (ThemeMode.dark, Icons.dark_mode_outlined, 'Sombre'),
                     ])
