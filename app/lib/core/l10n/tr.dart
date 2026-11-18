@@ -108,7 +108,8 @@ String _translate(String s, int depth) {
       var value = m.group(g + 1)!;
       final n = p.order[g];
       // "2,5" → "2.5" in English.
-      if (RegExp(r'^\d+,\d+$').hasMatch(value)) value = value.replaceAll(',', '.');
+      if (RegExp(r'^\d+,\d+$').hasMatch(value))
+        value = value.replaceAll(',', '.');
       // "{1:s}": English plural "s" when the French had a plural ending.
       out = out.replaceAll('{$n:s}', value.isEmpty ? '' : 's').replaceAll(
             '{$n}',
