@@ -632,8 +632,17 @@ class PhotoPage extends StatelessWidget {
       excludeFromSemantics: true,
     );
     if (heroTag != null) image = Hero(tag: heroTag!, child: image);
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
+      // White status bar icons over the photo; the navigation bar keeps
+      // the page's own look.
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarIconBrightness:
+            dark ? Brightness.light : Brightness.dark,
+        systemNavigationBarContrastEnforced: false,
+      ),
       child: Stack(
         children: [
           Positioned.fill(child: ColoredBox(color: c.bgApp)),

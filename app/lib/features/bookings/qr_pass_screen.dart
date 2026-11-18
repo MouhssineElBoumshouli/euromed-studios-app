@@ -68,7 +68,7 @@ class _QrPassState extends ConsumerState<QrPassScreen> {
           EsColors.light.successText,
         ),
       QrWindow.notYet => (
-          'S’active ${Fmt.relativeDay(b.start, now).toLowerCase()} à ${Fmt.time(b.start)}',
+          'S’active ${tr(Fmt.relativeDay(b.start, now)).toLowerCase()} à ${Fmt.time(b.start)}',
           EsColors.light.pendingBg,
           EsColors.light.pendingText,
         ),

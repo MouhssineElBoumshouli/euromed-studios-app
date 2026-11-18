@@ -46,7 +46,7 @@ class _ProjectDetailState extends ConsumerState<ProjectDetailScreen> {
       context: context,
       showDragHandle: true,
       builder: (ctx) => _ConfirmSheet(
-        title: 'Passer en ${next.label.toLowerCase()} ?',
+        title: 'Passer en ${tr(next.label).toLowerCase()} ?',
         text: switch (next) {
           ProjectStage.production =>
             'Les documents de préparation sont prêts. Vous pourrez réserver '
@@ -55,14 +55,14 @@ class _ProjectDetailState extends ConsumerState<ProjectDetailScreen> {
             'Les séances sont faites. Le projet passe au montage.',
           _ => '',
         },
-        action: 'Passer en ${next.label.toLowerCase()}',
+        action: 'Passer en ${tr(next.label).toLowerCase()}',
       ),
     );
     if (ok != true) return;
     setState(() => advancing = true);
     try {
       await _service.advance(p.id, by: ref.read(currentPersonProvider));
-      _say('Projet passé en ${next.label.toLowerCase()}.');
+      _say('Projet passé en ${tr(next.label).toLowerCase()}.');
     } on ProjectProblem catch (e) {
       _say(e.message);
     } finally {
@@ -196,10 +196,10 @@ class _ProjectDetailState extends ConsumerState<ProjectDetailScreen> {
       const SizedBox(height: EsSpace.s4),
       Row(children: [TypeTag(p.type)]),
       const SizedBox(height: 10),
-      Text(p.title, style: EsText.displayL.copyWith(color: c.textPrimary)),
+      Text.user(p.title, style: EsText.displayL.copyWith(color: c.textPrimary)),
       if (p.description != null) ...[
         const SizedBox(height: 6),
-        Text(
+        Text.user(
           p.description!,
           style: EsText.bodyM.copyWith(color: c.textSecondary),
         ),
@@ -535,7 +535,7 @@ class _NextStep extends StatelessWidget {
                 ),
               ),
             EsButton(
-              'Passer en ${next.label.toLowerCase()}',
+              'Passer en ${tr(next.label).toLowerCase()}',
               size: EsButtonSize.medium,
               trailingIcon: Icons.arrow_forward_rounded,
               loading: busy,
@@ -667,11 +667,11 @@ class _HistoryState extends State<_History> {
       return switch (e.type) {
         ProjectEventType.created => '$who a créé le projet',
         ProjectEventType.stageChanged =>
-          '$who a passé le projet en ${ProjectStage.values.where((s) => s.name == e.detail).firstOrNull?.label.toLowerCase() ?? e.detail}',
+          '$who a passé le projet en ${(tr(ProjectStage.values.where((s) => s.name == e.detail).firstOrNull?.label) ?? e.detail).toLowerCase()}',
         ProjectEventType.fileAdded => '$who a ajouté « ${e.detail} »',
         ProjectEventType.fileRemoved => '$who a retiré « ${e.detail} »',
         ProjectEventType.postStatus =>
-          '$who : ${PostStatus.values.where((s) => s.name == e.detail).firstOrNull?.label.toLowerCase() ?? e.detail}',
+          '$who : ${(tr(PostStatus.values.where((s) => s.name == e.detail).firstOrNull?.label) ?? e.detail).toLowerCase()}',
         ProjectEventType.correction => '$who a demandé une correction',
         ProjectEventType.qcPassed =>
           '$who a validé le contrôle qualité et livré le projet',

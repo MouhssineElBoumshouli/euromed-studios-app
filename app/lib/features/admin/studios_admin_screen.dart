@@ -414,7 +414,9 @@ class _MaintenanceSheetState extends ConsumerState<_MaintenanceSheet> {
         EsSpace.page,
         0,
         EsSpace.page,
-        EsSpace.s5 + MediaQuery.viewInsetsOf(context).bottom,
+        EsSpace.s5 +
+            MediaQuery.viewInsetsOf(context).bottom +
+            MediaQuery.paddingOf(context).bottom,
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -533,7 +535,7 @@ class _When extends StatelessWidget {
               onPressed: onDay,
               icon: const Icon(Icons.event_rounded),
               label: Text(
-                '$label ${Fmt.longDay(day).toLowerCase()}',
+                '$label ${tr(Fmt.longDay(day)).toLowerCase()}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),

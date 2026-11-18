@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart' hide Text;
 
 import 'tr.dart';
 
-export 'tr.dart' show tr;
+export 'tr.dart' show tr, trExact;
 
 class Text extends StatelessWidget {
   const Text(
@@ -28,7 +28,30 @@ class Text extends StatelessWidget {
     this.textWidthBasis,
     this.textHeightBehavior,
     this.selectionColor,
-  }) : textSpan = null;
+  })  : textSpan = null,
+        _userText = false;
+
+  /// Text someone typed (a project title, a message, a note): shown as
+  /// written. Only an exact known text is translated (the demo's own
+  /// content), never a piece of it.
+  const Text.user(
+    String this.data, {
+    super.key,
+    this.style,
+    this.strutStyle,
+    this.textAlign,
+    this.textDirection,
+    this.locale,
+    this.softWrap,
+    this.overflow,
+    this.textScaler,
+    this.maxLines,
+    this.semanticsLabel,
+    this.textWidthBasis,
+    this.textHeightBehavior,
+    this.selectionColor,
+  })  : textSpan = null,
+        _userText = true;
 
   const Text.rich(
     InlineSpan this.textSpan, {
@@ -46,7 +69,8 @@ class Text extends StatelessWidget {
     this.textWidthBasis,
     this.textHeightBehavior,
     this.selectionColor,
-  }) : data = null;
+  })  : data = null,
+        _userText = false;
 
   final String? data;
   final InlineSpan? textSpan;
@@ -63,6 +87,7 @@ class Text extends StatelessWidget {
   final TextWidthBasis? textWidthBasis;
   final w.TextHeightBehavior? textHeightBehavior;
   final Color? selectionColor;
+  final bool _userText;
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +112,7 @@ class Text extends StatelessWidget {
       );
     }
     return w.Text(
-      tr(data!),
+      _userText ? trExact(data!) : tr(data!),
       style: style,
       strutStyle: strutStyle,
       textAlign: textAlign,

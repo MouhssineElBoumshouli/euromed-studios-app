@@ -702,7 +702,7 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
               for (final p in _myProjects(me))
                 ChoiceChip(
                   avatar: const Icon(Icons.layers_outlined, size: 16),
-                  label: Text(p.title),
+                  label: Text.user(p.title),
                   selected: projectId == p.id,
                   onSelected: (_) => setState(() => projectId = p.id),
                 ),

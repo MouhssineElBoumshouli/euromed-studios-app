@@ -32,24 +32,54 @@ final _cache = <String, String>{};
 /// [s] in the app language. Works on null too (returns null).
 T tr<T extends String?>(T s) {
   if (s == null || !L.en || s.isEmpty) return s;
+  // Countdowns change every minute: keep the cache small.
+  if (_cache.length > 2000) _cache.clear();
   return (_cache[s] ??= _translate(s, 0)) as T;
 }
 
+/// For text people typed (titles, messages, notes): only an exact known
+/// text is translated (the demo's own content), never a piece of it.
+String trExact(String s) => L.en ? (enExact[s] ?? s) : s;
+
+final _placeholder = RegExp(r'\{(\d)(?::([np]))?\}');
+
 class _Pattern {
   _Pattern(String fr, this.en)
-      : re = RegExp(
-          '^${fr.split(RegExp(r'\{\d\}')).map(RegExp.escape).join('(.*?)')}\$',
-          dotAll: true,
-        ),
+      : re = RegExp(_regex(fr), dotAll: true),
         order = [
-          for (final m in RegExp(r'\{(\d)\}').allMatches(fr))
+          for (final m in _placeholder.allMatches(fr)) int.parse(m.group(1)!),
+        ],
+        quoted = {
+          for (final m in RegExp(r'[«"]\s?\{(\d)\}\s?[»"]').allMatches(fr))
             int.parse(m.group(1)!),
-        ];
+        };
   final RegExp re;
   final String en;
 
   /// Which placeholder each regex group is ({1} may come before {0}).
   final List<int> order;
+
+  /// Values in quotes are names people typed: never translated.
+  final Set<int> quoted;
+
+  /// {0:n} a number, {1:p} a French plural ending, {0} anything.
+  static String _regex(String fr) {
+    final b = StringBuffer('^');
+    var i = 0;
+    for (final m in _placeholder.allMatches(fr)) {
+      b.write(RegExp.escape(fr.substring(i, m.start)));
+      b.write(switch (m.group(2)) {
+        'n' => r'(\d+)',
+        'p' => '([sx]?)',
+        _ => '(.*?)',
+      });
+      i = m.end;
+    }
+    b
+      ..write(RegExp.escape(fr.substring(i)))
+      ..write(r'$');
+    return b.toString();
+  }
 }
 
 /// Most specific first: the longer the fixed text, the earlier it is tried.
@@ -78,7 +108,9 @@ String _translate(String s, int depth) {
       // "{1:s}": English plural "s" when the French had a plural ending.
       out = out.replaceAll('{$n:s}', value.isEmpty ? '' : 's').replaceAll(
             '{$n}',
-            depth < 4 ? _translate(value, depth + 1) : value,
+            depth < 4 && !p.quoted.contains(n)
+                ? _translate(value, depth + 1)
+                : value,
           );
     }
     return out;

@@ -141,7 +141,7 @@ class EsColors extends ThemeExtension<EsColors> {
     bgApp: Color(0xFF0A0E24),
     bgSurface: Color(0xFF141A38),
     bgSubtle: Color(0xFF1C2347),
-    bgBrand: Color(0xFF0E1540),
+    bgBrand: Color(0xFF1A2462),
     bgBrandRaised: Color(0xFF1E2A6E),
     actionPrimary: Color(0xFF4B63E6),
     onActionPrimary: Color(0xFFFFFFFF),

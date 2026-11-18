@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
@@ -14,6 +15,9 @@ import 'data/live_sync.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Draw behind the status and navigation bars on every Android version;
+  // screens leave room for them.
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   Intl.defaultLocale = 'fr_FR';
   await initializeDateFormatting('fr_FR');
   await initializeDateFormatting('en_GB');

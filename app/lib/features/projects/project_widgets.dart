@@ -161,7 +161,7 @@ class ProjectCard extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 10),
-          Text(
+          Text.user(
             project.title,
             style: EsText.titleM.copyWith(color: c.textPrimary),
           ),

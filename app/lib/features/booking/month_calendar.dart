@@ -38,17 +38,6 @@ class MonthCalendar extends StatelessWidget {
   final ValueChanged<DateTime> onMonth;
   final ValueChanged<DateTime> onDay;
 
-  static const _letters = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
-  static const _weekdays = [
-    'lundi',
-    'mardi',
-    'mercredi',
-    'jeudi',
-    'vendredi',
-    'samedi',
-    'dimanche',
-  ];
-
   void _shift(int by) => onMonth(DateTime(month.year, month.month + by));
 
   @override
@@ -99,7 +88,7 @@ class MonthCalendar extends StatelessWidget {
             ExcludeSemantics(
               child: Row(
                 children: [
-                  for (final l in _letters)
+                  for (final l in Fmt.weekdayLetters())
                     Expanded(
                       child: Text(
                         l,
@@ -165,7 +154,7 @@ class MonthCalendar extends StatelessWidget {
       free: free,
       isToday: d == today,
       isSelected: d == selected,
-      semanticLabel: '${_weekdays[d.weekday - 1]} ${Fmt.dayMonthYear(d)}, '
+      semanticLabel: '${Fmt.weekdayName(d)} ${Fmt.dayMonthYear(d)}, '
           '${free == null ? 'fermé' : free == 0 ? 'complet' : '$free '
               'créneau${free > 1 ? 'x' : ''} libre${free > 1 ? 's' : ''}'}',
       onTap: free != null && free > 0 ? () => onDay(d) : null,

@@ -25,6 +25,14 @@ abstract final class Fmt {
 
   static String time(DateTime d) => _time.format(d);
 
+  /// "L", "M"… (French) or "M", "T"… (English), Monday first.
+  static List<String> weekdayLetters() => [
+        for (var i = 0; i < 7; i++) _f('EEEEE').format(DateTime(2024, 1, 1 + i)),
+      ];
+
+  /// "lundi" / "Monday".
+  static String weekdayName(DateTime d) => _f('EEEE').format(d);
+
   static String range(DateTime a, DateTime b) => '${time(a)}–${time(b)}';
 
   /// "Aujourd’hui", "Demain", or "Lun. 18 nov."
@@ -63,7 +71,7 @@ abstract final class Fmt {
   static String duration(Duration d) {
     if (d.inMinutes < 60) return '${d.inMinutes < 1 ? 1 : d.inMinutes} min';
     if (d.inHours < 24) return '${d.inHours} h';
-    return '${d.inDays} j';
+    return '${d.inDays} ${L.en ? 'd' : 'j'}';
   }
 
   static String _cap(String s) =>

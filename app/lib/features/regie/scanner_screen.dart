@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide Text;
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -68,7 +69,13 @@ class _ScannerState extends ConsumerState<ScannerScreen> {
     }
     final found = scanned == null ? null : _lookup(scanned!, w.bookings);
 
-    return Scaffold(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      // Navy screen: light status and navigation icons.
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: Colors.transparent,
+      ),
+      child: Scaffold(
       backgroundColor: c.bgBrand,
       body: SafeArea(
         child: Column(
@@ -205,6 +212,7 @@ class _ScannerState extends ConsumerState<ScannerScreen> {
           ],
         ),
       ),
+    ),
     );
   }
 

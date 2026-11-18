@@ -1,3 +1,4 @@
+import '../../core/l10n/tr.dart';
 import '../bookings.dart';
 import '../people.dart';
 
@@ -18,7 +19,7 @@ bool isCheckedIn(Booking b) =>
 /// (Policy.qrGraceMinutes, Q19), so the pass and the door always agree.
 String? checkInProblem(Booking b, DateTime now, {required int earlyMinutes}) {
   if (b.status != BookingStatus.approved) {
-    return 'La séance n’est pas validée (${b.status.label.toLowerCase()}).';
+    return 'La séance n’est pas validée (${tr(b.status.label).toLowerCase()}).';
   }
   if (isCheckedIn(b)) return 'Arrivée déjà enregistrée.';
   if (now.isBefore(b.start.subtract(Duration(minutes: earlyMinutes)))) {

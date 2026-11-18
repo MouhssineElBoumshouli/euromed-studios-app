@@ -393,7 +393,9 @@ class _QcState extends ConsumerState<QualityCheckSheet> {
         EsSpace.page,
         0,
         EsSpace.page,
-        EsSpace.s5 + MediaQuery.viewInsetsOf(context).bottom,
+        EsSpace.s5 +
+            MediaQuery.viewInsetsOf(context).bottom +
+            MediaQuery.paddingOf(context).bottom,
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -951,7 +953,7 @@ class _MessageTile extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                       ],
-                      SelectableText(
+                      SelectableText.user(
                         m.body,
                         style: EsText.bodyM.copyWith(color: c.textPrimary),
                       ),
@@ -1229,7 +1231,8 @@ class _InviteState extends ConsumerState<InvitePeopleSheet> {
     return SafeArea(
       child: Padding(
         padding: EdgeInsets.only(
-          bottom: MediaQuery.viewInsetsOf(context).bottom,
+          bottom: MediaQuery.viewInsetsOf(context).bottom +
+              MediaQuery.paddingOf(context).bottom,
         ),
         child: ConstrainedBox(
           constraints: BoxConstraints(

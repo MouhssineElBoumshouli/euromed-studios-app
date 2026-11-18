@@ -43,7 +43,18 @@ abstract final class AppPrefs {
   }
 
   static Future<void> setLanguage(String code) async {
+    if (code == language.value) return;
     _apply(code);
+    // Some labels are made by a parent screen (tooltips, field labels,
+    // dates): redraw everything once so none stays in the old language.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      void mark(Element e) {
+        e.markNeedsBuild();
+        e.visitChildren(mark);
+      }
+
+      WidgetsBinding.instance.rootElement?.visitChildren(mark);
+    });
     try {
       final p = await SharedPreferences.getInstance();
       await p.setString(_langKey, code);

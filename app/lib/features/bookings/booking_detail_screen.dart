@@ -171,7 +171,7 @@ class BookingDetailScreen extends ConsumerWidget {
                 const SectionTitle('Votre note'),
                 const SizedBox(height: EsSpace.s2),
                 EsCard(
-                  child: Text(
+                  child: Text.user(
                     b.note!,
                     style: EsText.bodyM.copyWith(color: c.textSecondary),
                   ),

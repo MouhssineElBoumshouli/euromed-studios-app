@@ -107,7 +107,13 @@ class AppShell extends ConsumerWidget {
                     alignment: Alignment.topCenter,
                     child: ConstrainedBox(
                       constraints: BoxConstraints(maxWidth: maxWidth),
-                      child: page,
+                      // Phones in landscape put their buttons on the right.
+                      child: SafeArea(
+                        left: false,
+                        top: false,
+                        bottom: false,
+                        child: page,
+                      ),
                     ),
                   ),
                 ),
