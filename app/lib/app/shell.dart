@@ -168,15 +168,42 @@ class WideFrame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!isWide(context)) return child;
-    return ColoredBox(
-      color: context.es.bgSubtle,
-      child: Center(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: maxWidth),
-          child: DecoratedBox(
-            decoration:
-                BoxDecoration(boxShadow: esShadow(context.es, strength: 2)),
-            child: child,
+    // A floating card over the same soft background as the tab screens,
+    // so the page reads as a focused step, not as a strip cut out of the
+    // screen.
+    final insets = MediaQuery.paddingOf(context);
+    return Material(
+      color: context.es.bgApp,
+      child: BlobBackground.page(
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(
+              24 + insets.left,
+              20 + insets.top,
+              24 + insets.right,
+              20 + insets.bottom,
+            ),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: maxWidth),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(EsRadius.xl),
+                  boxShadow: esShadow(context.es, strength: 2),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(EsRadius.xl),
+                  // The card already sits inside the safe area.
+                  child: MediaQuery.removePadding(
+                    context: context,
+                    removeTop: true,
+                    removeBottom: true,
+                    removeLeft: true,
+                    removeRight: true,
+                    child: child,
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),
