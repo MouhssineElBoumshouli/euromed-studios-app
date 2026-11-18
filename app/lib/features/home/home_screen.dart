@@ -40,8 +40,12 @@ class HomeScreen extends ConsumerWidget {
           tabBarSpace(context),
         ),
         children: [
-          const _TopRow(),
-          const SizedBox(height: EsSpace.s5),
+          // On computers and tablets the side menu already has the logo,
+          // the bell and the profile.
+          if (!isWide(context)) ...[
+            const _TopRow(),
+            const SizedBox(height: EsSpace.s5),
+          ],
           if (isRequester) _RequesterHome(w: w) else _ManagerHome(w: w),
         ],
       ),

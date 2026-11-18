@@ -344,7 +344,9 @@ class BlobBackground extends StatelessWidget {
       painter: _BlobPainter(context.es.blob, variant, wide: _page),
       child: child,
     );
-    return _page ? _BlobScope(child: paint) : paint;
+    // The page version is clipped: its shapes must never spill over the
+    // side menu.
+    return _page ? _BlobScope(child: ClipRect(child: paint)) : paint;
   }
 }
 

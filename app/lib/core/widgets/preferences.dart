@@ -22,27 +22,28 @@ class PreferencesCard extends StatelessWidget {
             Text('Apparence',
                 style: EsText.titleS.copyWith(color: c.textPrimary)),
             const SizedBox(height: 8),
-            SegmentedButton<ThemeMode>(
-              showSelectedIcon: false,
-              segments: const [
-                ButtonSegment(
-                  value: ThemeMode.system,
-                  icon: Icon(Icons.brightness_auto_outlined),
-                  label: Text('Système'),
-                ),
-                ButtonSegment(
-                  value: ThemeMode.light,
-                  icon: Icon(Icons.light_mode_outlined),
-                  label: Text('Clair'),
-                ),
-                ButtonSegment(
-                  value: ThemeMode.dark,
-                  icon: Icon(Icons.dark_mode_outlined),
-                  label: Text('Sombre'),
-                ),
-              ],
-              selected: {AppPrefs.theme.value},
-              onSelectionChanged: (s) => AppPrefs.setTheme(s.first),
+            // Icons only when there is room for them next to the words.
+            LayoutBuilder(
+              builder: (context, box) {
+                final icons = box.maxWidth >= 420;
+                return SegmentedButton<ThemeMode>(
+                  showSelectedIcon: false,
+                  segments: [
+                    for (final (mode, icon, label) in const [
+                      (ThemeMode.system, Icons.brightness_auto_outlined, 'Système'),
+                      (ThemeMode.light, Icons.light_mode_outlined, 'Clair'),
+                      (ThemeMode.dark, Icons.dark_mode_outlined, 'Sombre'),
+                    ])
+                      ButtonSegment(
+                        value: mode,
+                        icon: icons ? Icon(icon) : null,
+                        label: Text(label, maxLines: 1, softWrap: false),
+                      ),
+                  ],
+                  selected: {AppPrefs.theme.value},
+                  onSelectionChanged: (s) => AppPrefs.setTheme(s.first),
+                );
+              },
             ),
             const SizedBox(height: EsSpace.s4),
             Text('Langue', style: EsText.titleS.copyWith(color: c.textPrimary)),
