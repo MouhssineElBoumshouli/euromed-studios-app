@@ -94,8 +94,11 @@ jobs:
           else
             git worktree add --detach /tmp/pvwt && (cd /tmp/pvwt && git checkout --orphan preview && git rm -rf . -q || true)
           fi
+          # Keep the last APK so its link never breaks while the new one builds.
+          cp "/tmp/pvwt/$SLUG/euromed-studios.apk" /tmp/keep.apk 2>/dev/null || true
           rm -rf "/tmp/pvwt/$SLUG" && mkdir -p "/tmp/pvwt/$SLUG"
           cp -r /tmp/pv/site/. "/tmp/pvwt/$SLUG/"
+          if [ -f /tmp/keep.apk ]; then cp /tmp/keep.apk "/tmp/pvwt/$SLUG/euromed-studios.apk"; fi
           echo "${{ github.sha }}" > "/tmp/pvwt/$SLUG/BUILD_SHA"
           cd /tmp/pvwt && git add -A && git commit -qm "preview: $SLUG @ ${{ github.sha }}" && git push -q origin preview
 
