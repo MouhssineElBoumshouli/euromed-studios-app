@@ -262,7 +262,7 @@ class _DayTab extends StatelessWidget {
           child: Row(
             children: [
               Text(
-                '${_wd[day.weekday - 1]} ${day.day}',
+                '${tr(_wd[day.weekday - 1])} ${day.day}',
                 style: EsText.titleS.copyWith(color: fg),
               ),
               const Spacer(),
