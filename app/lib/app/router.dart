@@ -1,7 +1,10 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/widgets/es_button.dart';
+import '../core/widgets/layout.dart';
 import '../data/backend.dart';
+import '../data/catalog.dart';
 import '../features/admin/activity_screen.dart';
 import '../features/admin/admin_hub_screen.dart';
 import '../features/admin/charter_admin_screen.dart';
@@ -76,8 +79,9 @@ final appRouter = GoRouter(
               path: ':id',
               parentNavigatorKey: _rootKey,
               builder: (_, st) => WideFrame(
-                  child:
-                      StudioDetailScreen(studioId: st.pathParameters['id']!)),
+                  child: _knownStudio(st.pathParameters['id']!)
+                      ? StudioDetailScreen(studioId: st.pathParameters['id']!)
+                      : const _StudioNotFound()),
             ),
           ],
         ),
@@ -215,11 +219,14 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/book/:studioId',
       builder: (_, st) => WideFrame(
-          child: BookingFlowScreen(
-        studioId: st.pathParameters['studioId']!,
-        initialDay: DateTime.tryParse(st.uri.queryParameters['day'] ?? ''),
-        projectId: st.uri.queryParameters['project'],
-      )),
+          child: !_knownStudio(st.pathParameters['studioId']!)
+              ? const _StudioNotFound()
+              : BookingFlowScreen(
+                  studioId: st.pathParameters['studioId']!,
+                  initialDay:
+                      DateTime.tryParse(st.uri.queryParameters['day'] ?? ''),
+                  projectId: st.uri.queryParameters['project'],
+                )),
     ),
     // D4
     GoRoute(
@@ -249,3 +256,27 @@ final appRouter = GoRouter(
     ),
   ],
 );
+
+/// Old or mistyped links to a studio show a clear message, never a blank
+/// screen.
+bool _knownStudio(String id) => Catalog.studios.any((s) => s.id == id);
+
+class _StudioNotFound extends StatelessWidget {
+  const _StudioNotFound();
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        body: SafeArea(
+          child: EmptyState(
+            icon: Icons.search_off_rounded,
+            title: 'Studio introuvable',
+            message: 'Ce lien ne correspond à aucun studio.',
+            action: EsButton(
+              'Voir les studios',
+              expand: false,
+              onPressed: () => context.go('/studios'),
+            ),
+          ),
+        ),
+      );
+}
