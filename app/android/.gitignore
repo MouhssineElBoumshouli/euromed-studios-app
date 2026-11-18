@@ -12,3 +12,6 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# The demo signing key is shared on purpose (see app/build.gradle.kts).
+!app/demo-signing.keystore

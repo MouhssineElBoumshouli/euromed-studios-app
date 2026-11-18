@@ -15,7 +15,11 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>euromed_studios</string>
+	<string>Euromed Studios</string>
+	<key>NSCameraUsageDescription</key>
+	<string>La caméra sert à scanner les QR codes d’accès aux studios.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Vos photos servent à joindre des fichiers à un projet.</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

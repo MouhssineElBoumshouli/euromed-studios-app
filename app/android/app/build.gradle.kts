@@ -15,11 +15,9 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "ma.ueuromed.euromed_studios"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // Android 7.0 and newer (camera and file plugins need it).
+        minSdk = maxOf(flutter.minSdkVersion, 24)
         targetSdk = flutter.targetSdkVersion
         // Uses the version code from pubspec.yaml. When using split APKs, 1000 * ABI_VERSION
         // is added automatically by Flutter. (https://developer.android.com/studio/build/configure-apk-splits#configure-APK-versions)
@@ -29,11 +27,25 @@ android {
         versionName = flutter.versionName
     }
 
+    // DEMO signing key, kept in the repo on purpose: every build (GitHub,
+    // Android Studio on any laptop) is signed the same way, so a new APK
+    // installs over the old one. Its password is public. Before a Play Store
+    // release, replace it with a private key kept outside the repo.
+    signingConfigs {
+        create("demo") {
+            storeFile = file("demo-signing.keystore")
+            storePassword = "euromed-demo"
+            keyAlias = "euromed-demo"
+            keyPassword = "euromed-demo"
+        }
+    }
+
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("demo")
+        }
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("demo")
         }
     }
 }

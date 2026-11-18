@@ -103,6 +103,80 @@ jobs:
           path: app/build/web
           retention-days: 14
 
+  # Android app. Builds on every push to check it compiles; on main the APK
+  # is also published next to the web demo:
+  #   .../euromed-studios-app/demo/euromed-studios.apk
+  android-apk:
+    needs: check-test-build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Get packages
+        run: flutter pub get
+      - name: Build the APK (64-bit phones and tablets)
+        run: flutter build apk --release --split-per-abi --target-platform android-arm64
+      - name: Upload the APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: app/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          retention-days: 7
+      - name: Publish the APK with the demo (main only)
+        if: github.ref_name == 'main'
+        working-directory: .
+        run: |
+          set -e
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin preview:preview
+          git worktree add /tmp/pvwt preview
+          cp app/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk /tmp/pvwt/demo/euromed-studios.apk
+          cd /tmp/pvwt && git add demo/euromed-studios.apk
+          git commit -qm "apk: demo @ ${{ github.sha }}"
+          for i in 1 2 3; do git push -q origin preview && break; git pull --rebase -q origin preview; done
+
+  # iPhone build check (Mac machine). Manual only: Actions > App CI > Run
+  # workflow. Gives an unsigned .ipa that a free Apple ID can sign with
+  # Sideloadly (Windows) or Xcode (Mac).
+  ios-build:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Get packages
+        run: flutter pub get
+      - name: Build for iPhone (unsigned)
+        run: flutter build ios --release --no-codesign
+      - name: Package as .ipa
+        run: |
+          mkdir -p Payload && cp -r build/ios/iphoneos/Runner.app Payload/
+          zip -qr euromed-studios-unsigned.ipa Payload
+      - name: Upload the .ipa
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-unsigned-ipa
+          path: app/euromed-studios-unsigned.ipa
+          retention-days: 7
+
   # Two-device live demo check against the demo database. Runs only when the
   # commit message contains "[e2e]", because it resets the demo data.
   live-demo:
