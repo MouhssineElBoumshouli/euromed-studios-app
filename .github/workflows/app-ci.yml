@@ -31,8 +31,18 @@ jobs:
       - name: Flutter version
         run: flutter --version
 
-      - name: Add missing platform files (web)
-        run: flutter create --platforms=web --project-name euromed_studios --org ma.ueuromed . --no-overwrite
+      - name: Add missing platform files (web, Android, iOS)
+        run: flutter create --platforms=web,android,ios --project-name euromed_studios --org ma.ueuromed . --no-overwrite
+
+      - name: Save new platform files (one-time, on branches)
+        if: github.event_name == 'push' && github.ref_name != 'main'
+        run: |
+          if [ -n "$(git status --porcelain android ios)" ]; then
+            git config --global user.name "github-actions[bot]"
+            git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add android ios && git commit -m "chore: add Android and iOS platform files"
+            git pull --rebase -q origin "${{ github.ref_name }}" && git push || echo "Could not save platform files."
+          fi
 
       - name: Get packages
         run: flutter pub get
