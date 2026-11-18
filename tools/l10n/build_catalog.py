@@ -19,25 +19,21 @@ def dart(s):
                   .replace('\n', '\\n')) + "'"
 
 
-SUFFIX = re.compile(r'(?<=[A-Za-zÀ-ÿ])\{(\d)\}')
+SUFFIX = re.compile(r'(?<=[A-Za-zÀ-ÿ]{2})\{(\d)\}')
 
 
 def typed(k):
     """Marks what a placeholder can hold, so short patterns can't grab
-    unrelated text: {1:p} is a French plural ending right after a word
-    ("séance{1}"), {0:n} is the number before such a word or before a unit
-    ("{0} h"). Returns None when the pattern is too loose to be safe."""
+    unrelated text:
+      {1:p} a French plural ending right after a word ("séance{1}"),
+      {0:n} a number (before a plural word, a unit, or "/"),
+      {0:r} a booking reference ("Demande ES-2026-0140").
+    Everything else matches any text."""
     t = SUFFIX.sub(lambda m: '{%s:p}' % m.group(1), k)
     t = re.sub(r'\{(\d)\}(?= [A-Za-zÀ-ÿ]+\{\d:p\})', lambda m: '{%s:n}' % m.group(1), t)
-    t = re.sub(r'\{(\d)\}(?= (h|min|j|%|jours|personnes)\b)', lambda m: '{%s:n}' % m.group(1), t)
-    rest = re.sub(r'\{\d(:[np])?\}', ' ', t)
-    words = re.findall(r'[A-Za-zÀ-ÿ’]+', rest)
-    loose = re.findall(r'\{\d\}', t)
-    # One word plus a free value ("Demande {0}") would match any text
-    # starting with that word.
-    if (len(words) <= 1 and loose and words != ['Bonjour']
-            and not re.search(r'[:.,·«»"()?!]', rest)):
-        return None
+    t = re.sub(r'\{(\d)\}(?= (h|min|j|%|jours|personnes|matériel)\b)', lambda m: '{%s:n}' % m.group(1), t)
+    t = re.sub(r'\{(\d)\}(?=/)|(?<=/)\{(\d)\}', lambda m: '{%s:n}' % (m.group(1) or m.group(2)), t)
+    t = re.sub(r'^Demande \{(\d)\}$', r'Demande {\1:r}', t)
     return t
 
 

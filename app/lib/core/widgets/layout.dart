@@ -153,7 +153,7 @@ class Overline extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.es;
     return Text(
-      text.toUpperCase(),
+      tr(text).toUpperCase(),
       style: EsText.overline.copyWith(
         color: color ?? (onBrand ? c.brandAccent : c.accent),
       ),

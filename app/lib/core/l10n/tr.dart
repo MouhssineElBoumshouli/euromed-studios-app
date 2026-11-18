@@ -41,7 +41,7 @@ T tr<T extends String?>(T s) {
 /// text is translated (the demo's own content), never a piece of it.
 String trExact(String s) => L.en ? (enExact[s] ?? s) : s;
 
-final _placeholder = RegExp(r'\{(\d)(?::([np]))?\}');
+final _placeholder = RegExp(r'\{(\d)(?::([npr]))?\}');
 
 class _Pattern {
   _Pattern(String fr, this.en)
@@ -62,15 +62,17 @@ class _Pattern {
   /// Values in quotes are names people typed: never translated.
   final Set<int> quoted;
 
-  /// {0:n} a number, {1:p} a French plural ending, {0} anything.
+  /// {0:n} a number, {1:p} a French plural ending, {0:r} a booking
+  /// reference, {0} anything.
   static String _regex(String fr) {
     final b = StringBuffer('^');
     var i = 0;
     for (final m in _placeholder.allMatches(fr)) {
       b.write(RegExp.escape(fr.substring(i, m.start)));
       b.write(switch (m.group(2)) {
-        'n' => r'(\d+)',
+        'n' => r'(\d+(?:[.,]\d+)?)',
         'p' => '([sx]?)',
+        'r' => r'(ES-[\w-]+)',
         _ => '(.*?)',
       });
       i = m.end;
@@ -92,7 +94,7 @@ final List<_Pattern> _patterns = () {
   return [for (final k in keys) _Pattern(k, enPatterns[k]!)];
 }();
 
-const _separators = ['\n', ' · ', ' — ', ' – ', ' : ', '. '];
+const _separators = ['\n', ' · ', ' / ', ' × ', ' — ', ' – ', ' : ', '. '];
 
 String _translate(String s, int depth) {
   final exact = enExact[s];
@@ -103,8 +105,10 @@ String _translate(String s, int depth) {
     if (m == null) continue;
     var out = p.en;
     for (var g = 0; g < p.order.length; g++) {
-      final value = m.group(g + 1)!;
+      var value = m.group(g + 1)!;
       final n = p.order[g];
+      // "2,5" → "2.5" in English.
+      if (RegExp(r'^\d+,\d+$').hasMatch(value)) value = value.replaceAll(',', '.');
       // "{1:s}": English plural "s" when the French had a plural ending.
       out = out.replaceAll('{$n:s}', value.isEmpty ? '' : 's').replaceAll(
             '{$n}',

@@ -21,6 +21,13 @@ void main() {
       tr('Ouvert à la réservation · salle partagée'),
       'Open to booking · shared room',
     );
+    // Short patterns only take what they are meant to hold.
+    expect(tr('Demande ES-2026-0140'), 'Request ES-2026-0140');
+    expect(tr('Demande urgente'), 'Demande urgente');
+    expect(tr('Reçue il y a 1 j'), 'Received 1 d ago');
+    expect(tr('2 matériel'), '2 equipment');
+    // Typed text: only an exact known text is translated.
+    expect(trExact('Montage final'), 'Montage final');
     // Names and unknown texts are left alone.
     expect(tr('Yasmine Mansouri'), 'Yasmine Mansouri');
     expect(tr(null), isNull);
