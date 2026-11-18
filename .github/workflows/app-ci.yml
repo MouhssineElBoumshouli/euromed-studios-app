@@ -41,7 +41,7 @@ jobs:
             git config --global user.name "github-actions[bot]"
             git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add android ios && git commit -m "chore: add Android and iOS platform files"
-            git pull --rebase -q origin "${{ github.ref_name }}" && git push || echo "Could not save platform files."
+            git pull --rebase --autostash -q origin "${{ github.ref_name }}" && git push || echo "Could not save platform files."
           fi
 
       - name: Get packages
