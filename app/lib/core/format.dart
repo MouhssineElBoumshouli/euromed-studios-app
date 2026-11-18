@@ -27,7 +27,8 @@ abstract final class Fmt {
 
   /// "L", "M"… (French) or "M", "T"… (English), Monday first.
   static List<String> weekdayLetters() => [
-        for (var i = 0; i < 7; i++) _f('EEEEE').format(DateTime(2024, 1, 1 + i)),
+        for (var i = 0; i < 7; i++)
+          _f('EEEEE').format(DateTime(2024, 1, 1 + i)),
       ];
 
   /// "lundi" / "Monday".

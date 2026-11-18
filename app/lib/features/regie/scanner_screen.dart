@@ -76,143 +76,145 @@ class _ScannerState extends ConsumerState<ScannerScreen> {
         systemNavigationBarColor: Colors.transparent,
       ),
       child: Scaffold(
-      backgroundColor: c.bgBrand,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-              child: Row(
-                children: [
-                  EsBackButton(
-                    close: true,
-                    label: null,
-                    onDark: true,
-                    onPressed: () =>
-                        context.canPop() ? context.pop() : context.go('/regie'),
-                  ),
-                  const Spacer(),
-                  Text(
-                    'Contrôle d’accès',
-                    style: EsText.titleM.copyWith(color: c.textOnBrand),
-                  ),
-                  const Spacer(),
-                  const SizedBox(width: 44),
-                ],
+        backgroundColor: c.bgBrand,
+        body: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                child: Row(
+                  children: [
+                    EsBackButton(
+                      close: true,
+                      label: null,
+                      onDark: true,
+                      onPressed: () => context.canPop()
+                          ? context.pop()
+                          : context.go('/regie'),
+                    ),
+                    const Spacer(),
+                    Text(
+                      'Contrôle d’accès',
+                      style: EsText.titleM.copyWith(color: c.textOnBrand),
+                    ),
+                    const Spacer(),
+                    const SizedBox(width: 44),
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(EsRadius.xl),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      MobileScanner(
-                        controller: controller,
-                        onDetect: (capture) {
-                          final v = capture.barcodes.firstOrNull?.rawValue;
-                          if (v != null && v != scanned) {
-                            setState(() => scanned = v);
-                          }
-                        },
-                        errorBuilder: (context, error) => ColoredBox(
-                          color: c.bgBrandRaised,
-                          child: Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(24),
-                              child: Text(
-                                'Caméra indisponible. Autorisez la caméra, '
-                                'ou saisissez la référence ci-dessous.',
-                                textAlign: TextAlign.center,
-                                style: EsText.bodyM
-                                    .copyWith(color: c.textOnBrandMuted),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(EsRadius.xl),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        MobileScanner(
+                          controller: controller,
+                          onDetect: (capture) {
+                            final v = capture.barcodes.firstOrNull?.rawValue;
+                            if (v != null && v != scanned) {
+                              setState(() => scanned = v);
+                            }
+                          },
+                          errorBuilder: (context, error) => ColoredBox(
+                            color: c.bgBrandRaised,
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(24),
+                                child: Text(
+                                  'Caméra indisponible. Autorisez la caméra, '
+                                  'ou saisissez la référence ci-dessous.',
+                                  textAlign: TextAlign.center,
+                                  style: EsText.bodyM
+                                      .copyWith(color: c.textOnBrandMuted),
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                      IgnorePointer(
-                        child: Center(
-                          child: Container(
-                            width: 230,
-                            height: 230,
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.white, width: 3),
-                              borderRadius: BorderRadius.circular(28),
+                        IgnorePointer(
+                          child: Center(
+                            child: Container(
+                              width: 230,
+                              height: 230,
+                              decoration: BoxDecoration(
+                                border:
+                                    Border.all(color: Colors.white, width: 3),
+                                borderRadius: BorderRadius.circular(28),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            Container(
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: c.bgSurface,
-                borderRadius: BorderRadius.circular(EsRadius.xl),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  AnimatedSize(
-                    duration: EsMotion.medium,
-                    child: scanned == null
-                        ? Text(
-                            'Placez le QR code du demandeur dans le cadre.',
-                            style:
-                                EsText.bodyM.copyWith(color: c.textSecondary),
-                          )
-                        : _Result(
-                            booking: found,
-                            now: w.now,
-                            busy: busy,
-                            early: w.policy.qrGraceMinutes,
-                            onCheckIn:
-                                found == null ? null : () => _checkIn(found),
+              Container(
+                margin: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: c.bgSurface,
+                  borderRadius: BorderRadius.circular(EsRadius.xl),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    AnimatedSize(
+                      duration: EsMotion.medium,
+                      child: scanned == null
+                          ? Text(
+                              'Placez le QR code du demandeur dans le cadre.',
+                              style:
+                                  EsText.bodyM.copyWith(color: c.textSecondary),
+                            )
+                          : _Result(
+                              booking: found,
+                              now: w.now,
+                              busy: busy,
+                              early: w.policy.qrGraceMinutes,
+                              onCheckIn:
+                                  found == null ? null : () => _checkIn(found),
+                            ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: reference,
+                            textCapitalization: TextCapitalization.characters,
+                            decoration: InputDecoration(
+                              hintText: tr('Ou référence : ES-2026-0147'),
+                              isDense: true,
+                            ),
+                            onSubmitted: (v) => setState(() => scanned = v),
                           ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: reference,
-                          textCapitalization: TextCapitalization.characters,
-                          decoration: InputDecoration(
-                            hintText: tr('Ou référence : ES-2026-0147'),
-                            isDense: true,
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton.filled(
+                          tooltip: tr('Vérifier'),
+                          style: IconButton.styleFrom(
+                            backgroundColor: c.actionPrimary,
+                            foregroundColor: c.onActionPrimary,
+                            fixedSize: const Size(48, 48),
                           ),
-                          onSubmitted: (v) => setState(() => scanned = v),
+                          onPressed: () =>
+                              setState(() => scanned = reference.text),
+                          icon: const Icon(Icons.search_rounded),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton.filled(
-                        tooltip: tr('Vérifier'),
-                        style: IconButton.styleFrom(
-                          backgroundColor: c.actionPrimary,
-                          foregroundColor: c.onActionPrimary,
-                          fixedSize: const Size(48, 48),
-                        ),
-                        onPressed: () =>
-                            setState(() => scanned = reference.text),
-                        icon: const Icon(Icons.search_rounded),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
     );
   }
 
