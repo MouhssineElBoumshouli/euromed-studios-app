@@ -295,7 +295,7 @@ List<Notice> projectNoticesFor(
         ProjectEventType.stageChanged when mine && p.ownerId != person.id => (
             NoticeKind.progress,
             'Le projet avance',
-            '« ${p.title} » passe en ${(tr(ProjectStage.values.where((s) => s.name == e.detail).firstOrNull?.label) ?? e.detail).toLowerCase()}.',
+            '« ${p.title} » passe en ${(tr(ProjectStage.values.where((s) => s.name == e.detail).firstOrNull?.label) ?? e.detail ?? '').toLowerCase()}.',
           ),
         _ => null,
       };

@@ -667,11 +667,11 @@ class _HistoryState extends State<_History> {
       return switch (e.type) {
         ProjectEventType.created => '$who a créé le projet',
         ProjectEventType.stageChanged =>
-          '$who a passé le projet en ${(tr(ProjectStage.values.where((s) => s.name == e.detail).firstOrNull?.label) ?? e.detail).toLowerCase()}',
+          '$who a passé le projet en ${(tr(ProjectStage.values.where((s) => s.name == e.detail).firstOrNull?.label) ?? e.detail ?? '').toLowerCase()}',
         ProjectEventType.fileAdded => '$who a ajouté « ${e.detail} »',
         ProjectEventType.fileRemoved => '$who a retiré « ${e.detail} »',
         ProjectEventType.postStatus =>
-          '$who : ${(tr(PostStatus.values.where((s) => s.name == e.detail).firstOrNull?.label) ?? e.detail).toLowerCase()}',
+          '$who : ${(tr(PostStatus.values.where((s) => s.name == e.detail).firstOrNull?.label) ?? e.detail ?? '').toLowerCase()}',
         ProjectEventType.correction => '$who a demandé une correction',
         ProjectEventType.qcPassed =>
           '$who a validé le contrôle qualité et livré le projet',

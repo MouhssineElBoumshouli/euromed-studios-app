@@ -953,7 +953,7 @@ class _MessageTile extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                       ],
-                      SelectableText.user(
+                      SelectableText(
                         m.body,
                         style: EsText.bodyM.copyWith(color: c.textPrimary),
                       ),
