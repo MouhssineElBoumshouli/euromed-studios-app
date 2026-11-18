@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -9,6 +9,7 @@ import '../../core/widgets/es_button.dart';
 import '../../core/widgets/layout.dart';
 import '../../data/app_state.dart';
 import '../bookings/booking_widgets.dart';
+import '../../core/l10n/text.dart';
 
 /// D4 · Request sent.
 class SentScreen extends ConsumerWidget {

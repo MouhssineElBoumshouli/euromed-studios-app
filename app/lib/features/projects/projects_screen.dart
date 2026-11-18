@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -15,6 +15,7 @@ import '../../domain/rules/projects.dart';
 import '../notifications/notifications_screen.dart';
 import 'project_sections.dart';
 import 'project_widgets.dart';
+import '../../core/l10n/text.dart';
 
 /// F1 · Projects: mine and the ones I'm invited to, by stage.
 /// On a computer, a board with one column per stage (R-26).

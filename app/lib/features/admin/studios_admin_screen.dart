@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format.dart';
@@ -14,6 +14,7 @@ import '../../domain/bookings.dart';
 import '../../domain/people.dart';
 import '../../domain/studios.dart';
 import 'admin_page.dart';
+import '../../core/l10n/text.dart';
 
 /// I4 · Studios open to booking, and maintenance closures per room.
 /// The studio manager can plan closures; only the admin opens or closes
@@ -256,7 +257,7 @@ class _ClosureRow extends ConsumerWidget {
             ),
           ),
           IconButton(
-            tooltip: 'Retirer la fermeture',
+            tooltip: tr('Retirer la fermeture'),
             icon: Icon(Icons.delete_outline_rounded, color: c.dangerText),
             onPressed: () async {
               final ok = await showDialog<bool>(
@@ -425,7 +426,7 @@ class _MaintenanceSheetState extends ConsumerState<_MaintenanceSheet> {
             const SizedBox(height: EsSpace.s3),
             DropdownButtonFormField<String>(
               initialValue: roomId,
-              decoration: const InputDecoration(labelText: 'Salle'),
+              decoration: InputDecoration(labelText: tr('Salle')),
               items: [
                 for (final r in roomIds)
                   DropdownMenuItem(value: r, child: Text(roomName(r))),
@@ -474,9 +475,9 @@ class _MaintenanceSheetState extends ConsumerState<_MaintenanceSheet> {
             TextField(
               controller: reason,
               maxLength: 200,
-              decoration: const InputDecoration(
-                labelText: 'Raison',
-                hintText: 'Ex. : remplacement du téléprompteur',
+              decoration: InputDecoration(
+                labelText: tr('Raison'),
+                hintText: tr('Ex. : remplacement du téléprompteur'),
               ),
             ),
             if (clashes > 0)
@@ -542,7 +543,7 @@ class _When extends StatelessWidget {
             child: DropdownButtonFormField<int>(
               key: ValueKey('$label-$hour'),
               initialValue: hour,
-              decoration: const InputDecoration(labelText: 'Heure'),
+              decoration: InputDecoration(labelText: tr('Heure')),
               items: [
                 for (var h = hours.$1; h <= hours.$2; h++)
                   DropdownMenuItem(value: h, child: Text('$h h')),

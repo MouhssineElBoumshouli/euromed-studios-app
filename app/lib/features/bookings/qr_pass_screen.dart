@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -14,6 +14,7 @@ import '../../core/widgets/logo.dart';
 import '../../data/app_state.dart';
 import '../../data/demo_world.dart';
 import '../../domain/bookings.dart';
+import '../../core/l10n/text.dart';
 
 enum QrWindow { notYet, active, over }
 
@@ -159,9 +160,9 @@ class _QrPassState extends ConsumerState<QrPassScreen> {
             child: Column(
               children: [
                 Semantics(
-                  label: active
+                  label: tr(active
                       ? 'QR code d’accès actif'
-                      : 'QR code d’accès, pas encore actif',
+                      : 'QR code d’accès, pas encore actif'),
                   child: Stack(
                     alignment: Alignment.center,
                     children: [

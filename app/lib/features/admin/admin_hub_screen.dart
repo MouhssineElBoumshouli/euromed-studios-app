@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,6 +11,7 @@ import '../../data/admin_state.dart';
 import '../../data/app_state.dart';
 import '../../domain/people.dart';
 import '../notifications/notifications_screen.dart';
+import '../../core/l10n/text.dart';
 
 /// I3–I9 · Gestion: everything an admin can adjust, in one place.
 class AdminHubScreen extends ConsumerWidget {

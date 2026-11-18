@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -8,6 +8,7 @@ import '../../core/widgets/es_button.dart';
 import '../../core/widgets/layout.dart';
 import '../../data/app_state.dart';
 import '../../domain/people.dart';
+import '../../core/l10n/text.dart';
 
 /// The frame shared by the admin pages: back button, title, a short line
 /// of explanation, an access check, and an optional bottom bar.

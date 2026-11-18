@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -10,6 +10,7 @@ import '../../core/widgets/status_chip.dart';
 import '../../data/app_state.dart';
 import '../../data/directory.dart';
 import '../../domain/people.dart';
+import '../../core/l10n/text.dart';
 
 enum _Filter {
   all('Tous'),
@@ -118,9 +119,9 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
           else ...[
             TextField(
               controller: search,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 prefixIcon: Icon(Icons.search_rounded),
-                hintText: 'Rechercher un nom ou une fonction',
+                hintText: tr('Rechercher un nom ou une fonction'),
               ),
             ),
             const SizedBox(height: 10),

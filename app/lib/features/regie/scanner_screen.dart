@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -13,6 +13,7 @@ import '../../data/booking_service.dart';
 import '../../domain/bookings.dart';
 import '../../domain/rules/sessions.dart';
 import 'regie_screen.dart';
+import '../../core/l10n/text.dart';
 
 /// H2 · Door check: scan the person's QR pass (or type its reference),
 /// see at once if they may come in, and let them in.
@@ -176,8 +177,8 @@ class _ScannerState extends ConsumerState<ScannerScreen> {
                         child: TextField(
                           controller: reference,
                           textCapitalization: TextCapitalization.characters,
-                          decoration: const InputDecoration(
-                            hintText: 'Ou référence : ES-2026-0147',
+                          decoration: InputDecoration(
+                            hintText: tr('Ou référence : ES-2026-0147'),
                             isDense: true,
                           ),
                           onSubmitted: (v) => setState(() => scanned = v),
@@ -185,7 +186,7 @@ class _ScannerState extends ConsumerState<ScannerScreen> {
                       ),
                       const SizedBox(width: 8),
                       IconButton.filled(
-                        tooltip: 'Vérifier',
+                        tooltip: tr('Vérifier'),
                         style: IconButton.styleFrom(
                           backgroundColor: c.actionPrimary,
                           foregroundColor: c.onActionPrimary,

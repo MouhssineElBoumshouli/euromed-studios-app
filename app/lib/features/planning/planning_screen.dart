@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -17,6 +17,7 @@ import '../../domain/rules/availability.dart';
 import '../../domain/studios.dart';
 import '../../data/directory.dart';
 import '../../data/catalog.dart';
+import '../../core/l10n/text.dart';
 
 /// F1 · Planning: every studio on one day, hour by hour.
 ///
@@ -97,7 +98,7 @@ class _PlanningState extends ConsumerState<PlanningScreen> {
                 ),
               ),
               IconButton.outlined(
-                tooltip: 'Semaine précédente',
+                tooltip: tr('Semaine précédente'),
                 onPressed: () => setState(
                   () => _day = day.subtract(const Duration(days: 7)),
                 ),
@@ -110,7 +111,7 @@ class _PlanningState extends ConsumerState<PlanningScreen> {
               ),
               const SizedBox(width: 6),
               IconButton.outlined(
-                tooltip: 'Semaine suivante',
+                tooltip: tr('Semaine suivante'),
                 onPressed: () =>
                     setState(() => _day = day.add(const Duration(days: 7))),
                 icon: const Icon(Icons.chevron_right_rounded),
@@ -239,7 +240,7 @@ class _DayTab extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      label: '${Fmt.longDay(day)}, $count réservations',
+      label: tr('${Fmt.longDay(day)}, $count réservations'),
       excludeSemantics: true,
       child: InkWell(
         onTap: onTap,
@@ -597,10 +598,10 @@ class _Block extends StatelessWidget {
         ? '${studioById(b.studioId).name} (salle partagée)'
         : '$who · ${b.activity.label}';
     return Tooltip(
-      message: b.isPrivate
+      message: tr(b.isPrivate
           ? 'Créneau réservé'
           : '${studioById(b.studioId).name} · ${Fmt.range(b.start, b.end)}\n'
-              '$who · ${b.status.label}',
+              '$who · ${b.status.label}'),
       child: Opacity(
         opacity: shared ? 0.45 : 1,
         child: Material(

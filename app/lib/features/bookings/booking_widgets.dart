@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 
 import '../../core/format.dart';
 import '../../core/theme/es_colors.dart';
@@ -6,6 +6,7 @@ import '../../core/theme/es_text.dart';
 import '../../data/app_state.dart';
 import '../../domain/bookings.dart';
 import '../../domain/rules/approval.dart';
+import '../../core/l10n/text.dart';
 
 enum _StepState { done, now, next, failed }
 

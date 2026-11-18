@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -12,6 +12,7 @@ import '../../data/projects_state.dart';
 import '../../domain/bookings.dart';
 import '../../domain/projects.dart';
 import 'project_sections.dart';
+import '../../core/l10n/text.dart';
 
 /// Colour and icon for each project type.
 (Color, Color, IconData) typeStyle(EsColors c, ProjectType t) => switch (t) {
@@ -50,7 +51,7 @@ class StageBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.es;
     return Semantics(
-      label: 'Étape ${stage.index + 1} sur 4 : ${stage.label}',
+      label: tr('Étape ${stage.index + 1} sur 4 : ${stage.label}'),
       excludeSemantics: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,7 +96,7 @@ class PeopleStack extends StatelessWidget {
     final c = context.es;
     final shown = ids.take(4).toList();
     return Semantics(
-      label: shown.map((id) => personById(id).fullName).join(', '),
+      label: tr(shown.map((id) => personById(id).fullName).join(', ')),
       excludeSemantics: true,
       child: SizedBox(
         height: size,

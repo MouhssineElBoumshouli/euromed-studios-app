@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/es_colors.dart';
@@ -10,6 +10,7 @@ import '../../data/catalog.dart';
 import '../../domain/bookings.dart';
 import '../../domain/rules/settings_rules.dart';
 import 'admin_page.dart';
+import '../../core/l10n/text.dart';
 
 /// I5 · Equipment catalogue and stock. New requests can't ask for more
 /// than the stock. Lowering it (broken or lost gear) is allowed: the page
@@ -111,14 +112,14 @@ class _ItemRowState extends ConsumerState<_ItemRow> {
                 ),
               ),
               IconButton(
-                tooltip: 'Moins',
+                tooltip: tr('Moins'),
                 onPressed: busy || v <= 0 ? null : () => setState(() => draft = v - 1),
                 icon: const Icon(Icons.remove_circle_outline_rounded),
               ),
               SizedBox(
                 width: 36,
                 child: Semantics(
-                  label: '${it.name} : $v en stock',
+                  label: tr('${it.name} : $v en stock'),
                   liveRegion: true,
                   child: Text(
                     '$v',
@@ -128,7 +129,7 @@ class _ItemRowState extends ConsumerState<_ItemRow> {
                 ),
               ),
               IconButton(
-                tooltip: 'Plus',
+                tooltip: tr('Plus'),
                 onPressed: busy || v >= 999 ? null : () => setState(() => draft = v + 1),
                 icon: const Icon(Icons.add_circle_outline_rounded),
               ),

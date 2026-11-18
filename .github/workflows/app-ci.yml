@@ -60,6 +60,9 @@ jobs:
             fi
           fi
 
+      - name: English catalogue is complete
+        run: python3 ../tools/l10n/build_catalog.py --check
+
       - name: Analyze
         run: flutter analyze --no-fatal-infos
 

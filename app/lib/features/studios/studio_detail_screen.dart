@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,6 +13,7 @@ import '../../domain/rules/availability.dart';
 import '../../domain/studios.dart';
 import 'studios_screen.dart';
 import '../../data/catalog.dart';
+import '../../core/l10n/text.dart';
 
 /// The next free slots of [studio], starting now, across the next days.
 List<Slot> nextFreeSlots(WorldState w, Studio studio, {int count = 3}) {

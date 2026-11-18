@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -18,6 +18,7 @@ import '../../domain/rules/quota.dart';
 import '../bookings/booking_widgets.dart';
 import '../../data/directory.dart';
 import '../../data/catalog.dart';
+import '../../core/l10n/text.dart';
 
 /// Ready-made refusal reasons, so a refusal takes two taps. The approver
 /// can always edit or write their own (R-19: a reason is mandatory).
@@ -728,8 +729,8 @@ class _ApproveSheetState extends State<_ApproveSheet> {
             controller: comment,
             maxLines: 2,
             maxLength: 200,
-            decoration: const InputDecoration(
-              hintText: 'Un mot pour le demandeur (facultatif)',
+            decoration: InputDecoration(
+              hintText: tr('Un mot pour le demandeur (facultatif)'),
             ),
           ),
           const SizedBox(height: EsSpace.s2),
@@ -806,8 +807,8 @@ class _RefuseSheetState extends State<_RefuseSheet> {
             controller: reason,
             maxLines: 3,
             maxLength: 300,
-            decoration: const InputDecoration(
-              hintText: 'Écrivez le motif, ou choisissez-en un ci-dessus',
+            decoration: InputDecoration(
+              hintText: tr('Écrivez le motif, ou choisissez-en un ci-dessus'),
             ),
           ),
           const SizedBox(height: EsSpace.s2),

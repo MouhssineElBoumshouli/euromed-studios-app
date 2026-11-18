@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,6 +11,7 @@ import '../../data/app_state.dart';
 import '../../data/booking_service.dart';
 import '../../data/selectors.dart';
 import '../../domain/rules/notifications.dart';
+import '../../core/l10n/text.dart';
 
 /// I1 · Notifications: what changed for me, and what waits for me.
 class NotificationsScreen extends ConsumerStatefulWidget {
@@ -157,7 +158,7 @@ class _NoticeTile extends StatelessWidget {
     final (icon, bg, fg) = noticeStyle(c, notice.kind);
     return Semantics(
       button: true,
-      label: '${unread ? 'Nouveau. ' : ''}${notice.title}. ${notice.body}',
+      label: tr('${unread ? 'Nouveau. ' : ''}${notice.title}. ${notice.body}'),
       excludeSemantics: true,
       child: InkWell(
         onTap: () => context.push(notice.route),
@@ -227,7 +228,7 @@ class NoticeBell extends ConsumerWidget {
     final n = ref.watch(unreadNoticesProvider);
     return Semantics(
       button: true,
-      label: n == 0 ? 'Notifications' : 'Notifications, $n nouvelles',
+      label: tr(n == 0 ? 'Notifications' : 'Notifications, $n nouvelles'),
       excludeSemantics: true,
       child: Material(
         color: onDark ? Colors.white.withValues(alpha: 0.12) : c.bgSurface,

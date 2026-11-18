@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -15,6 +15,7 @@ import '../../domain/bookings.dart';
 import '../../domain/rules/approval.dart';
 import '../../domain/rules/quota.dart';
 import 'booking_widgets.dart';
+import '../../core/l10n/text.dart';
 
 /// E2 · One booking: status journey, equipment, actions.
 class BookingDetailScreen extends ConsumerWidget {
@@ -245,8 +246,8 @@ class BookingDetailScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               TextField(
                 controller: reason,
-                decoration: const InputDecoration(
-                  hintText: 'Motif (facultatif)',
+                decoration: InputDecoration(
+                  hintText: tr('Motif (facultatif)'),
                 ),
               ),
               const SizedBox(height: 16),

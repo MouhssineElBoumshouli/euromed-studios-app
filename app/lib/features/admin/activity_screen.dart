@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -12,6 +12,7 @@ import '../../data/app_state.dart';
 import '../../data/projects_state.dart';
 import '../../domain/activity.dart';
 import '../../domain/people.dart';
+import '../../core/l10n/text.dart';
 
 /// I8 · Activity log: who did what, and when (P-11). Admins only.
 class ActivityScreen extends ConsumerStatefulWidget {
@@ -127,9 +128,9 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
     return frame([
       TextField(
         controller: search,
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
           prefixIcon: Icon(Icons.search_rounded),
-          hintText: 'Rechercher une personne, une référence, un projet',
+          hintText: tr('Rechercher une personne, une référence, un projet'),
         ),
       ),
       const SizedBox(height: 10),

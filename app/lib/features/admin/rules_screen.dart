@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/es_colors.dart';
@@ -8,6 +8,7 @@ import '../../data/admin_service.dart';
 import '../../data/app_state.dart';
 import '../../domain/rules/settings_rules.dart';
 import 'admin_page.dart';
+import '../../core/l10n/text.dart';
 
 /// I6 · The rules everyone books by. Changes apply at once to new
 /// requests; requests already made are not changed.
@@ -228,7 +229,7 @@ class _Hour extends StatelessWidget {
         // A new key when the value changes from outside (e.g. "Annuler").
         key: ValueKey('$label-$value'),
         initialValue: value,
-        decoration: InputDecoration(labelText: label),
+        decoration: InputDecoration(labelText: tr(label)),
         items: [
           for (var h = 6; h <= 23; h++)
             DropdownMenuItem(value: h, child: Text('$h h 00')),
@@ -271,7 +272,7 @@ class _Stepper extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton.outlined(
-          tooltip: 'Moins',
+          tooltip: tr('Moins'),
           onPressed: value <= min
               ? null
               : () => onChanged((value - step).clamp(min, max)),
@@ -280,7 +281,7 @@ class _Stepper extends StatelessWidget {
         SizedBox(
           width: 104,
           child: Semantics(
-            label: '$label : $display',
+            label: tr('$label : $display'),
             liveRegion: true,
             child: Text(
               display,
@@ -291,7 +292,7 @@ class _Stepper extends StatelessWidget {
           ),
         ),
         IconButton.outlined(
-          tooltip: 'Plus',
+          tooltip: tr('Plus'),
           onPressed: value >= max
               ? null
               : () => onChanged((value + step).clamp(min, max)),

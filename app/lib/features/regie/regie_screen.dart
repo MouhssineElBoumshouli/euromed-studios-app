@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -14,6 +14,7 @@ import '../../data/booking_service.dart';
 import '../../domain/bookings.dart';
 import '../../domain/rules/sessions.dart';
 import '../notifications/notifications_screen.dart';
+import '../../core/l10n/text.dart';
 
 /// H1 · Régie: today's validated sessions, in order, with what to do next
 /// for each (let in, close with a report).
@@ -441,8 +442,8 @@ class _ReportSheetState extends State<_ReportSheet> {
             controller: text,
             maxLines: 3,
             maxLength: 300,
-            decoration: const InputDecoration(
-              hintText: 'Ex. : câble XLR abîmé, à remplacer',
+            decoration: InputDecoration(
+              hintText: tr('Ex. : câble XLR abîmé, à remplacer'),
             ),
           ),
           const SizedBox(height: EsSpace.s2),

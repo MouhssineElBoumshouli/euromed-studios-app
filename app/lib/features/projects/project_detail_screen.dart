@@ -1,5 +1,5 @@
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -19,6 +19,7 @@ import '../../domain/rules/projects.dart';
 import 'project_sections.dart';
 import 'project_widgets.dart';
 import '../../data/catalog.dart';
+import '../../core/l10n/text.dart';
 
 /// F3–F5 · One project: where it stands, its documents, its sessions,
 /// and the step that moves it forward.
@@ -375,7 +376,7 @@ class _Pipeline extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.es;
     return Semantics(
-      label: 'Étape ${stage.index + 1} sur 4 : ${stage.label}',
+      label: tr('Étape ${stage.index + 1} sur 4 : ${stage.label}'),
       excludeSemantics: true,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -588,7 +589,7 @@ class _FileTile extends StatelessWidget {
             ),
             if (onRemove != null)
               IconButton(
-                tooltip: 'Retirer ${file.name}',
+                tooltip: tr('Retirer ${file.name}'),
                 onPressed: onRemove,
                 icon: Icon(Icons.delete_outline_rounded, color: c.dangerText),
               )

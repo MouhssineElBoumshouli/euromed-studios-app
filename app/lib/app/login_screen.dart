@@ -1,13 +1,15 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 
 import '../core/theme/es_colors.dart';
 import '../core/theme/es_text.dart';
 import '../core/widgets/layout.dart';
 import '../core/widgets/logo.dart';
+import '../core/widgets/preferences.dart';
 import '../data/backend.dart';
 import '../data/demo_world.dart';
 import '../data/live_sync.dart';
 import '../domain/people.dart';
+import '../core/l10n/text.dart';
 
 /// A1 · Sign-in for the live demo.
 ///
@@ -58,9 +60,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   EsSpace.s8,
                 ),
                 children: [
-                  const Align(
-                    alignment: Alignment.centerLeft,
-                    child: EuromedStudiosLogo(height: 64, onDark: false),
+                  const Row(
+                    children: [
+                      EuromedStudiosLogo(height: 64, onDark: false),
+                      Spacer(),
+                      LanguageSwitch(compact: true),
+                    ],
                   ),
                   ValueListenableBuilder<String?>(
                     valueListenable: loginNotice,
@@ -82,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       text: 'Bienvenue ',
                       children: [
                         TextSpan(
-                          text: 'en studio.',
+                          text: 'aux studios.',
                           style: TextStyle(color: c.accent),
                         ),
                       ],

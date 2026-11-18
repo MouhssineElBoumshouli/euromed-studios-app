@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,6 +17,7 @@ import '../../domain/people.dart';
 import '../../domain/projects.dart';
 import '../../domain/rules/projects.dart';
 import '../../data/directory.dart';
+import '../../core/l10n/text.dart';
 
 /// Runs a project action with a snackbar for the result.
 Future<bool> runProjectAction(
@@ -240,7 +241,7 @@ class _PostSteps extends StatelessWidget {
     const labels = ['À commencer', 'Montage', 'Contrôle'];
     final loop = status == PostStatus.correctionRequested;
     return Semantics(
-      label: 'Montage : ${status.label}',
+      label: tr('Montage : ${status.label}'),
       excludeSemantics: true,
       child: Row(
         children: [
@@ -442,14 +443,14 @@ class _QcState extends ConsumerState<QualityCheckSheet> {
                 keyboardType: TextInputType.url,
                 autocorrect: false,
                 decoration: InputDecoration(
-                  labelText: 'Lien sécurisé du fichier final',
-                  hintText: 'https://…',
-                  helperText: 'Visible par l’équipe du projet et les '
-                      'studios (voir Q12).',
-                  errorText: link.text.isNotEmpty &&
+                  labelText: tr('Lien sécurisé du fichier final'),
+                  hintText: tr('https://…'),
+                  helperText: tr('Visible par l’équipe du projet et les '
+                      'studios (voir Q12).'),
+                  errorText: tr(link.text.isNotEmpty &&
                           !isValidDeliveryLink(link.text)
                       ? 'Le lien doit commencer par https://'
-                      : null,
+                      : null),
                 ),
               ),
               const SizedBox(height: EsSpace.s3),
@@ -457,8 +458,8 @@ class _QcState extends ConsumerState<QualityCheckSheet> {
                 controller: passNote,
                 maxLines: 2,
                 maxLength: 600,
-                decoration: const InputDecoration(
-                  labelText: 'Un mot pour le porteur (facultatif)',
+                decoration: InputDecoration(
+                  labelText: tr('Un mot pour le porteur (facultatif)'),
                 ),
               ),
             ],
@@ -468,10 +469,10 @@ class _QcState extends ConsumerState<QualityCheckSheet> {
                 controller: failNote,
                 maxLines: 4,
                 maxLength: 600,
-                decoration: const InputDecoration(
-                  labelText: 'Ce qu’il faut corriger',
-                  hintText: 'Ex. : niveau sonore trop bas sur la scène 2, '
-                      'générique à refaire',
+                decoration: InputDecoration(
+                  labelText: tr('Ce qu’il faut corriger'),
+                  hintText: tr('Ex. : niveau sonore trop bas sur la scène 2, '
+                      'générique à refaire'),
                   alignLabelWithHint: true,
                 ),
               ),
@@ -513,7 +514,7 @@ class _Verdict extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      label: label,
+      label: tr(label),
       excludeSemantics: true,
       child: InkWell(
         onTap: onTap,
@@ -748,22 +749,22 @@ class _ThreadState extends ConsumerState<ProjectThread> {
                         maxLength: 1000,
                         textCapitalization: TextCapitalization.sentences,
                         decoration: InputDecoration(
-                          hintText: asCorrection
+                          hintText: tr(asCorrection
                               ? 'Décrivez la correction à faire…'
-                              : 'Écrire un message…',
+                              : 'Écrire un message…'),
                           border: InputBorder.none,
                           enabledBorder: InputBorder.none,
                           focusedBorder: InputBorder.none,
                           filled: false,
                           // The limit shows only when it gets close.
-                          counterText: text.text.length > 850 ? null : '',
+                          counterText: tr(text.text.length > 850 ? null : ''),
                         ),
                       ),
                     ),
                     IconButton.filled(
-                      tooltip: asCorrection
+                      tooltip: tr(asCorrection
                           ? 'Envoyer la demande de correction'
-                          : 'Envoyer',
+                          : 'Envoyer'),
                       onPressed: text.text.trim().isEmpty || sending
                           ? null
                           : _send,
@@ -915,7 +916,7 @@ class _MessageTile extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Tooltip(
-                      message: when,
+                      message: tr(when),
                       child: Text(
                         Fmt.ago(m.at, now),
                         style: EsText.bodyS.copyWith(color: c.textDisabled),
@@ -1080,7 +1081,7 @@ class MembersSection extends ConsumerWidget {
                   ? null
                   : owner
                       ? IconButton(
-                          tooltip: 'Retirer ${personById(m).fullName}',
+                          tooltip: tr('Retirer ${personById(m).fullName}'),
                           icon: Icon(
                             Icons.person_remove_outlined,
                             color: c.dangerText,
@@ -1256,9 +1257,9 @@ class _InviteState extends ConsumerState<InvitePeopleSheet> {
                     TextField(
                       controller: search,
                       autofocus: false,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         prefixIcon: Icon(Icons.search_rounded),
-                        hintText: 'Rechercher un nom',
+                        hintText: tr('Rechercher un nom'),
                       ),
                     ),
                     const SizedBox(height: 6),

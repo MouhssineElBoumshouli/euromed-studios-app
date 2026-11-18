@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -8,6 +8,7 @@ import '../../core/widgets/es_button.dart';
 import '../../core/widgets/layout.dart';
 import '../../data/app_state.dart';
 import '../../data/booking_service.dart';
+import '../../core/l10n/text.dart';
 
 /// A6 · House rules, signed before any request (R-13).
 /// Returns `true` to the caller once signed.

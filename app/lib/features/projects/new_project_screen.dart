@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -10,6 +10,7 @@ import '../../data/app_state.dart';
 import '../../data/project_service.dart';
 import '../../domain/projects.dart';
 import 'project_widgets.dart';
+import '../../core/l10n/text.dart';
 
 /// F2 · New project: a title, one type (R-21, P-06), a short description.
 class NewProjectScreen extends ConsumerStatefulWidget {
@@ -107,9 +108,9 @@ class _NewProjectState extends ConsumerState<NewProjectScreen> {
                   controller: title,
                   maxLength: 80,
                   textCapitalization: TextCapitalization.sentences,
-                  decoration: const InputDecoration(
-                    labelText: 'Titre du projet',
-                    hintText: 'Ex. : Podcast « Voix du campus »',
+                  decoration: InputDecoration(
+                    labelText: tr('Titre du projet'),
+                    hintText: tr('Ex. : Podcast « Voix du campus »'),
                   ),
                 ),
                 const SizedBox(height: EsSpace.s3),
@@ -146,9 +147,9 @@ class _NewProjectState extends ConsumerState<NewProjectScreen> {
                   maxLines: 4,
                   maxLength: 600,
                   textCapitalization: TextCapitalization.sentences,
-                  decoration: const InputDecoration(
-                    labelText: 'Description (facultatif)',
-                    hintText: 'Le but, le format, le nombre d’épisodes…',
+                  decoration: InputDecoration(
+                    labelText: tr('Description (facultatif)'),
+                    hintText: tr('Le but, le format, le nombre d’épisodes…'),
                     alignLabelWithHint: true,
                   ),
                 ),
@@ -205,7 +206,7 @@ class _TypeCard extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      label: '${type.label}. $hint',
+      label: tr('${type.label}. $hint'),
       excludeSemantics: true,
       child: Material(
         color: Colors.transparent,

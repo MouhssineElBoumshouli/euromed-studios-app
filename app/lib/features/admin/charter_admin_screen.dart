@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,6 +11,7 @@ import '../../data/app_state.dart';
 import '../../data/directory.dart';
 import '../../domain/rules/settings_rules.dart';
 import 'admin_page.dart';
+import '../../core/l10n/text.dart';
 
 /// I7 · Charter version. Publishing a new version asks everyone to sign
 /// again before their next booking (R-13).
@@ -159,9 +160,9 @@ class _CharterAdminState extends ConsumerState<CharterAdminScreen> {
           controller: version,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           decoration: InputDecoration(
-            labelText: 'Nouveau numéro de version',
-            hintText: 'Ex. : 2.0',
-            errorText: problem == null ? null : adminProblemText(problem),
+            labelText: tr('Nouveau numéro de version'),
+            hintText: tr('Ex. : 2.0'),
+            errorText: tr(problem == null ? null : adminProblemText(problem)),
           ),
         ),
         const SizedBox(height: 12),

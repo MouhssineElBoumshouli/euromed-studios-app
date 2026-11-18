@@ -1,5 +1,5 @@
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -24,6 +24,7 @@ import '../../domain/rules/quota.dart';
 import '../../domain/studios.dart';
 import 'month_calendar.dart';
 import '../../data/catalog.dart';
+import '../../core/l10n/text.dart';
 
 /// D0–D3 · Booking in four steps (R-10 to R-15, R-33):
 /// 1. choose the date on a month calendar, 2. choose the time,
@@ -730,8 +731,8 @@ class _BookingFlowState extends ConsumerState<BookingFlowScreen> {
           controller: note,
           maxLines: 3,
           maxLength: 300,
-          decoration: const InputDecoration(
-            hintText: 'Ex. : enregistrement avec deux invités externes',
+          decoration: InputDecoration(
+            hintText: tr('Ex. : enregistrement avec deux invités externes'),
           ),
         ),
       ],
@@ -1176,7 +1177,7 @@ class SlotTile extends StatelessWidget {
       child: Semantics(
         button: onTap != null,
         selected: selected,
-        label: '${Fmt.range(slot.start, slot.end)}, $label',
+        label: tr('${Fmt.range(slot.start, slot.end)}, $label'),
         excludeSemantics: true,
         child: AnimatedContainer(
           duration: EsMotion.fast,
@@ -1335,7 +1336,7 @@ class _ActivityCard extends StatelessWidget {
     return Semantics(
       selected: selected,
       button: true,
-      label: activity.label,
+      label: tr(activity.label),
       excludeSemantics: true,
       child: GestureDetector(
         onTap: onTap,
@@ -1520,7 +1521,7 @@ class _EquipRow extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      tooltip: 'Retirer un',
+                      tooltip: tr('Retirer un'),
                                             onPressed: e.qty == 0
                           ? null
                           : () {
@@ -1539,7 +1540,7 @@ class _EquipRow extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Ajouter un',
+                      tooltip: tr('Ajouter un'),
                                             onPressed: e.qty >= e.item.stock
                           ? null
                           : () {

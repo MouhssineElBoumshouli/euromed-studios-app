@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 
 import '../../core/format.dart';
 import '../../core/theme/es_colors.dart';
 import '../../core/theme/es_text.dart';
 import '../../core/widgets/layout.dart';
+import '../../core/l10n/text.dart';
 
 /// Month calendar for picking a booking date (D0).
 ///
@@ -210,7 +211,7 @@ class _DayCell extends StatelessWidget {
       button: open,
       selected: isSelected,
       enabled: open,
-      label: semanticLabel,
+      label: tr(semanticLabel),
       excludeSemantics: true,
       child: AspectRatio(
         aspectRatio: 1,
@@ -289,7 +290,7 @@ class _NavButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.es;
     return IconButton(
-      tooltip: label,
+      tooltip: tr(label),
       onPressed: onTap,
       style: IconButton.styleFrom(
         minimumSize: const Size(44, 44),

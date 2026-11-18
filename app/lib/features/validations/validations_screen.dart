@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -15,6 +15,7 @@ import '../../domain/rules/approval.dart';
 import '../notifications/notifications_screen.dart';
 import 'decision_screen.dart';
 import '../../data/directory.dart';
+import '../../core/l10n/text.dart';
 
 /// G1 · Validation inbox for Level 1 approvers, the Studio Manager and the
 /// Administrator. Oldest request first, so nobody waits too long.

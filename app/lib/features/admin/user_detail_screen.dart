@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -16,6 +16,7 @@ import '../../domain/activity.dart';
 import '../../domain/bookings.dart';
 import '../../domain/people.dart';
 import '../../domain/rules/admin.dart';
+import '../../core/l10n/text.dart';
 
 /// I3 · One person's access: roles, approval scope, clubs, account.
 /// Changes are saved together, after a summary, and logged (P-11).
@@ -476,8 +477,8 @@ class _UserDetailState extends ConsumerState<UserDetailScreen> {
                       padding: const EdgeInsets.fromLTRB(56, 0, 16, 10),
                       child: DropdownButtonFormField<String?>(
                         initialValue: _scopeEstablishment(t),
-                        decoration: const InputDecoration(
-                          labelText: 'Établissement',
+                        decoration: InputDecoration(
+                          labelText: tr('Établissement'),
                           isDense: true,
                         ),
                         items: [

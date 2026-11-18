@@ -1,16 +1,27 @@
 import 'package:intl/intl.dart';
 
 import '../domain/rules/availability.dart';
+import 'l10n/tr.dart';
+import '../core/l10n/text.dart';
 
-/// French date and time wording used across the app.
+/// Date and time wording used across the app, in the app language.
+/// (The French words below are shown in English by tr() when needed.)
 abstract final class Fmt {
-  static final _time = DateFormat('HH:mm', 'fr_FR');
-  static final _dayShort = DateFormat('EEE d MMM', 'fr_FR');
-  static final _dayLong = DateFormat('EEEE d MMMM', 'fr_FR');
-  static final _dateTime = DateFormat('EEE d MMM · HH:mm', 'fr_FR');
-  static final _dayMonth = DateFormat('d MMM', 'fr_FR');
-  static final _dayMonthYear = DateFormat('d MMM y', 'fr_FR');
-  static final _month = DateFormat('MMMM y', 'fr_FR');
+  static final _formats = <String, DateFormat>{};
+
+  /// One DateFormat per pattern and language, made once.
+  static DateFormat _f(String pattern) {
+    final locale = L.en ? 'en_GB' : 'fr_FR';
+    return _formats.putIfAbsent('$locale|$pattern', () => DateFormat(pattern, locale));
+  }
+
+  static DateFormat get _time => _f('HH:mm');
+  static DateFormat get _dayShort => _f('EEE d MMM');
+  static DateFormat get _dayLong => _f('EEEE d MMMM');
+  static DateFormat get _dateTime => _f('EEE d MMM · HH:mm');
+  static DateFormat get _dayMonth => _f('d MMM');
+  static DateFormat get _dayMonthYear => _f('d MMM y');
+  static DateFormat get _month => _f('MMMM y');
 
   static String time(DateTime d) => _time.format(d);
 

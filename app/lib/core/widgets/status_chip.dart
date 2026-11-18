@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
 
 import '../../domain/bookings.dart';
 import '../theme/es_colors.dart';
 import '../theme/es_text.dart';
+import '../../core/l10n/text.dart';
 
 /// Colors for a booking status: (background, text).
 (Color, Color) statusColors(EsColors c, BookingStatus s) => switch (s) {
