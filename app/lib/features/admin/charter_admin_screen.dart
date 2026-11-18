@@ -116,8 +116,7 @@ class _CharterAdminState extends ConsumerState<CharterAdminScreen> {
                         Text(
                           '$signed sur ${people.length} demandeurs l’ont '
                           'signée',
-                          style:
-                              EsText.bodyS.copyWith(color: c.textSecondary),
+                          style: EsText.bodyS.copyWith(color: c.textSecondary),
                         ),
                       ],
                     ),

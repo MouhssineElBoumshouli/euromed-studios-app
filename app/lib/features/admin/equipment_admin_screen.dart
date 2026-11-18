@@ -74,7 +74,8 @@ class _ItemRowState extends ConsumerState<_ItemRow> {
       await ref
           .read(adminServiceProvider)
           .setStock(ref.read(currentPersonProvider), widget.item.id, draft!);
-      m.showSnackBar(SnackBar(content: Text('${widget.item.name} : stock mis à jour.')));
+      m.showSnackBar(
+          SnackBar(content: Text('${widget.item.name} : stock mis à jour.')));
       if (mounted) setState(() => draft = null);
     } on AdminProblem catch (e) {
       m.showSnackBar(SnackBar(content: Text(e.message)));
@@ -113,7 +114,8 @@ class _ItemRowState extends ConsumerState<_ItemRow> {
               ),
               IconButton(
                 tooltip: tr('Moins'),
-                onPressed: busy || v <= 0 ? null : () => setState(() => draft = v - 1),
+                onPressed:
+                    busy || v <= 0 ? null : () => setState(() => draft = v - 1),
                 icon: const Icon(Icons.remove_circle_outline_rounded),
               ),
               SizedBox(
@@ -130,7 +132,9 @@ class _ItemRowState extends ConsumerState<_ItemRow> {
               ),
               IconButton(
                 tooltip: tr('Plus'),
-                onPressed: busy || v >= 999 ? null : () => setState(() => draft = v + 1),
+                onPressed: busy || v >= 999
+                    ? null
+                    : () => setState(() => draft = v + 1),
                 icon: const Icon(Icons.add_circle_outline_rounded),
               ),
             ],

@@ -31,7 +31,8 @@ const refusalPresets = [
 
 /// G2/G3 · One request, everything needed to decide, and the decision.
 class DecisionScreen extends ConsumerStatefulWidget {
-  const DecisionScreen({super.key, required this.bookingId, this.embedded = false});
+  const DecisionScreen(
+      {super.key, required this.bookingId, this.embedded = false});
   final String bookingId;
 
   /// True when shown in the right pane of the wide (computer) layout.
@@ -103,9 +104,7 @@ class _DecisionState extends ConsumerState<DecisionScreen> {
     final sameDay = [
       for (final o in w.bookings)
         if (o.id != b.id &&
-            Catalog.studios
-                    .firstWhere((x) => x.id == o.studioId)
-                    .roomId ==
+            Catalog.studios.firstWhere((x) => x.id == o.studioId).roomId ==
                 s.roomId &&
             o.status.holdsSlot &&
             o.start.year == b.start.year &&
@@ -114,7 +113,8 @@ class _DecisionState extends ConsumerState<DecisionScreen> {
           o,
     ]..sort((x, y) => x.start.compareTo(y.start));
 
-    final top = widget.embedded ? EsSpace.s5 : MediaQuery.paddingOf(context).top;
+    final top =
+        widget.embedded ? EsSpace.s5 : MediaQuery.paddingOf(context).top;
 
     final body = ListView(
       padding: EdgeInsets.fromLTRB(
@@ -181,8 +181,7 @@ class _DecisionState extends ConsumerState<DecisionScreen> {
                             b.requesterType.label,
                             if (who.title != null) who.title!,
                           ].join(' · '),
-                          style:
-                              EsText.bodyS.copyWith(color: c.textSecondary),
+                          style: EsText.bodyS.copyWith(color: c.textSecondary),
                         ),
                       ],
                     ),
@@ -217,12 +216,10 @@ class _DecisionState extends ConsumerState<DecisionScreen> {
                       label: 'Quota : ${formatMinutes(q.usedMinutes)} / '
                           '${formatMinutes(q.limitMinutes!)} cette semaine-là',
                       icon: Icons.hourglass_bottom_rounded,
-                      background: q.remainingMinutes < 0
-                          ? c.dangerBg
-                          : c.neutralBg,
-                      foreground: q.remainingMinutes < 0
-                          ? c.dangerText
-                          : c.neutralText,
+                      background:
+                          q.remainingMinutes < 0 ? c.dangerBg : c.neutralBg,
+                      foreground:
+                          q.remainingMinutes < 0 ? c.dangerText : c.neutralText,
                     ),
                 ],
               ),
@@ -264,8 +261,7 @@ class _DecisionState extends ConsumerState<DecisionScreen> {
                         children: [
                           Text(
                             s.name,
-                            style:
-                                EsText.titleL.copyWith(color: Colors.white),
+                            style: EsText.titleL.copyWith(color: Colors.white),
                           ),
                           Text(
                             room.name,
@@ -358,7 +354,9 @@ class _DecisionState extends ConsumerState<DecisionScreen> {
         if (b.equipment.isNotEmpty) ...[
           const SizedBox(height: EsSpace.s4),
           SectionTitle(
-            decidable && !level1 ? 'Matériel : que pouvez-vous fournir ?' : 'Matériel demandé',
+            decidable && !level1
+                ? 'Matériel : que pouvez-vous fournir ?'
+                : 'Matériel demandé',
           ),
           const SizedBox(height: EsSpace.s2),
           for (var i = 0; i < b.equipment.length; i++)
@@ -433,7 +431,8 @@ class _DecisionState extends ConsumerState<DecisionScreen> {
               EsSpace.page,
               EsSpace.s3,
               EsSpace.page,
-              EsSpace.s3 + (widget.embedded ? 0 : MediaQuery.paddingOf(context).bottom),
+              EsSpace.s3 +
+                  (widget.embedded ? 0 : MediaQuery.paddingOf(context).bottom),
             ),
             decoration: BoxDecoration(
               color: c.bgSurface,
@@ -556,7 +555,9 @@ class _DecisionState extends ConsumerState<DecisionScreen> {
     if (reason == null || reason.trim().isEmpty || !mounted) return;
     setState(() => busy = true);
     try {
-      await ref.read(bookingServiceProvider).refuse(b.id, by: me, reason: reason);
+      await ref
+          .read(bookingServiceProvider)
+          .refuse(b.id, by: me, reason: reason);
       if (!mounted) return;
       setState(() => busy = false);
       _done('Demande refusée. Le demandeur voit votre motif.');
@@ -705,7 +706,8 @@ class _ApproveSheetState extends State<_ApproveSheet> {
             width: 64,
             height: 64,
             alignment: Alignment.center,
-            decoration: BoxDecoration(color: c.successBg, shape: BoxShape.circle),
+            decoration:
+                BoxDecoration(color: c.successBg, shape: BoxShape.circle),
             child: Icon(Icons.check_rounded, size: 32, color: c.successText),
           ),
           const SizedBox(height: EsSpace.s3),

@@ -97,7 +97,8 @@ class StudiosAdminScreen extends ConsumerWidget {
                 if (e.key != rooms.keys.first)
                   Divider(height: 1, color: c.border),
                 for (final s in e.value)
-                  _StudioRow(studio: s, enabled: isAdmin, shared: e.value.length > 1),
+                  _StudioRow(
+                      studio: s, enabled: isAdmin, shared: e.value.length > 1),
               ],
             ],
           ),
@@ -186,7 +187,8 @@ class _StudioRowState extends ConsumerState<_StudioRow> {
           );
       m.showSnackBar(
         SnackBar(
-          content: Text('${s.name} ${v ? 'ouvert' : 'fermé'} à la réservation.'),
+          content:
+              Text('${s.name} ${v ? 'ouvert' : 'fermé'} à la réservation.'),
         ),
       );
     } on AdminProblem catch (e) {

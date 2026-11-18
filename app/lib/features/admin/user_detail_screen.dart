@@ -47,8 +47,7 @@ class _UserDetailState extends ConsumerState<UserDetailScreen> {
     active = p.active;
   }
 
-  bool _hasScope(RequesterType t) =>
-      scopes.any((s) => s.requesterType == t);
+  bool _hasScope(RequesterType t) => scopes.any((s) => s.requesterType == t);
 
   String? _scopeEstablishment(RequesterType t) =>
       scopes.where((s) => s.requesterType == t).firstOrNull?.establishmentId;
@@ -72,8 +71,8 @@ class _UserDetailState extends ConsumerState<UserDetailScreen> {
       });
 
   Future<void> _save(Person me, List<String> changes) async {
-    final serious = !active ||
-        roles.contains(Role.admin) != base!.has(Role.admin);
+    final serious =
+        !active || roles.contains(Role.admin) != base!.has(Role.admin);
     final w = ref.read(worldProvider);
     final turningOff = !active && base!.active;
     final waiting = turningOff
@@ -121,8 +120,7 @@ class _UserDetailState extends ConsumerState<UserDetailScreen> {
                         Expanded(
                           child: Text(
                             ch,
-                            style:
-                                EsText.bodyM.copyWith(color: c.textPrimary),
+                            style: EsText.bodyM.copyWith(color: c.textPrimary),
                           ),
                         ),
                       ],
@@ -201,9 +199,8 @@ class _UserDetailState extends ConsumerState<UserDetailScreen> {
           );
       m.showSnackBar(const SnackBar(content: Text('Accès mis à jour.')));
       if (mounted) {
-        final fresh = Directory.people
-            .where((p) => p.id == widget.personId)
-            .firstOrNull;
+        final fresh =
+            Directory.people.where((p) => p.id == widget.personId).firstOrNull;
         if (fresh != null) setState(() => _reset(fresh));
       }
     } on AccessProblem catch (e) {
@@ -218,8 +215,7 @@ class _UserDetailState extends ConsumerState<UserDetailScreen> {
     final c = context.es;
     final me = ref.watch(currentPersonProvider);
     final everyone = ref.watch(directoryProvider);
-    final person =
-        everyone.where((p) => p.id == widget.personId).firstOrNull;
+    final person = everyone.where((p) => p.id == widget.personId).firstOrNull;
     final top = MediaQuery.paddingOf(context).top;
     final bottom = MediaQuery.paddingOf(context).bottom;
 
@@ -426,8 +422,7 @@ class _UserDetailState extends ConsumerState<UserDetailScreen> {
                 for (final r in list)
                   CheckboxListTile(
                     value: roles.contains(r),
-                    onChanged: saving ||
-                            (self && r == Role.admin)
+                    onChanged: saving || (self && r == Role.admin)
                         ? null
                         : (v) => setState(() {
                               if (v == true) {
@@ -468,7 +463,8 @@ class _UserDetailState extends ConsumerState<UserDetailScreen> {
                 for (final t in RequesterType.values) ...[
                   CheckboxListTile(
                     value: _hasScope(t),
-                    onChanged: saving ? null : (v) => _toggleScope(t, v == true),
+                    onChanged:
+                        saving ? null : (v) => _toggleScope(t, v == true),
                     title: Text(t.label, style: EsText.titleS),
                     controlAffinity: ListTileControlAffinity.leading,
                   ),
@@ -492,9 +488,8 @@ class _UserDetailState extends ConsumerState<UserDetailScreen> {
                               child: Text(e.short),
                             ),
                         ],
-                        onChanged: saving
-                            ? null
-                            : (v) => _setScopeEstablishment(t, v),
+                        onChanged:
+                            saving ? null : (v) => _setScopeEstablishment(t, v),
                       ),
                     ),
                 ],
@@ -540,7 +535,8 @@ class _UserDetailState extends ConsumerState<UserDetailScreen> {
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: SwitchListTile(
             value: active,
-            onChanged: saving || self ? null : (v) => setState(() => active = v),
+            onChanged:
+                saving || self ? null : (v) => setState(() => active = v),
             title: Text(
               active ? 'Compte actif' : 'Compte désactivé',
               style: EsText.titleS,
@@ -580,9 +576,8 @@ class _AuditLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.es;
-    final who = entry.actorId == null
-        ? 'Système'
-        : personById(entry.actorId!).fullName;
+    final who =
+        entry.actorId == null ? 'Système' : personById(entry.actorId!).fullName;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Column(

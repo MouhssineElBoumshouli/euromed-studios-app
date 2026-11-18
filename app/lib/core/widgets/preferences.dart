@@ -19,7 +19,8 @@ class PreferencesCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Apparence', style: EsText.titleS.copyWith(color: c.textPrimary)),
+            Text('Apparence',
+                style: EsText.titleS.copyWith(color: c.textPrimary)),
             const SizedBox(height: 8),
             SegmentedButton<ThemeMode>(
               showSelectedIcon: false,

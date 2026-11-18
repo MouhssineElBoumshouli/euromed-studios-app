@@ -349,9 +349,7 @@ class _QcState extends ConsumerState<QualityCheckSheet> {
             note: note.text.trim().isEmpty ? null : note.text.trim(),
             deliveryUrl: passed! ? link.text.trim() : null,
           ),
-      done: passed!
-          ? 'Projet validé et livré.'
-          : 'Renvoyé en correction.',
+      done: passed! ? 'Projet validé et livré.' : 'Renvoyé en correction.',
     );
     if (!mounted) return;
     if (ok) {
@@ -447,10 +445,10 @@ class _QcState extends ConsumerState<QualityCheckSheet> {
                   hintText: tr('https://…'),
                   helperText: tr('Visible par l’équipe du projet et les '
                       'studios (voir Q12).'),
-                  errorText: tr(link.text.isNotEmpty &&
-                          !isValidDeliveryLink(link.text)
-                      ? 'Le lien doit commencer par https://'
-                      : null),
+                  errorText: tr(
+                      link.text.isNotEmpty && !isValidDeliveryLink(link.text)
+                          ? 'Le lien doit commencer par https://'
+                          : null),
                 ),
               ),
               const SizedBox(height: EsSpace.s3),
@@ -660,10 +658,11 @@ class _ThreadState extends ConsumerState<ProjectThread> {
             widget.project.id,
             body,
             by: ref.read(currentPersonProvider),
-            correction: correction && canRequestCorrection(
-              ref.read(currentPersonProvider),
-              widget.project,
-            ),
+            correction: correction &&
+                canRequestCorrection(
+                  ref.read(currentPersonProvider),
+                  widget.project,
+                ),
           ),
       done: correction ? 'Demande de correction envoyée.' : null,
     );
@@ -683,7 +682,8 @@ class _ThreadState extends ConsumerState<ProjectThread> {
     final me = ref.watch(currentPersonProvider);
     final p = widget.project;
     final all = ref.watch(projectsProvider).messagesOf(p.id);
-    final shown = showAll || all.length <= 6 ? all : all.sublist(all.length - 6);
+    final shown =
+        showAll || all.length <= 6 ? all : all.sublist(all.length - 6);
     final canWrite = canMessage(me, p);
     final canCorrect = canRequestCorrection(me, p);
     final asCorrection = correction && canCorrect;
@@ -765,9 +765,8 @@ class _ThreadState extends ConsumerState<ProjectThread> {
                       tooltip: tr(asCorrection
                           ? 'Envoyer la demande de correction'
                           : 'Envoyer'),
-                      onPressed: text.text.trim().isEmpty || sending
-                          ? null
-                          : _send,
+                      onPressed:
+                          text.text.trim().isEmpty || sending ? null : _send,
                       style: IconButton.styleFrom(
                         backgroundColor:
                             asCorrection ? c.pendingText : c.actionPrimary,
@@ -857,7 +856,8 @@ class _MessageTile extends StatelessWidget {
       );
     }
 
-    final (Color? bg, Color? fg, String? badge, IconData? icon) = switch (m.kind) {
+    final (Color? bg, Color? fg, String? badge, IconData? icon) =
+        switch (m.kind) {
       MessageKind.correction => (
           c.pendingBg,
           c.pendingText,
@@ -905,8 +905,8 @@ class _MessageTile extends StatelessWidget {
                             ),
                             TextSpan(
                               text: staffRole,
-                              style: EsText.bodyS
-                                  .copyWith(color: c.textSecondary),
+                              style:
+                                  EsText.bodyS.copyWith(color: c.textSecondary),
                             ),
                           ],
                         ),
@@ -927,9 +927,8 @@ class _MessageTile extends StatelessWidget {
                 const SizedBox(height: 4),
                 Container(
                   width: double.infinity,
-                  padding: bg == null
-                      ? EdgeInsets.zero
-                      : const EdgeInsets.all(10),
+                  padding:
+                      bg == null ? EdgeInsets.zero : const EdgeInsets.all(10),
                   decoration: bg == null
                       ? null
                       : BoxDecoration(
@@ -975,8 +974,8 @@ class MembersSection extends ConsumerWidget {
   const MembersSection({super.key, required this.project});
   final Project project;
 
-  Future<bool> _confirm(BuildContext context, String title, String text,
-      String action) async {
+  Future<bool> _confirm(
+      BuildContext context, String title, String text, String action) async {
     final ok = await showModalBottomSheet<bool>(
       context: context,
       showDragHandle: true,
@@ -1138,7 +1137,8 @@ class MembersSection extends ConsumerWidget {
             for (final i in pending)
               row(
                 personId: i.inviteeId,
-                role: 'Invitation envoyée · ${Fmt.ago(i.at, ref.watch(worldProvider).now)}',
+                role:
+                    'Invitation envoyée · ${Fmt.ago(i.at, ref.watch(worldProvider).now)}',
                 pendingInvite: true,
                 trailing: TextButton(
                   onPressed: () => runProjectAction(
@@ -1273,8 +1273,7 @@ class _InviteState extends ConsumerState<InvitePeopleSheet> {
                         child: Text(
                           'Personne ne correspond à « ${search.text} ».',
                           textAlign: TextAlign.center,
-                          style:
-                              EsText.bodyM.copyWith(color: c.textSecondary),
+                          style: EsText.bodyM.copyWith(color: c.textSecondary),
                         ),
                       )
                     : ListView(

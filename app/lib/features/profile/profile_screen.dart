@@ -83,20 +83,20 @@ class ProfileScreen extends ConsumerWidget {
               const SectionTitle('Préférences'),
               const PreferencesCard(),
               if (kDemoMode) ...[
-              const SizedBox(height: EsSpace.s5),
-              EsButton(
-                'Voir l’application avec un autre rôle',
-                icon: Icons.swap_horiz_rounded,
-                style: EsButtonStyle.secondary,
-                onPressed: () => showDemoSwitcher(context, ref),
-              ),
-              const SizedBox(height: EsSpace.s3),
-              Text(
-                'Mode démo. Dans la version finale, vos rôles viennent de '
-                'votre compte UEMF et ne se changent pas ici.',
-                textAlign: TextAlign.center,
-                style: EsText.bodyS.copyWith(color: c.textSecondary),
-              ),
+                const SizedBox(height: EsSpace.s5),
+                EsButton(
+                  'Voir l’application avec un autre rôle',
+                  icon: Icons.swap_horiz_rounded,
+                  style: EsButtonStyle.secondary,
+                  onPressed: () => showDemoSwitcher(context, ref),
+                ),
+                const SizedBox(height: EsSpace.s3),
+                Text(
+                  'Mode démo. Dans la version finale, vos rôles viennent de '
+                  'votre compte UEMF et ne se changent pas ici.',
+                  textAlign: TextAlign.center,
+                  style: EsText.bodyS.copyWith(color: c.textSecondary),
+                ),
               ],
             ],
           ),

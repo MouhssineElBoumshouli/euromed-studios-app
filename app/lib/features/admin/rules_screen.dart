@@ -143,7 +143,8 @@ class _RulesScreenState extends ConsumerState<RulesScreen> {
                     ButtonSegment(value: m, label: Text(_hours(m))),
                 ],
                 selected: {d.slotMinutes},
-                onSelectionChanged: (s) => set(d.copyWith(slotMinutes: s.first)),
+                onSelectionChanged: (s) =>
+                    set(d.copyWith(slotMinutes: s.first)),
               ),
               const SizedBox(height: 6),
               Text(

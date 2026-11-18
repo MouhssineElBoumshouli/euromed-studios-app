@@ -65,7 +65,9 @@ class RulesDraft {
 const allowedSlotMinutes = [30, 60, 120];
 
 String? rulesProblem(RulesDraft d) {
-  if (d.openingHour < 6 || d.closingHour > 23 || d.openingHour >= d.closingHour) {
+  if (d.openingHour < 6 ||
+      d.closingHour > 23 ||
+      d.openingHour >= d.closingHour) {
     return 'bad_hours';
   }
   if (!allowedSlotMinutes.contains(d.slotMinutes)) return 'bad_slot';

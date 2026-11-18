@@ -39,33 +39,84 @@ class BookingTimeline extends StatelessWidget {
     }
 
     final steps = <(String, String?, String?, _StepState)>[
-      ('Demande envoyée', sent == null ? null : Fmt.dateTime(sent.at), null, _StepState.done),
+      (
+        'Demande envoyée',
+        sent == null ? null : Fmt.dateTime(sent.at),
+        null,
+        _StepState.done
+      ),
       if (l1 != null)
-        ('Validée par l’entité', '${who(l1)}\n${Fmt.dateTime(l1.at)}', l1.comment, _StepState.done)
+        (
+          'Validée par l’entité',
+          '${who(l1)}\n${Fmt.dateTime(l1.at)}',
+          l1.comment,
+          _StepState.done
+        )
       else if (refused != null && b.history.indexOf(refused) == 1)
-        ('Refusée par l’entité', '${who(refused)}\n${Fmt.dateTime(refused.at)}', refused.comment, _StepState.failed)
+        (
+          'Refusée par l’entité',
+          '${who(refused)}\n${Fmt.dateTime(refused.at)}',
+          refused.comment,
+          _StepState.failed
+        )
       else if (cancelled != null)
-        ('Annulée', Fmt.dateTime(cancelled.at), cancelled.comment, _StepState.failed)
+        (
+          'Annulée',
+          Fmt.dateTime(cancelled.at),
+          cancelled.comment,
+          _StepState.failed
+        )
       else
-        ('En attente entité', level1Label(b.requesterType), null, _StepState.now),
+        (
+          'En attente entité',
+          level1Label(b.requesterType),
+          null,
+          _StepState.now
+        ),
       if (l1 != null)
         if (l2 != null)
-          ('Validée par les Studios', '${who(l2)}\n${Fmt.dateTime(l2.at)}', l2.comment, _StepState.done)
+          (
+            'Validée par les Studios',
+            '${who(l2)}\n${Fmt.dateTime(l2.at)}',
+            l2.comment,
+            _StepState.done
+          )
         else if (refused != null)
-          ('Refusée par les Studios', '${who(refused)}\n${Fmt.dateTime(refused.at)}', refused.comment, _StepState.failed)
+          (
+            'Refusée par les Studios',
+            '${who(refused)}\n${Fmt.dateTime(refused.at)}',
+            refused.comment,
+            _StepState.failed
+          )
         else if (cancelled != null)
-          ('Annulée', Fmt.dateTime(cancelled.at), cancelled.comment, _StepState.failed)
+          (
+            'Annulée',
+            Fmt.dateTime(cancelled.at),
+            cancelled.comment,
+            _StepState.failed
+          )
         else
           ('En attente studio', level2Label, null, _StepState.now),
       if (l2 != null) ...[
         if (cancelled != null)
-          ('Annulée', Fmt.dateTime(cancelled.at), cancelled.comment, _StepState.failed)
+          (
+            'Annulée',
+            Fmt.dateTime(cancelled.at),
+            cancelled.comment,
+            _StepState.failed
+          )
         else
-          ('QR code disponible', 'Actif uniquement pendant le créneau', null, _StepState.done),
+          (
+            'QR code disponible',
+            'Actif uniquement pendant le créneau',
+            null,
+            _StepState.done
+          ),
         if (checkIn != null)
           ('Entrée au studio', Fmt.dateTime(checkIn.at), null, _StepState.done),
       ] else if (refused == null && cancelled == null) ...[
-        if (l1 == null) ('En attente studio', level2Label, null, _StepState.next),
+        if (l1 == null)
+          ('En attente studio', level2Label, null, _StepState.next),
         ('Validée · QR code', null, null, _StepState.next),
       ],
     ];
@@ -116,7 +167,8 @@ class BookingTimeline extends StatelessWidget {
                         if (steps[i].$2 != null)
                           Text(
                             steps[i].$2!,
-                            style: EsText.bodyS.copyWith(color: c.textSecondary),
+                            style:
+                                EsText.bodyS.copyWith(color: c.textSecondary),
                           ),
                         if (steps[i].$3 != null)
                           Padding(

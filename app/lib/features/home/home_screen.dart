@@ -49,7 +49,6 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-
 /// Phones: one column. Wide screens: the main column on the left and the
 /// lists on the right, so the page uses the room instead of a thin strip.
 class _TwoColumns extends StatelessWidget {
@@ -342,8 +341,8 @@ class _NextSessionHero extends StatelessWidget {
                           const SizedBox(height: 4),
                           Text(
                             s.name,
-                            style: EsText.displayM
-                                .copyWith(color: Colors.white),
+                            style:
+                                EsText.displayM.copyWith(color: Colors.white),
                           ),
                           const SizedBox(height: 4),
                           Text(
@@ -422,7 +421,10 @@ class _EmptyHero extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, c.bgBrand.withValues(alpha: 0.9)],
+                  colors: [
+                    Colors.transparent,
+                    c.bgBrand.withValues(alpha: 0.9)
+                  ],
                 ),
               ),
             ),
@@ -596,7 +598,8 @@ class RequestCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(s.name, style: EsText.titleM.copyWith(color: c.textPrimary)),
+                Text(s.name,
+                    style: EsText.titleM.copyWith(color: c.textPrimary)),
                 const SizedBox(height: 2),
                 Text(
                   '${Fmt.relativeDay(booking.start, now)} · '
@@ -854,8 +857,8 @@ class _ManagerHome extends ConsumerWidget {
                           const SizedBox(height: 4),
                           Text(
                             'Les plus anciennes en premier.',
-                            style:
-                                EsText.bodyS.copyWith(color: c.textOnBrandMuted),
+                            style: EsText.bodyS
+                                .copyWith(color: c.textOnBrandMuted),
                           ),
                         ],
                       ),
@@ -963,8 +966,7 @@ class _TimelineRow extends StatelessWidget {
                   ),
                 ),
               ),
-              if (!last)
-                Expanded(child: Container(width: 2, color: c.border)),
+              if (!last) Expanded(child: Container(width: 2, color: c.border)),
             ],
           ),
           const SizedBox(width: 12),
@@ -984,8 +986,7 @@ class _TimelineRow extends StatelessWidget {
                         children: [
                           Text(
                             s.name,
-                            style:
-                                EsText.titleS.copyWith(color: c.textPrimary),
+                            style: EsText.titleS.copyWith(color: c.textPrimary),
                           ),
                           Text(
                             '${Fmt.range(booking.start, booking.end)} · '

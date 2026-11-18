@@ -53,16 +53,16 @@ class _ValidationsState extends ConsumerState<ValidationsScreen> {
     final items = showDone ? done : inbox;
     // The studio team also sees what is on its way: requests still waiting
     // for their level 1 approver (read-only here), so nothing surprises them.
-    final upcoming = !showDone &&
-            (me.has(Role.studioManager) || me.has(Role.admin))
-        ? ([
-            for (final b in w.bookings)
-              if (!b.isPrivate &&
-                  b.status == BookingStatus.pendingEntity &&
-                  !inbox.contains(b))
-                b,
-          ]..sort((a, b) => a.start.compareTo(b.start)))
-        : const <Booking>[];
+    final upcoming =
+        !showDone && (me.has(Role.studioManager) || me.has(Role.admin))
+            ? ([
+                for (final b in w.bookings)
+                  if (!b.isPrivate &&
+                      b.status == BookingStatus.pendingEntity &&
+                      !inbox.contains(b))
+                    b,
+              ]..sort((a, b) => a.start.compareTo(b.start)))
+            : const <Booking>[];
     final wide = isWide(context);
     final current = wide
         ? (items.any((b) => b.id == selectedId)
@@ -73,38 +73,93 @@ class _ValidationsState extends ConsumerState<ValidationsScreen> {
         : null;
 
     final list = ListView(
-        padding: EdgeInsets.only(bottom: tabBarSpace(context)),
-        children: [
-          BrandHeader(
-            title: 'Validations',
-            subtitle: inbox.isEmpty
-                ? 'Tout est traité. Beau travail.'
-                : '${inbox.length} demande${inbox.length > 1 ? 's' : ''} '
-                    'à traiter',
-            bottomPadding: EsSpace.s4,
-            trailing: wide ? null : const NoticeBell(),
+      padding: EdgeInsets.only(bottom: tabBarSpace(context)),
+      children: [
+        BrandHeader(
+          title: 'Validations',
+          subtitle: inbox.isEmpty
+              ? 'Tout est traité. Beau travail.'
+              : '${inbox.length} demande${inbox.length > 1 ? 's' : ''} '
+                  'à traiter',
+          bottomPadding: EsSpace.s4,
+          trailing: wide ? null : const NoticeBell(),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: EsSpace.page),
+          child: _Segmented(
+            left: 'À traiter',
+            leftCount: inbox.length,
+            right: 'Déjà traitées',
+            rightCount: done.length,
+            rightSelected: showDone,
+            onChanged: (v) => setState(() => showDone = v),
+          ),
+        ),
+        const SizedBox(height: EsSpace.s4),
+        if (items.isEmpty)
+          EmptyState(
+            icon: showDone ? Icons.history_rounded : Icons.task_alt_rounded,
+            title: showDone ? 'Aucune décision encore' : 'Rien à valider',
+            message: showDone
+                ? 'Vos validations et refus apparaîtront ici.'
+                : 'Les nouvelles demandes arrivent ici dès leur envoi.',
+          ),
+        for (var i = 0; i < items.length; i++)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              EsSpace.page,
+              0,
+              EsSpace.page,
+              EsSpace.s3,
+            ),
+            child: FadeInUp(
+              index: i,
+              child: RequestReviewCard(
+                booking: items[i],
+                now: w.now,
+                conflict: items[i].status == BookingStatus.pendingStudio
+                    ? notifier.level2Conflict(items[i])
+                    : null,
+                selected: items[i].id == current,
+                onTap: wide
+                    ? () => setState(() => selectedId = items[i].id)
+                    : () => context.push('/validations/${items[i].id}'),
+              ),
+            ),
+          ),
+        if (upcoming.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              EsSpace.page,
+              EsSpace.s4,
+              EsSpace.page,
+              EsSpace.s1,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Overline(
+                    'Bientôt chez vous · ${upcoming.length} en attente du '
+                    'niveau 1',
+                  ),
+                ),
+              ],
+            ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: EsSpace.page),
-            child: _Segmented(
-              left: 'À traiter',
-              leftCount: inbox.length,
-              right: 'Déjà traitées',
-              rightCount: done.length,
-              rightSelected: showDone,
-              onChanged: (v) => setState(() => showDone = v),
+            padding: const EdgeInsets.fromLTRB(
+              EsSpace.page,
+              0,
+              EsSpace.page,
+              EsSpace.s3,
+            ),
+            child: Text(
+              'Vous les validerez après l’accord du responsable de '
+              'l’entité.',
+              style: EsText.bodyS.copyWith(color: c.textSecondary),
             ),
           ),
-          const SizedBox(height: EsSpace.s4),
-          if (items.isEmpty)
-            EmptyState(
-              icon: showDone ? Icons.history_rounded : Icons.task_alt_rounded,
-              title: showDone ? 'Aucune décision encore' : 'Rien à valider',
-              message: showDone
-                  ? 'Vos validations et refus apparaîtront ici.'
-                  : 'Les nouvelles demandes arrivent ici dès leur envoi.',
-            ),
-          for (var i = 0; i < items.length; i++)
+          for (final b in upcoming)
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 EsSpace.page,
@@ -112,78 +167,23 @@ class _ValidationsState extends ConsumerState<ValidationsScreen> {
                 EsSpace.page,
                 EsSpace.s3,
               ),
-              child: FadeInUp(
-                index: i,
+              child: Opacity(
+                opacity: 0.85,
                 child: RequestReviewCard(
-                  booking: items[i],
+                  booking: b,
                   now: w.now,
-                  conflict: items[i].status == BookingStatus.pendingStudio
-                      ? notifier.level2Conflict(items[i])
-                      : null,
-                  selected: items[i].id == current,
+                  waitingFor: needsLevel1Fallback(b, Directory.people)
+                      ? 'Administration (repli)'
+                      : level1Label(b.requesterType),
+                  selected: b.id == current,
                   onTap: wide
-                      ? () => setState(() => selectedId = items[i].id)
-                      : () => context.push('/validations/${items[i].id}'),
+                      ? () => setState(() => selectedId = b.id)
+                      : () => context.push('/validations/${b.id}'),
                 ),
               ),
             ),
-          if (upcoming.isNotEmpty) ...[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                EsSpace.page,
-                EsSpace.s4,
-                EsSpace.page,
-                EsSpace.s1,
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Overline(
-                      'Bientôt chez vous · ${upcoming.length} en attente du '
-                      'niveau 1',
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                EsSpace.page,
-                0,
-                EsSpace.page,
-                EsSpace.s3,
-              ),
-              child: Text(
-                'Vous les validerez après l’accord du responsable de '
-                'l’entité.',
-                style: EsText.bodyS.copyWith(color: c.textSecondary),
-              ),
-            ),
-            for (final b in upcoming)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  EsSpace.page,
-                  0,
-                  EsSpace.page,
-                  EsSpace.s3,
-                ),
-                child: Opacity(
-                  opacity: 0.85,
-                  child: RequestReviewCard(
-                    booking: b,
-                    now: w.now,
-                    waitingFor: needsLevel1Fallback(b, Directory.people)
-                        ? 'Administration (repli)'
-                        : level1Label(b.requesterType),
-                    selected: b.id == current,
-                    onTap: wide
-                        ? () => setState(() => selectedId = b.id)
-                        : () => context.push('/validations/${b.id}'),
-                  ),
-                ),
-              ),
-          ],
         ],
+      ],
     );
 
     if (!wide) return BlobBackground(variant: 1, child: list);
@@ -420,7 +420,8 @@ class RequestReviewCard extends StatelessWidget {
             const SizedBox(height: 8),
             Row(
               children: [
-                Icon(Icons.hourglass_top_rounded, size: 15, color: c.pendingText),
+                Icon(Icons.hourglass_top_rounded,
+                    size: 15, color: c.pendingText),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(

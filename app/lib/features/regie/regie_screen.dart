@@ -46,14 +46,13 @@ class RegieScreen extends ConsumerWidget {
       next = DateTime(next.year, next.month, next.day + 1);
     }
     final upcoming = closed ? sessionsOn(next) : const <Booking>[];
-    int count(Set<SessionPhase> p) =>
-        today
-            .where(
-              (b) => p.contains(
-                phaseOf(b, w.now, earlyMinutes: w.policy.qrGraceMinutes),
-              ),
-            )
-            .length;
+    int count(Set<SessionPhase> p) => today
+        .where(
+          (b) => p.contains(
+            phaseOf(b, w.now, earlyMinutes: w.policy.qrGraceMinutes),
+          ),
+        )
+        .length;
 
     return ListView(
       padding: EdgeInsets.only(bottom: tabBarSpace(context)),
@@ -89,7 +88,8 @@ class RegieScreen extends ConsumerWidget {
                 c.reviewText,
               ),
               const SizedBox(width: 10),
-              _Count('En cours', count({SessionPhase.inProgress}), c.successText),
+              _Count(
+                  'En cours', count({SessionPhase.inProgress}), c.successText),
               const SizedBox(width: 10),
               _Count('En retard', count({SessionPhase.late}), c.pendingText),
               const SizedBox(width: 10),
@@ -225,8 +225,7 @@ class _SessionCardState extends ConsumerState<SessionCard> {
     final early = ref.watch(worldProvider).policy.qrGraceMinutes;
     final phase = phaseOf(b, widget.now, earlyMinutes: early);
     final (label, bg, fg) = phaseLabel(c, phase);
-    final canIn =
-        checkInProblem(b, widget.now, earlyMinutes: early) == null;
+    final canIn = checkInProblem(b, widget.now, earlyMinutes: early) == null;
     final canClose = canComplete(b, widget.now);
     final canAbsent = canMarkNoShow(b, widget.now);
     return EsCard(
@@ -303,8 +302,8 @@ class _SessionCardState extends ConsumerState<SessionCard> {
                   'Arrivée enregistrée. Bonne séance !',
                 ),
               )
-            else
-              if (canClose) EsButton(
+            else if (canClose)
+              EsButton(
                 'Clôturer la séance',
                 icon: Icons.task_alt_rounded,
                 style: EsButtonStyle.secondary,
@@ -432,8 +431,8 @@ class _ReportSheetState extends State<_ReportSheet> {
               for (final r in _reportChips)
                 ActionChip(
                   label: Text(r),
-                  onPressed: () => text.text =
-                      text.text.isEmpty ? r : '${text.text} · $r',
+                  onPressed: () =>
+                      text.text = text.text.isEmpty ? r : '${text.text} · $r',
                 ),
             ],
           ),

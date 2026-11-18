@@ -76,9 +76,7 @@ String _translate(String s, int depth) {
       final value = m.group(g + 1)!;
       final n = p.order[g];
       // "{1:s}": English plural "s" when the French had a plural ending.
-      out = out
-          .replaceAll('{$n:s}', value.isEmpty ? '' : 's')
-          .replaceAll(
+      out = out.replaceAll('{$n:s}', value.isEmpty ? '' : 's').replaceAll(
             '{$n}',
             depth < 4 ? _translate(value, depth + 1) : value,
           );

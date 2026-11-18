@@ -211,8 +211,18 @@ class BookingCard extends StatelessWidget {
   final DateTime now;
 
   static const _mo = [
-    'JANV', 'FÉVR', 'MARS', 'AVR', 'MAI', 'JUIN',
-    'JUIL', 'AOÛT', 'SEPT', 'OCT', 'NOV', 'DÉC',
+    'JANV',
+    'FÉVR',
+    'MARS',
+    'AVR',
+    'MAI',
+    'JUIN',
+    'JUIL',
+    'AOÛT',
+    'SEPT',
+    'OCT',
+    'NOV',
+    'DÉC',
   ];
 
   @override

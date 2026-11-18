@@ -155,8 +155,7 @@ class StudiosScreen extends ConsumerWidget {
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: EsSpace.page),
                 sliver: SliverGrid.builder(
-                  gridDelegate:
-                      const SliverGridDelegateWithMaxCrossAxisExtent(
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                     maxCrossAxisExtent: 420,
                     mainAxisSpacing: EsSpace.s4,
                     crossAxisSpacing: EsSpace.s4,
@@ -173,11 +172,9 @@ class StudiosScreen extends ConsumerWidget {
             else
               SliverList.separated(
                 itemCount: studios.length,
-                separatorBuilder: (_, __) =>
-                    const SizedBox(height: EsSpace.s4),
+                separatorBuilder: (_, __) => const SizedBox(height: EsSpace.s4),
                 itemBuilder: (context, i) => Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: EsSpace.page),
+                  padding: const EdgeInsets.symmetric(horizontal: EsSpace.page),
                   child: FadeInUp(
                     index: i,
                     child: StudioCard(

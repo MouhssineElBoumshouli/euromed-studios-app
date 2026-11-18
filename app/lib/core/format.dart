@@ -12,7 +12,8 @@ abstract final class Fmt {
   /// One DateFormat per pattern and language, made once.
   static DateFormat _f(String pattern) {
     final locale = L.en ? 'en_GB' : 'fr_FR';
-    return _formats.putIfAbsent('$locale|$pattern', () => DateFormat(pattern, locale));
+    return _formats.putIfAbsent(
+        '$locale|$pattern', () => DateFormat(pattern, locale));
   }
 
   static DateFormat get _time => _f('HH:mm');

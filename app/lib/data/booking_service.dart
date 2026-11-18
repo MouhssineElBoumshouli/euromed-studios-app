@@ -124,7 +124,8 @@ class BookingService {
           params: {
             'p_id': bookingId,
             'p_comment': comment,
-            'p_equipment': equipment == null ? null : equipmentToJson(equipment),
+            'p_equipment':
+                equipment == null ? null : equipmentToJson(equipment),
             'p_technician': technicianId,
           },
         ),
@@ -159,7 +160,8 @@ class BookingService {
     _world.refuse(bookingId, by: by, reason: reason);
   }
 
-  Future<void> cancel(String bookingId, {required Person by, String? reason}) async {
+  Future<void> cancel(String bookingId,
+      {required Person by, String? reason}) async {
     if (isLive) {
       await _call(
         () => _db.rpc(
@@ -175,7 +177,8 @@ class BookingService {
 
   Future<void> checkIn(String bookingId, {required Person by}) async {
     if (isLive) {
-      await _call(() => _db.rpc('check_in_booking', params: {'p_id': bookingId}));
+      await _call(
+          () => _db.rpc('check_in_booking', params: {'p_id': bookingId}));
       return;
     }
     await Future<void>.delayed(_latency);

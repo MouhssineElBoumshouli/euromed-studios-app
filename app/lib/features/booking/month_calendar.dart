@@ -40,7 +40,13 @@ class MonthCalendar extends StatelessWidget {
 
   static const _letters = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
   static const _weekdays = [
-    'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche',
+    'lundi',
+    'mardi',
+    'mercredi',
+    'jeudi',
+    'vendredi',
+    'samedi',
+    'dimanche',
   ];
 
   void _shift(int by) => onMonth(DateTime(month.year, month.month + by));
@@ -120,7 +126,8 @@ class MonthCalendar extends StatelessWidget {
                         children: [
                           for (var col = 0; col < 7; col++) ...[
                             if (col > 0) const SizedBox(width: 3),
-                            Expanded(child: _cell(r * 7 + col - lead + 1, count)),
+                            Expanded(
+                                child: _cell(r * 7 + col - lead + 1, count)),
                           ],
                         ],
                       ),
@@ -247,30 +254,30 @@ class _DayCell extends StatelessWidget {
               child: FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    '${day.day}',
-                    style: EsText.titleM.copyWith(
-                      color: fg,
-                      fontWeight: isSelected || isToday
-                          ? FontWeight.w800
-                          : FontWeight.w600,
-                      decoration: full ? TextDecoration.lineThrough : null,
-                      decorationColor: c.textDisabled,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '${day.day}',
+                      style: EsText.titleM.copyWith(
+                        color: fg,
+                        fontWeight: isSelected || isToday
+                            ? FontWeight.w800
+                            : FontWeight.w600,
+                        decoration: full ? TextDecoration.lineThrough : null,
+                        decorationColor: c.textDisabled,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 3),
-                  Container(
-                    width: 5,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: dot ?? Colors.transparent,
-                      shape: BoxShape.circle,
+                    const SizedBox(height: 3),
+                    Container(
+                      width: 5,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: dot ?? Colors.transparent,
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -305,7 +312,8 @@ class _NavButton extends StatelessWidget {
 }
 
 class _Legend extends StatelessWidget {
-  const _Legend({required this.color, required this.label, this.hollow = false});
+  const _Legend(
+      {required this.color, required this.label, this.hollow = false});
   final Color color;
   final String label;
   final bool hollow;

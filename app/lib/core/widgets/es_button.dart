@@ -172,9 +172,8 @@ class EsBackButton extends StatelessWidget {
                       : c.bgSurface,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: onDark
-                        ? Colors.white.withValues(alpha: 0.2)
-                        : c.border,
+                    color:
+                        onDark ? Colors.white.withValues(alpha: 0.2) : c.border,
                   ),
                 ),
                 child: Icon(

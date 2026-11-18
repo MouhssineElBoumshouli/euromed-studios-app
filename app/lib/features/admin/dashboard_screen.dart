@@ -112,8 +112,7 @@ class DashboardScreen extends ConsumerWidget {
       _Kpi(
         icon: Icons.person_off_outlined,
         label: 'Absences',
-        value:
-            absences == null ? '—' : '${(absences.rate * 100).round()} %',
+        value: absences == null ? '—' : '${(absences.rate * 100).round()} %',
         sub: absences == null
             ? 'Aucune séance passée sur 30 jours'
             : '${absences.noShows} sur ${absences.held} séance'
@@ -186,7 +185,8 @@ class DashboardScreen extends ConsumerWidget {
                   : c.reviewText,
               title: '${personById(b.requesterId).fullName} · '
                   '${studioById(b.studioId).name}',
-              detail: '${b.status == BookingStatus.pendingEntity ? 'Niveau 1' : 'Niveau 2'}'
+              detail:
+                  '${b.status == BookingStatus.pendingEntity ? 'Niveau 1' : 'Niveau 2'}'
                   ' · attend depuis '
                   '${Fmt.duration(w.now.difference(b.history.last.at))}',
               onTap: () => context.push('/validations/${b.id}'),
@@ -389,8 +389,7 @@ class _Panel extends StatelessWidget {
                       if (subtitle != null)
                         Text(
                           subtitle!,
-                          style:
-                              EsText.bodyS.copyWith(color: c.textSecondary),
+                          style: EsText.bodyS.copyWith(color: c.textSecondary),
                         ),
                     ],
                   ),
@@ -493,8 +492,7 @@ class _DayBars extends StatelessWidget {
                       children: [
                         Text(
                           '${d.validated + d.waiting}',
-                          style: EsText.labelS
-                              .copyWith(color: c.textSecondary),
+                          style: EsText.labelS.copyWith(color: c.textSecondary),
                         ),
                         const SizedBox(height: 4),
                         Container(

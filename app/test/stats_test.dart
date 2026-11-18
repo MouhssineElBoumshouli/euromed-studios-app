@@ -31,7 +31,10 @@ void main() {
       expect(l.studios.every((s) => s.bookable), isTrue);
     }
     // Studios sharing a room are measured together (one row per room).
-    final rooms = {for (final s in DemoWorld.studios) if (s.bookable) s.roomId};
+    final rooms = {
+      for (final s in DemoWorld.studios)
+        if (s.bookable) s.roomId
+    };
     expect(loads.length, rooms.length);
   });
 
@@ -113,14 +116,15 @@ void main() {
     final from = DateTime(2026, 11, 9);
     final to = DateTime(2026, 11, 10); // one Monday
     final s = DemoWorld.studios.firstWhere((s) => s.bookable);
-    final loads = occupancy([s], const [], policy, from, to, maintenance: [
-      MaintenanceBlock(
-        roomId: s.roomId,
-        start: DateTime(2026, 11, 9, 9),
-        end: DateTime(2026, 11, 9, 12),
-        reason: 'test',
-      ),
-    ]);
+    final loads = occupancy([s], const [], policy, from, to,
+        maintenance: [
+          MaintenanceBlock(
+            roomId: s.roomId,
+            start: DateTime(2026, 11, 9, 9),
+            end: DateTime(2026, 11, 9, 12),
+            reason: 'test',
+          ),
+        ]);
     expect(loads.single.openMinutes, 6 * 60);
   });
 

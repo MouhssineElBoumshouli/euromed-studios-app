@@ -106,14 +106,14 @@ class _CharterState extends ConsumerState<CharterScreen> {
                           children: [
                             Text(
                               _rules[i].$1,
-                              style: EsText.titleS
-                                  .copyWith(color: c.textPrimary),
+                              style:
+                                  EsText.titleS.copyWith(color: c.textPrimary),
                             ),
                             const SizedBox(height: 2),
                             Text(
                               _rules[i].$2,
-                              style: EsText.bodyM
-                                  .copyWith(color: c.textSecondary),
+                              style:
+                                  EsText.bodyM.copyWith(color: c.textSecondary),
                             ),
                           ],
                         ),

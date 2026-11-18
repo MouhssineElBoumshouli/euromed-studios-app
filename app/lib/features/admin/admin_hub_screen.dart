@@ -91,7 +91,11 @@ class AdminHubScreen extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: EsSpace.page),
           child: LayoutBuilder(
             builder: (_, box) {
-              final cols = box.maxWidth >= 900 ? 3 : box.maxWidth >= 560 ? 2 : 1;
+              final cols = box.maxWidth >= 900
+                  ? 3
+                  : box.maxWidth >= 560
+                      ? 2
+                      : 1;
               final w = (box.maxWidth - 12 * (cols - 1)) / cols;
               return Wrap(
                 spacing: 12,
@@ -168,4 +172,3 @@ class _Section {
   /// Sections still being built show "Bientôt" and can't be opened.
   final bool ready;
 }
-

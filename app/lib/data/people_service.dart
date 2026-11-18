@@ -112,8 +112,10 @@ class PeopleService {
       final world = _ref.read(worldProvider.notifier);
       for (final b in _ref.read(worldProvider).bookings) {
         if (b.requesterId == target.id && b.status.isPending) {
-          world.cancel(b.id, by: by, reason: 'Compte désactivé par '
-              'l’administration');
+          world.cancel(b.id,
+              by: by,
+              reason: 'Compte désactivé par '
+                  'l’administration');
         }
       }
     }

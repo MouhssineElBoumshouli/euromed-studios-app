@@ -1,4 +1,3 @@
-
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
@@ -76,8 +75,9 @@ final appRouter = GoRouter(
             GoRoute(
               path: ':id',
               parentNavigatorKey: _rootKey,
-              builder: (_, st) =>
-                  WideFrame(child: StudioDetailScreen(studioId: st.pathParameters['id']!)),
+              builder: (_, st) => WideFrame(
+                  child:
+                      StudioDetailScreen(studioId: st.pathParameters['id']!)),
             ),
           ],
         ),
@@ -89,8 +89,9 @@ final appRouter = GoRouter(
             GoRoute(
               path: ':id',
               parentNavigatorKey: _rootKey,
-              builder: (_, st) =>
-                  WideFrame(child: BookingDetailScreen(bookingId: st.pathParameters['id']!)),
+              builder: (_, st) => WideFrame(
+                  child:
+                      BookingDetailScreen(bookingId: st.pathParameters['id']!)),
             ),
           ],
         ),
@@ -124,8 +125,8 @@ final appRouter = GoRouter(
             GoRoute(
               path: ':id',
               parentNavigatorKey: _rootKey,
-              builder: (_, st) =>
-                  WideFrame(child: DecisionScreen(bookingId: st.pathParameters['id']!)),
+              builder: (_, st) => WideFrame(
+                  child: DecisionScreen(bookingId: st.pathParameters['id']!)),
             ),
           ],
         ),
@@ -213,7 +214,8 @@ final appRouter = GoRouter(
     // D1–D3
     GoRoute(
       path: '/book/:studioId',
-      builder: (_, st) => WideFrame(child: BookingFlowScreen(
+      builder: (_, st) => WideFrame(
+          child: BookingFlowScreen(
         studioId: st.pathParameters['studioId']!,
         initialDay: DateTime.tryParse(st.uri.queryParameters['day'] ?? ''),
         projectId: st.uri.queryParameters['project'],
@@ -222,12 +224,14 @@ final appRouter = GoRouter(
     // D4
     GoRoute(
       path: '/sent/:id',
-      builder: (_, st) => WideFrame(child: SentScreen(bookingId: st.pathParameters['id']!)),
+      builder: (_, st) =>
+          WideFrame(child: SentScreen(bookingId: st.pathParameters['id']!)),
     ),
     // E3
     GoRoute(
       path: '/qr/:id',
-      builder: (_, st) => WideFrame(child: QrPassScreen(bookingId: st.pathParameters['id']!)),
+      builder: (_, st) =>
+          WideFrame(child: QrPassScreen(bookingId: st.pathParameters['id']!)),
     ),
     // A6
     GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),

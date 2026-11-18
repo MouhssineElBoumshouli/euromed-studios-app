@@ -54,7 +54,12 @@ class _NotificationsState extends ConsumerState<NotificationsScreen> {
       final days = DateTime(w.now.year, w.now.month, w.now.day)
           .difference(DateTime(n.at.year, n.at.month, n.at.day))
           .inDays;
-      (days <= 0 ? today : days < 7 ? week : older).add(n);
+      (days <= 0
+              ? today
+              : days < 7
+                  ? week
+                  : older)
+          .add(n);
     }
 
     Widget section(String title, List<Notice> items) => items.isEmpty
@@ -130,13 +135,33 @@ class _NotificationsState extends ConsumerState<NotificationsScreen> {
 }
 
 (IconData, Color, Color) noticeStyle(EsColors c, NoticeKind k) => switch (k) {
-      NoticeKind.toDecide => (Icons.task_alt_rounded, c.pendingBg, c.pendingText),
-      NoticeKind.approved => (Icons.qr_code_2_rounded, c.successBg, c.successText),
-      NoticeKind.progress => (Icons.hourglass_bottom_rounded, c.reviewBg, c.reviewText),
+      NoticeKind.toDecide => (
+          Icons.task_alt_rounded,
+          c.pendingBg,
+          c.pendingText
+        ),
+      NoticeKind.approved => (
+          Icons.qr_code_2_rounded,
+          c.successBg,
+          c.successText
+        ),
+      NoticeKind.progress => (
+          Icons.hourglass_bottom_rounded,
+          c.reviewBg,
+          c.reviewText
+        ),
       NoticeKind.refused => (Icons.close_rounded, c.dangerBg, c.dangerText),
-      NoticeKind.cancelled => (Icons.event_busy_outlined, c.dangerBg, c.dangerText),
+      NoticeKind.cancelled => (
+          Icons.event_busy_outlined,
+          c.dangerBg,
+          c.dangerText
+        ),
       NoticeKind.reminder => (Icons.alarm_rounded, c.lilac, c.onLilac),
-      NoticeKind.assigned => (Icons.engineering_outlined, c.reviewBg, c.reviewText),
+      NoticeKind.assigned => (
+          Icons.engineering_outlined,
+          c.reviewBg,
+          c.reviewText
+        ),
       NoticeKind.closed => (Icons.done_all_rounded, c.neutralBg, c.neutralText),
       NoticeKind.invite => (Icons.group_add_outlined, c.lilac, c.onLilac),
       NoticeKind.project => (Icons.layers_outlined, c.reviewBg, c.reviewText),

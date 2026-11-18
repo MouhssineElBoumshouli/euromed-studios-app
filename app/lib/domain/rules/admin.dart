@@ -58,7 +58,8 @@ String? accessProblem({
   if (target.id == by.id && losesAdmin) return 'self_lockout';
   if (losesAdmin &&
       target.has(Role.admin) &&
-      !everyone.any((p) => p.id != target.id && p.active && p.has(Role.admin))) {
+      !everyone
+          .any((p) => p.id != target.id && p.active && p.has(Role.admin))) {
     return 'last_admin';
   }
   return null;
@@ -68,8 +69,7 @@ String? accessProblem({
 String accessProblemText(String code) => switch (code) {
       'not_allowed' => 'Seule l’administration peut modifier les accès.',
       'no_role' => 'Gardez au moins un rôle.',
-      'scope_required' =>
-        'Choisissez au moins un type de demande à valider.',
+      'scope_required' => 'Choisissez au moins un type de demande à valider.',
       'club_required' => 'Choisissez au moins un club.',
       'self_lockout' =>
         'Vous ne pouvez pas retirer votre propre accès administrateur.',
@@ -91,8 +91,14 @@ List<String> accessChanges(
 }) {
   String key(ApproverScope s) =>
       '${s.requesterType.name}/${s.establishmentId ?? ''}';
-  final added = [for (final r in Role.values) if (roles.contains(r) && !before.has(r)) r];
-  final removed = [for (final r in Role.values) if (!roles.contains(r) && before.has(r)) r];
+  final added = [
+    for (final r in Role.values)
+      if (roles.contains(r) && !before.has(r)) r
+  ];
+  final removed = [
+    for (final r in Role.values)
+      if (!roles.contains(r) && before.has(r)) r
+  ];
   final beforeScopes = {
     if (before.has(Role.entityApprover)) ...before.approverScopes.map(key),
   };

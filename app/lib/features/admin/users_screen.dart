@@ -175,7 +175,10 @@ class _PersonRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.es;
     final p = person;
-    final roles = [for (final r in Role.values) if (p.has(r)) r];
+    final roles = [
+      for (final r in Role.values)
+        if (p.has(r)) r
+    ];
     return InkWell(
       onTap: () => context.push('/admin/users/${p.id}'),
       child: Padding(

@@ -185,7 +185,8 @@ class LiveSync {
       Future<dynamic>.value(db.rpc(
         'busy_slots',
         params: {
-          'p_from': now.subtract(const Duration(days: 45)).toUtc().toIso8601String(),
+          'p_from':
+              now.subtract(const Duration(days: 45)).toUtc().toIso8601String(),
           'p_to': now.add(const Duration(days: 60)).toUtc().toIso8601String(),
         },
       )),
@@ -262,7 +263,8 @@ class LiveSync {
     final known = {for (final s in Catalog.studios) s.id};
     final visible = [
       for (final r in results[1] as List)
-        if (known.contains(r['studio_id'])) bookingFromRow(r as Map<String, dynamic>),
+        if (known.contains(r['studio_id']))
+          bookingFromRow(r as Map<String, dynamic>),
     ];
     final seen = {for (final b in visible) b.id};
     final busy = [
@@ -387,8 +389,7 @@ Project? projectFromRow(Map<String, dynamic> r) {
     postStatus:
         _enum(PostStatus.values, r['post_status']) ?? PostStatus.notStarted,
     deliveryUrl: r['delivery_url'] as String?,
-    deliveredAt:
-        r['delivered_at'] == null ? null : _time(r['delivered_at']),
+    deliveredAt: r['delivered_at'] == null ? null : _time(r['delivered_at']),
     qcNote: r['qc_note'] as String?,
     history: [
       for (final e in (r['history'] as List? ?? const []))
@@ -454,14 +455,14 @@ Booking bookingFromRow(Map<String, dynamic> r) => Booking(
       equipment: [
         for (final e in (r['equipment'] as List? ?? const []))
           if (Catalog.equipment.any((x) => x.id == e['item_id']))
-          EquipmentRequest(
-            itemId: e['item_id'] as String,
-            quantity: e['quantity'] as int,
-            required: e['required'] as bool? ?? false,
-            outcome: EquipmentOutcome.values
-                .byName(e['outcome'] as String? ?? 'pending'),
-            note: e['note'] as String?,
-          ),
+            EquipmentRequest(
+              itemId: e['item_id'] as String,
+              quantity: e['quantity'] as int,
+              required: e['required'] as bool? ?? false,
+              outcome: EquipmentOutcome.values
+                  .byName(e['outcome'] as String? ?? 'pending'),
+              note: e['note'] as String?,
+            ),
       ],
       history: [
         for (final e in (r['history'] as List? ?? const []))

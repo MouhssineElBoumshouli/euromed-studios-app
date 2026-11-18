@@ -121,7 +121,8 @@ class _ActivityScreenState extends ConsumerState<ActivityScreen> {
     // Group by day.
     final groups = <DateTime, List<ActivityItem>>{};
     for (final i in page) {
-      groups.putIfAbsent(DateTime(i.at.year, i.at.month, i.at.day), () => [])
+      groups
+          .putIfAbsent(DateTime(i.at.year, i.at.month, i.at.day), () => [])
           .add(i);
     }
 
@@ -207,9 +208,17 @@ class _Row extends StatelessWidget {
     final c = context.es;
     final actor = item.actorId == null ? null : personById(item.actorId!);
     final (icon, bg, fg) = switch (item.category) {
-      ActivityCategory.booking => (Icons.event_note_outlined, c.reviewBg, c.reviewText),
+      ActivityCategory.booking => (
+          Icons.event_note_outlined,
+          c.reviewBg,
+          c.reviewText
+        ),
       ActivityCategory.project => (Icons.layers_outlined, c.lilac, c.onLilac),
-      ActivityCategory.admin => (Icons.admin_panel_settings_outlined, c.pendingBg, c.pendingText),
+      ActivityCategory.admin => (
+          Icons.admin_panel_settings_outlined,
+          c.pendingBg,
+          c.pendingText
+        ),
     };
     return InkWell(
       onTap: item.route == null ? null : () => context.push(item.route!),

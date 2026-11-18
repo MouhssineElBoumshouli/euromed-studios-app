@@ -62,173 +62,173 @@ class StudioDetailScreen extends ConsumerWidget {
         heroTag: 'studio-${s.id}',
         onBack: () => context.pop(),
         sheet: Container(
-                padding: const EdgeInsets.fromLTRB(
-                  EsSpace.page,
-                  EsSpace.s6,
-                  EsSpace.page,
-                  0,
+          padding: const EdgeInsets.fromLTRB(
+            EsSpace.page,
+            EsSpace.s6,
+            EsSpace.page,
+            0,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Overline(s.zone.label),
+              const SizedBox(height: 6),
+              Text(
+                s.name,
+                style: EsText.displayXL.copyWith(color: c.textPrimary),
+              ),
+              const SizedBox(height: EsSpace.s2),
+              Text(
+                s.description,
+                style: EsText.bodyL.copyWith(color: c.textSecondary),
+              ),
+              const SizedBox(height: EsSpace.s5),
+              Row(
+                children: [
+                  _Fact(
+                    icon: Icons.place_outlined,
+                    label: 'Salle',
+                    value: room.name,
+                  ),
+                  const SizedBox(width: 10),
+                  _Fact(
+                    icon: Icons.groups_outlined,
+                    label: 'Capacité',
+                    value: '${s.capacity} pers.',
+                  ),
+                  const SizedBox(width: 10),
+                  _Fact(
+                    icon: Icons.schedule_rounded,
+                    label: 'Horaires',
+                    value: hours,
+                  ),
+                ],
+              ),
+              const SizedBox(height: EsSpace.s5),
+              if (s.professorPriority) ...[
+                const InfoBanner(
+                  icon: Icons.school_outlined,
+                  title: 'Priorité aux enseignants',
+                  text: 'Les demandes des étudiants restent possibles.',
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Overline(s.zone.label),
-                    const SizedBox(height: 6),
-                    Text(
-                      s.name,
-                      style: EsText.displayXL.copyWith(color: c.textPrimary),
-                    ),
-                    const SizedBox(height: EsSpace.s2),
-                    Text(
-                      s.description,
-                      style: EsText.bodyL.copyWith(color: c.textSecondary),
-                    ),
-                    const SizedBox(height: EsSpace.s5),
-                    Row(
-                      children: [
-                        _Fact(
-                          icon: Icons.place_outlined,
-                          label: 'Salle',
-                          value: room.name,
-                        ),
-                        const SizedBox(width: 10),
-                        _Fact(
-                          icon: Icons.groups_outlined,
-                          label: 'Capacité',
-                          value: '${s.capacity} pers.',
-                        ),
-                        const SizedBox(width: 10),
-                        _Fact(
-                          icon: Icons.schedule_rounded,
-                          label: 'Horaires',
-                          value: hours,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: EsSpace.s5),
-                    if (s.professorPriority) ...[
-                      const InfoBanner(
-                        icon: Icons.school_outlined,
-                        title: 'Priorité aux enseignants',
-                        text: 'Les demandes des étudiants restent possibles.',
-                      ),
-                      const SizedBox(height: EsSpace.s3),
-                    ],
-                    if (shared.isNotEmpty) ...[
-                      InfoBanner(
-                        icon: Icons.meeting_room_outlined,
-                        title: 'Salle partagée',
-                        text: 'Avec ${shared.join(', ')}. Une réservation '
-                            'bloque toute la salle.',
-                      ),
-                      const SizedBox(height: EsSpace.s3),
-                    ],
-                    const SectionTitle('Ce que permet ce studio'),
-                    const SizedBox(height: EsSpace.s2),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        for (final cap in s.capabilities)
-                          _CapChip(icon: capabilityIcon(cap), label: cap.label),
-                        _CapChip(
-                          icon: Icons.volume_off_outlined,
-                          label: 'Isolation ${s.isolation}/5',
-                        ),
-                      ],
-                    ),
-                    if (s.included.isNotEmpty) ...[
-                      const SizedBox(height: EsSpace.s4),
-                      const SectionTitle('Inclus avec le studio'),
-                      const SizedBox(height: EsSpace.s2),
-                      EsCard(
-                        child: Column(
+                const SizedBox(height: EsSpace.s3),
+              ],
+              if (shared.isNotEmpty) ...[
+                InfoBanner(
+                  icon: Icons.meeting_room_outlined,
+                  title: 'Salle partagée',
+                  text: 'Avec ${shared.join(', ')}. Une réservation '
+                      'bloque toute la salle.',
+                ),
+                const SizedBox(height: EsSpace.s3),
+              ],
+              const SectionTitle('Ce que permet ce studio'),
+              const SizedBox(height: EsSpace.s2),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final cap in s.capabilities)
+                    _CapChip(icon: capabilityIcon(cap), label: cap.label),
+                  _CapChip(
+                    icon: Icons.volume_off_outlined,
+                    label: 'Isolation ${s.isolation}/5',
+                  ),
+                ],
+              ),
+              if (s.included.isNotEmpty) ...[
+                const SizedBox(height: EsSpace.s4),
+                const SectionTitle('Inclus avec le studio'),
+                const SizedBox(height: EsSpace.s2),
+                EsCard(
+                  child: Column(
+                    children: [
+                      for (var i = 0; i < s.included.length; i++) ...[
+                        if (i > 0) const SizedBox(height: 10),
+                        Row(
                           children: [
-                            for (var i = 0; i < s.included.length; i++) ...[
-                              if (i > 0) const SizedBox(height: 10),
-                              Row(
-                                children: [
-                                  Container(
-                                    width: 24,
-                                    height: 24,
-                                    decoration: BoxDecoration(
-                                      color: c.successBg,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      Icons.check_rounded,
-                                      size: 15,
-                                      color: c.successText,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      s.included[i],
-                                      style: EsText.bodyM
-                                          .copyWith(color: c.textPrimary),
-                                    ),
-                                  ),
-                                ],
+                            Container(
+                              width: 24,
+                              height: 24,
+                              decoration: BoxDecoration(
+                                color: c.successBg,
+                                shape: BoxShape.circle,
                               ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: EsSpace.s4),
-                    const SectionTitle('Prochains créneaux libres'),
-                    const SizedBox(height: EsSpace.s2),
-                    if (free.isEmpty)
-                      Text(
-                        'Aucun créneau libre dans les 30 prochains jours.',
-                        style: EsText.bodyM.copyWith(color: c.textSecondary),
-                      )
-                    else
-                      Row(
-                        children: [
-                          for (var i = 0; i < free.length; i++) ...[
-                            if (i > 0) const SizedBox(width: 10),
+                              child: Icon(
+                                Icons.check_rounded,
+                                size: 15,
+                                color: c.successText,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
                             Expanded(
-                              child: EsCard(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                  horizontal: 8,
-                                ),
-                                onTap: () => context.push(
-                                  '/book/${s.id}?day='
-                                  '${free[i].start.toIso8601String()}',
-                                ),
-                                semanticLabel: 'Réserver '
-                                    '${Fmt.relativeDay(free[i].start, w.now)} '
-                                    'à ${Fmt.time(free[i].start)}',
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      Fmt.time(free[i].start),
-                                      style: EsText.numeric.copyWith(
-                                        color: c.textPrimary,
-                                        fontSize: 18,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      Fmt.relativeDay(free[i].start, w.now),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: EsText.bodyS
-                                          .copyWith(color: c.successText),
-                                    ),
-                                  ],
-                                ),
+                              child: Text(
+                                s.included[i],
+                                style:
+                                    EsText.bodyM.copyWith(color: c.textPrimary),
                               ),
                             ),
                           ],
-                        ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: EsSpace.s4),
+              const SectionTitle('Prochains créneaux libres'),
+              const SizedBox(height: EsSpace.s2),
+              if (free.isEmpty)
+                Text(
+                  'Aucun créneau libre dans les 30 prochains jours.',
+                  style: EsText.bodyM.copyWith(color: c.textSecondary),
+                )
+              else
+                Row(
+                  children: [
+                    for (var i = 0; i < free.length; i++) ...[
+                      if (i > 0) const SizedBox(width: 10),
+                      Expanded(
+                        child: EsCard(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 14,
+                            horizontal: 8,
+                          ),
+                          onTap: () => context.push(
+                            '/book/${s.id}?day='
+                            '${free[i].start.toIso8601String()}',
+                          ),
+                          semanticLabel: 'Réserver '
+                              '${Fmt.relativeDay(free[i].start, w.now)} '
+                              'à ${Fmt.time(free[i].start)}',
+                          child: Column(
+                            children: [
+                              Text(
+                                Fmt.time(free[i].start),
+                                style: EsText.numeric.copyWith(
+                                  color: c.textPrimary,
+                                  fontSize: 18,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                Fmt.relativeDay(free[i].start, w.now),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style:
+                                    EsText.bodyS.copyWith(color: c.successText),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    const SizedBox(height: EsSpace.s6),
+                    ],
                   ],
                 ),
-              ),
+              const SizedBox(height: EsSpace.s6),
+            ],
+          ),
+        ),
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(

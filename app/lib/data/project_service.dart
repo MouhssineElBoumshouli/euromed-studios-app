@@ -143,7 +143,8 @@ class ProjectService {
 
   Future<void> advance(String projectId, {required Person by}) async {
     if (isLive) {
-      await _call(() => _db.rpc('advance_project', params: {'p_id': projectId}));
+      await _call(
+          () => _db.rpc('advance_project', params: {'p_id': projectId}));
       return;
     }
     await Future<void>.delayed(_latency);
@@ -169,8 +170,7 @@ class ProjectService {
         .toLowerCase()
         .replaceAll(RegExp(r'[^a-z0-9._-]+'), '-')
         .replaceAll(RegExp(r'-+'), '-');
-    final path =
-        '$projectId/${DateTime.now().millisecondsSinceEpoch}-$safe';
+    final path = '$projectId/${DateTime.now().millisecondsSinceEpoch}-$safe';
     if (isLive) {
       await _call(() async {
         await _db.storage.from(projectBucket).uploadBinary(
@@ -394,9 +394,7 @@ class ProjectService {
   Future<String?> linkFor(ProjectFile f) async {
     if (!isLive) return null;
     try {
-      return await _db.storage
-          .from(projectBucket)
-          .createSignedUrl(f.path, 60);
+      return await _db.storage.from(projectBucket).createSignedUrl(f.path, 60);
     } on StorageException {
       throw const ProjectProblem(
         'Le document est introuvable. Ajoutez-le à nouveau.',

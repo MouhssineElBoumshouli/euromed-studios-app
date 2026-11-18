@@ -120,17 +120,21 @@ List<ActivityItem> activityFeed({
 String projectEventLabel(ProjectEvent e, String Function(String) nameOf) =>
     switch (e.type) {
       ProjectEventType.created => 'Projet créé',
-      ProjectEventType.stageChanged => 'Étape : ${ProjectStage.values.where((s) => s.name == e.detail).firstOrNull?.label ?? e.detail}',
+      ProjectEventType.stageChanged =>
+        'Étape : ${ProjectStage.values.where((s) => s.name == e.detail).firstOrNull?.label ?? e.detail}',
       ProjectEventType.fileAdded => 'Document ajouté · ${e.detail ?? ''}',
       ProjectEventType.fileRemoved => 'Document retiré · ${e.detail ?? ''}',
-      ProjectEventType.postStatus => 'Montage : ${PostStatus.values.where((s) => s.name == e.detail).firstOrNull?.label ?? e.detail}',
+      ProjectEventType.postStatus =>
+        'Montage : ${PostStatus.values.where((s) => s.name == e.detail).firstOrNull?.label ?? e.detail}',
       ProjectEventType.correction => 'Correction demandée',
       ProjectEventType.qcPassed => 'Contrôle qualité validé',
       ProjectEventType.qcFailed => 'Contrôle qualité : à corriger',
-      ProjectEventType.memberInvited => 'Invitation · ${nameOf(e.detail ?? '')}',
+      ProjectEventType.memberInvited =>
+        'Invitation · ${nameOf(e.detail ?? '')}',
       ProjectEventType.memberJoined => 'Collaborateur ajouté',
       ProjectEventType.memberLeft => 'Collaborateur parti',
-      ProjectEventType.memberRemoved => 'Collaborateur retiré · ${nameOf(e.detail ?? '')}',
+      ProjectEventType.memberRemoved =>
+        'Collaborateur retiré · ${nameOf(e.detail ?? '')}',
     };
 
 String auditLabel(String action) => switch (action) {

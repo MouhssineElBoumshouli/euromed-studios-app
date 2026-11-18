@@ -83,19 +83,17 @@ class SentScreen extends ConsumerWidget {
                         children: [
                           Text(
                             s.name,
-                            style:
-                                EsText.titleM.copyWith(color: c.textPrimary),
+                            style: EsText.titleM.copyWith(color: c.textPrimary),
                           ),
                           Text(
                             '${Fmt.shortDay(b.start)} · '
                             '${Fmt.range(b.start, b.end)}',
-                            style: EsText.bodyS
-                                .copyWith(color: c.textSecondary),
+                            style:
+                                EsText.bodyS.copyWith(color: c.textSecondary),
                           ),
                           Text(
                             'Réf. ${b.reference}',
-                            style: EsText.bodyS
-                                .copyWith(color: c.textDisabled),
+                            style: EsText.bodyS.copyWith(color: c.textDisabled),
                           ),
                         ],
                       ),

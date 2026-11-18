@@ -46,7 +46,8 @@ bool needsLevel1Fallback(Booking b, List<Person> people) {
 ///   the Administrator decides (Q18 fallback).
 /// - Level 2 is the Studio Manager; the Administrator can also give final
 ///   slot validation (R-09).
-bool canDecide(Person person, Booking booking, {List<Person> people = const []}) {
+bool canDecide(Person person, Booking booking,
+    {List<Person> people = const []}) {
   if (booking.isPrivate) return false;
   if (person.id == booking.requesterId) return false;
   if (_decidedEarlier(person, booking)) return false;

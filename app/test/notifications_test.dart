@@ -51,10 +51,8 @@ void main() {
     final c = asPerson('yasmine');
     addTearDown(c.dispose);
     final w = c.read(worldProvider.notifier);
-    final b = c
-        .read(worldProvider)
-        .bookings
-        .firstWhere((x) => x.status == BookingStatus.pendingEntity && x.requesterId == 'yasmine');
+    final b = c.read(worldProvider).bookings.firstWhere((x) =>
+        x.status == BookingStatus.pendingEntity && x.requesterId == 'yasmine');
     final amrani = DemoWorld.people.firstWhere((p) => p.id == 'amrani');
     w.approve(b.id, by: amrani);
     final feed = c.read(noticesProvider);
@@ -67,10 +65,9 @@ void main() {
   test('own actions never notify yourself', () {
     final c = asPerson('amrani');
     addTearDown(c.dispose);
-    final b = c
-        .read(worldProvider)
-        .bookings
-        .firstWhere((x) => x.status == BookingStatus.pendingEntity && x.requesterType == RequesterType.student);
+    final b = c.read(worldProvider).bookings.firstWhere((x) =>
+        x.status == BookingStatus.pendingEntity &&
+        x.requesterType == RequesterType.student);
     final before = c.read(noticesProvider).length;
     c.read(worldProvider.notifier).approve(
           b.id,

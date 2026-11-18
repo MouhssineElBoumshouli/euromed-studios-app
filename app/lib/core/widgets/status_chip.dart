@@ -10,10 +10,14 @@ import '../../core/l10n/text.dart';
       BookingStatus.pendingEntity => (c.pendingBg, c.pendingText),
       BookingStatus.pendingStudio => (c.reviewBg, c.reviewText),
       BookingStatus.approved => (c.successBg, c.successText),
-      BookingStatus.refused || BookingStatus.noShow => (c.dangerBg, c.dangerText),
-      BookingStatus.cancelled ||
-      BookingStatus.completed =>
-        (c.neutralBg, c.neutralText),
+      BookingStatus.refused || BookingStatus.noShow => (
+          c.dangerBg,
+          c.dangerText
+        ),
+      BookingStatus.cancelled || BookingStatus.completed => (
+          c.neutralBg,
+          c.neutralText
+        ),
     };
 
 IconData statusIcon(BookingStatus s) => switch (s) {
@@ -141,31 +145,32 @@ class _LiveDotState extends State<LiveDot> with SingleTickerProviderStateMixin {
     final s = widget.size;
     return RepaintBoundary(
       child: SizedBox(
-      width: s * 2.2,
-      height: s * 2.2,
-      child: AnimatedBuilder(
-        animation: _a,
-        builder: (context, _) => Stack(
-          alignment: Alignment.center,
-          children: [
-            if (!reduce)
-              Container(
-                width: s + s * 1.2 * _a.value,
-                height: s + s * 1.2 * _a.value,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: widget.color.withValues(alpha: 0.35 * (1 - _a.value)),
+        width: s * 2.2,
+        height: s * 2.2,
+        child: AnimatedBuilder(
+          animation: _a,
+          builder: (context, _) => Stack(
+            alignment: Alignment.center,
+            children: [
+              if (!reduce)
+                Container(
+                  width: s + s * 1.2 * _a.value,
+                  height: s + s * 1.2 * _a.value,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color:
+                        widget.color.withValues(alpha: 0.35 * (1 - _a.value)),
+                  ),
                 ),
+              Container(
+                width: s,
+                height: s,
+                decoration:
+                    BoxDecoration(shape: BoxShape.circle, color: widget.color),
               ),
-            Container(
-              width: s,
-              height: s,
-              decoration:
-                  BoxDecoration(shape: BoxShape.circle, color: widget.color),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     );
   }

@@ -53,9 +53,8 @@ class _QrPassState extends ConsumerState<QrPassScreen> {
     final s = studioById(b.studioId);
     final me = personById(b.requesterId);
     final room = DemoWorld.rooms.firstWhere((r) => r.id == s.roomId);
-    final now = simulateSessionTime
-        ? b.start.add(const Duration(minutes: 18))
-        : w.now;
+    final now =
+        simulateSessionTime ? b.start.add(const Duration(minutes: 18)) : w.now;
     final win = b.status == BookingStatus.approved
         ? qrWindow(b, now, w.policy.qrGraceMinutes)
         : QrWindow.over;
@@ -131,8 +130,8 @@ class _QrPassState extends ConsumerState<QrPassScreen> {
                             ),
                             Text(
                               s.name,
-                              style: EsText.titleL
-                                  .copyWith(color: Colors.white),
+                              style:
+                                  EsText.titleL.copyWith(color: Colors.white),
                             ),
                           ],
                         ),
@@ -206,13 +205,11 @@ class _QrPassState extends ConsumerState<QrPassScreen> {
                 const SizedBox(height: 12),
                 Text(
                   me.fullName,
-                  style: EsText.titleS
-                      .copyWith(color: const Color(0xFF0E1433)),
+                  style: EsText.titleS.copyWith(color: const Color(0xFF0E1433)),
                 ),
                 Text(
                   'Réf. ${b.reference} · personnel, non partageable',
-                  style: EsText.bodyS
-                      .copyWith(color: const Color(0xFF5B6180)),
+                  style: EsText.bodyS.copyWith(color: const Color(0xFF5B6180)),
                 ),
               ],
             ),

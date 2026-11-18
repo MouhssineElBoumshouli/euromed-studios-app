@@ -186,7 +186,11 @@ class InfoBanner extends StatelessWidget {
     final c = context.es;
     final (Color bg, Color fg, IconData ic) = switch (tone) {
       BannerTone.info => (c.reviewBg, c.reviewText, Icons.info_outline_rounded),
-      BannerTone.warning => (c.pendingBg, c.pendingText, Icons.schedule_rounded),
+      BannerTone.warning => (
+          c.pendingBg,
+          c.pendingText,
+          Icons.schedule_rounded
+        ),
       BannerTone.danger => (
           c.dangerBg,
           c.dangerText,
@@ -467,14 +471,16 @@ class ZelligePainter extends CustomPainter {
     for (var y = step / 2; y < size.height + step; y += step) {
       for (var x = step / 2; x < size.width + step; x += step) {
         canvas.drawRect(
-          Rect.fromCenter(center: Offset(x, y), width: half * 2, height: half * 2),
+          Rect.fromCenter(
+              center: Offset(x, y), width: half * 2, height: half * 2),
           p,
         );
         canvas.save();
         canvas.translate(x, y);
         canvas.rotate(math.pi / 4);
         canvas.drawRect(
-          Rect.fromCenter(center: Offset.zero, width: half * 2, height: half * 2),
+          Rect.fromCenter(
+              center: Offset.zero, width: half * 2, height: half * 2),
           p,
         );
         canvas.restore();
@@ -588,8 +594,8 @@ class _FadeInUpState extends State<FadeInUp>
     return FadeTransition(
       opacity: t,
       child: SlideTransition(
-        position: Tween(begin: const Offset(0, 0.06), end: Offset.zero)
-            .animate(t),
+        position:
+            Tween(begin: const Offset(0, 0.06), end: Offset.zero).animate(t),
         child: widget.child,
       ),
     );
@@ -627,34 +633,34 @@ class PhotoPage extends StatelessWidget {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: Stack(
-      children: [
-        Positioned.fill(child: ColoredBox(color: c.bgApp)),
-        SingleChildScrollView(
-          child: Stack(
-            children: [
-              image,
-              Padding(
-                padding: EdgeInsets.only(top: height - 28),
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: c.bgApp,
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(EsRadius.xl),
+        children: [
+          Positioned.fill(child: ColoredBox(color: c.bgApp)),
+          SingleChildScrollView(
+            child: Stack(
+              children: [
+                image,
+                Padding(
+                  padding: EdgeInsets.only(top: height - 28),
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: c.bgApp,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(EsRadius.xl),
+                      ),
                     ),
+                    child: sheet,
                   ),
-                  child: sheet,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        Positioned(
-          top: MediaQuery.paddingOf(context).top + 10,
-          left: 16,
-          child: _PinnedBack(onPressed: onBack),
-        ),
-      ],
+          Positioned(
+            top: MediaQuery.paddingOf(context).top + 10,
+            left: 16,
+            child: _PinnedBack(onPressed: onBack),
+          ),
+        ],
       ),
     );
   }

@@ -128,8 +128,7 @@ const maxMessageLength = 1000;
 
 /// People it makes sense to invite: requesters and the technical team.
 bool isInvitable(Person candidate) =>
-    candidate.roles.any((r) => r.isRequester) ||
-    candidate.has(Role.regisseur);
+    candidate.roles.any((r) => r.isRequester) || candidate.has(Role.regisseur);
 
 /// A delivery link must be a secure web address.
 bool isValidDeliveryLink(String s) =>
@@ -138,5 +137,12 @@ bool isValidDeliveryLink(String s) =>
 /// Files accepted for upload (Q12 is about where final files go).
 const maxFileBytes = 20 * 1024 * 1024;
 const allowedFileExtensions = [
-  'pdf', 'doc', 'docx', 'txt', 'odt', 'png', 'jpg', 'jpeg',
+  'pdf',
+  'doc',
+  'docx',
+  'txt',
+  'odt',
+  'png',
+  'jpg',
+  'jpeg',
 ];

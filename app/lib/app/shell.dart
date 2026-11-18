@@ -144,7 +144,13 @@ class AppShell extends ConsumerWidget {
   }
 }
 
-const _roomy = ['/studios', '/validations', '/planning', '/dashboard', '/admin'];
+const _roomy = [
+  '/studios',
+  '/validations',
+  '/planning',
+  '/dashboard',
+  '/admin'
+];
 
 /// Shows a full-screen page (detail, booking flow, QR…) as a centered
 /// column on computers, instead of stretching it edge to edge.
@@ -162,7 +168,8 @@ class WideFrame extends StatelessWidget {
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: maxWidth),
           child: DecoratedBox(
-            decoration: BoxDecoration(boxShadow: esShadow(context.es, strength: 2)),
+            decoration:
+                BoxDecoration(boxShadow: esShadow(context.es, strength: 2)),
             child: child,
           ),
         ),
@@ -285,37 +292,37 @@ class _PillTab extends StatelessWidget {
       child: Material(
         type: MaterialType.transparency,
         child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(EsRadius.lg),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AnimatedSwitcher(
-              duration: EsMotion.fast,
-              child: Icon(
-                selected ? spec.selectedIcon : spec.icon,
-                key: ValueKey(selected),
-                size: 23,
-                color: fg,
-              ),
-            ),
-            const SizedBox(height: 3),
-            // Long labels ("Maintenance") shrink a little instead of cutting.
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                spec.label,
-                maxLines: 1,
-                softWrap: false,
-                style: EsText.labelS.copyWith(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(EsRadius.lg),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedSwitcher(
+                duration: EsMotion.fast,
+                child: Icon(
+                  selected ? spec.selectedIcon : spec.icon,
+                  key: ValueKey(selected),
+                  size: 23,
                   color: fg,
-                  fontSize: 11.5,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                 ),
               ),
-            ),
-          ],
-        ),
+              const SizedBox(height: 3),
+              // Long labels ("Maintenance") shrink a little instead of cutting.
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  spec.label,
+                  maxLines: 1,
+                  softWrap: false,
+                  style: EsText.labelS.copyWith(
+                    color: fg,
+                    fontSize: 11.5,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -502,50 +509,51 @@ class DemoBar extends ConsumerWidget {
       label: tr('Mode démo. Vous êtes ${p.fullName}. Changer de rôle'),
       excludeSemantics: true,
       child: Material(
-      color: c.bgBrand,
-      elevation: 0,
-      child: InkWell(
-        onTap: () => showDemoSwitcher(context, ref),
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(16, top + 8, 12, 8),
-          child: Row(
-            children: [
-              Icon(Icons.swap_horiz_rounded, size: 18, color: c.brandAccent),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  '${isLive ? 'En direct' : 'Démo'} · ${p.displayName}'
-                  '${p.title == null ? '' : ' · ${p.title}'}',
-                  overflow: TextOverflow.ellipsis,
-                  style: EsText.labelS.copyWith(color: c.textOnBrand),
+        color: c.bgBrand,
+        elevation: 0,
+        child: InkWell(
+          onTap: () => showDemoSwitcher(context, ref),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(16, top + 8, 12, 8),
+            child: Row(
+              children: [
+                Icon(Icons.swap_horiz_rounded, size: 18, color: c.brandAccent),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '${isLive ? 'En direct' : 'Démo'} · ${p.displayName}'
+                    '${p.title == null ? '' : ' · ${p.title}'}',
+                    overflow: TextOverflow.ellipsis,
+                    style: EsText.labelS.copyWith(color: c.textOnBrand),
+                  ),
                 ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(EsRadius.pill),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(EsRadius.pill),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Changer de rôle',
+                        style: EsText.labelS.copyWith(color: c.textOnBrand),
+                      ),
+                      Icon(
+                        Icons.expand_more_rounded,
+                        size: 16,
+                        color: c.textOnBrand,
+                      ),
+                    ],
+                  ),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Changer de rôle',
-                      style: EsText.labelS.copyWith(color: c.textOnBrand),
-                    ),
-                    Icon(
-                      Icons.expand_more_rounded,
-                      size: 16,
-                      color: c.textOnBrand,
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
-    ),
     );
   }
 }

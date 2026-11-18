@@ -159,15 +159,16 @@ class _ScannerState extends ConsumerState<ScannerScreen> {
                     child: scanned == null
                         ? Text(
                             'Placez le QR code du demandeur dans le cadre.',
-                            style: EsText.bodyM
-                                .copyWith(color: c.textSecondary),
+                            style:
+                                EsText.bodyM.copyWith(color: c.textSecondary),
                           )
                         : _Result(
                             booking: found,
                             now: w.now,
                             busy: busy,
                             early: w.policy.qrGraceMinutes,
-                            onCheckIn: found == null ? null : () => _checkIn(found),
+                            onCheckIn:
+                                found == null ? null : () => _checkIn(found),
                           ),
                   ),
                   const SizedBox(height: 12),
@@ -215,7 +216,9 @@ class _ScannerState extends ConsumerState<ScannerScreen> {
           .read(bookingServiceProvider)
           .checkIn(b.id, by: ref.read(currentPersonProvider));
       m.showSnackBar(
-        SnackBar(content: Text('${personById(b.requesterId).fullName} est entré·e.')),
+        SnackBar(
+            content:
+                Text('${personById(b.requesterId).fullName} est entré·e.')),
       );
     } catch (e) {
       m.showSnackBar(SnackBar(content: Text(sessionError(e))));
